@@ -4,6 +4,8 @@ local sched = require 'lumen.sched'
 local log = require 'lumen.log'
 local selector = require 'lumen.tasks.selector'
 
+local cos, sin, tan = math.cos, math.sin, math.tan
+local p, d = 0.182, 0.190
 local sig_drive = {}
 
 M.init = function(conf)
@@ -24,11 +26,13 @@ M.init = function(conf)
   local calibrator = require 'tasks.dm1.calibrator'(calibrationpot)
 
   local function read_pote()
-    --[[local fdpot = assert(io.open(filepot, 'rb'))
+    ---[[
+    local fdpot = assert(io.open(filepot, 'rb'))
     local data, err = fdpot:read('*l')
     fdpot:close()
-    return data, err--]]
-    return 1
+    return data, err
+    --]]
+    --return 1
   end
   --assert(read_pote())
   ----------------------------
@@ -49,9 +53,9 @@ M.init = function(conf)
     motor_right.set.rotation_mode('wheel')
     log('DM1', 'INFO', 'Chassis 1 initialized')
     sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-      --print("!U1", left, right) 
-      motor_left.set.moving_speed(left)
-      motor_right.set.moving_speed(-right)
+      print("!U1", left, right) 
+      motor_left.set.moving_speed(-left)
+      motor_right.set.moving_speed(right)
     end)
   end)
 
@@ -62,11 +66,29 @@ M.init = function(conf)
     motor_left.set.rotation_mode('wheel')
     motor_right.set.rotation_mode('wheel')
     log('DM1', 'INFO', 'Chassis 2 initialized')
-    sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
+    --sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
+    local waitd = {sig_drive, timeout=0.2}
+    local left, right = 0, 0
+    while true do
       -- TODO compute left right to follow
-      motor_left.set.moving_speed(left)
-      motor_right.set.moving_speed(-right)
-    end)
+      local sig,nleft,nright = sched.wait(waitd)
+      --print ('xxxx', left, right)
+      if sig then left, right = nleft, nright end
+      
+      local data, err = read_pote()
+      local a = calibrator(tonumber(data))
+    
+      local r2 = 0.5*( (2*cos(a) + sin(a)*(d*d+p*p)/(d*p))*left
+               + sin(a)*right*(d*d-p*p)/(d*p) )
+             
+      local l2 = 0.5*(sin(a)*left*(p*p-d*d)/(d*p)
+               + (2*cos(a) - sin(a)*(d*d+p*p)/(d*p))*right)
+             
+      print("!U2", l2, r2, a) 
+      
+      motor_left.set.moving_speed(-l2)
+      motor_right.set.moving_speed(r2)
+    end
   end)
 
   -- HTTP RC
