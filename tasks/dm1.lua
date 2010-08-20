@@ -18,7 +18,7 @@ local sig_drive = {}
 M.init = function(conf)
   
   ----------------------------
-  local filepot = conf.filepot or '/sys/devices/ocp.3/helper.15/AIN1'
+  local filepot = conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
   --local filepot = '/sys/devices/ocp.3/44e0d000.tscadc/tiadc/iio:device0/in_voltage1_raw'
   log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
   
@@ -49,7 +49,7 @@ M.init = function(conf)
     end
   end)
   --]]
-  ca
+
   --drive first pair
   sched.run(function()
     local motor_left = toribio.wait_for_device(conf.motor_id[1].left)
