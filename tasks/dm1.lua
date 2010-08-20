@@ -54,13 +54,14 @@ M.init = function(conf)
         local rate, threshold = conf.pot.rate, conf.pot.threshold
         while true do
           local pot_reading = tonumber( assert(read_pote(filepot)) )
+
           if abs(pot_reading-last_pot) > threshold then
             last_pot = pot_reading
             sched.signal(sig_angle, calibrator(tonumber(pot_reading)))
           end
           sched.sleep(rate)
         end
-      end):set_as_attached()
+      end)--:set_as_attached()
     end
     
     sched.run(function()
@@ -81,8 +82,8 @@ M.init = function(conf)
           pangle = par1 
         end
         
-        log('DM1', 'DEBUG', 'Drive: module %s, angle %s, pot %s', 
-          tostring(fmodule), tostring(fangle), tostring(pangle))
+        --log('DM1', 'DEBUG', 'Drive %s: module %s, angle %s, pot %s', 
+        --  tostring(i), tostring(fmodule), tostring(fangle), tostring(pangle))
       
         local fx = fmodule * cos(fangle+pangle)
         local fy = fmodule * sin(fangle+pangle)
@@ -90,12 +91,13 @@ M.init = function(conf)
         local out_r = fx - d_p*fy
         local out_l = fx + d_p*fy
         
-        log('DM1', 'DEBUG', 'Out: left %s, right %s', tostring(out_l), tostring(out_r))
+        --log('DM1', 'DEBUG', 'Out %s: left %s, right %s', 
+        --    tostring(i), tostring(out_l), tostring(out_r))
 
         motor_left.set.moving_speed(-out_r)
         motor_right.set.moving_speed(out_l)
         
-        sched.signal(sig_drive_out, fmodule, fangle)
+        sched.signal(sig_drive_out, fmodule, -fangle)
       end)
       log('DM1', 'INFO', 'Motors left %s and right %s ready', chassis.left, chassis.right)
 
@@ -104,6 +106,12 @@ M.init = function(conf)
   end
 
   -- HTTP RC
+  --[[
+  sched.run(function()
+      sched.sleep(3)
+      sched.signal(sig_drive_control, 20, 0)
+  end)
+  --]]
   
   if conf.http_server then 
     local http_server = require "lumen.tasks.http-server"  
@@ -114,7 +122,7 @@ M.init = function(conf)
       sched.run(function()
         while true do
           local message,opcode = ws:receive()
-          log('DM1', 'DEBUG', 'websocket traffic "%s"', tostring(message))
+          --log('DM1', 'DEBUG', 'websocket traffic "%s"', tostring(message))
           if not message then
             sched.signal(sig_drive_control, 0, 0)
             ws:close()
