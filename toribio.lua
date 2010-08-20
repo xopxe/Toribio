@@ -204,7 +204,7 @@ end
 -- @param taskname The name of the task
 -- @return true on success.
 M.start = function(section, taskname)
-	local packagename = section..'/'..taskname
+	local packagename = section..'.'..taskname
 	if package.loaded[packagename] 
 	then return package.loaded[packagename] end
 	
