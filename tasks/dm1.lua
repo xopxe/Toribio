@@ -50,11 +50,10 @@ M.init = function(conf)
      
       --task to poll the pot
       sched.run(function()
-        local last_pot = -1000000
         local rate, threshold = conf.pot.rate, conf.pot.threshold
+        local last_pot = -1000000
         while true do
           local pot_reading = tonumber( assert(read_pote(filepot)) )
-
           if abs(pot_reading-last_pot) > threshold then
             last_pot = pot_reading
             sched.signal(sig_angle, calibrator(tonumber(pot_reading)))
@@ -83,20 +82,25 @@ M.init = function(conf)
         elseif sig==sig_angle then 
           pangle = par1 
         end
+        
+        local fangle_local = fangle+pangle
              
-        local fx = fmodulo * cos(fangle+pangle)
-        local fy = fmodulo * sin(fangle+pangle)
+        local fx = fmodulo * cos(fangle_local)
+        local fy = fmodulo * sin(fangle_local)
         
         local out_r = fx - d_p*fy
         local out_l = fx + d_p*fy
         
-        log('DM1', 'DEBUG', 'Drive %s: IN modulo %s, angle %s, pot %s, OUT left %s, right %s', 
-          tostring(i), tostring(fmodulo), tostring(fangle), tostring(pangle), tostring(out_l), tostring(out_r))
+        ---[[
+        log('DM1', 'DEBUG', 'Drive %s: IN modulo %s, drive %s, angle %s, pot %s, OUT left %s, right %s', 
+          tostring(i), tostring(fmodulo), tostring(sig==sig_drive_in), tostring(fangle), 
+          tostring(pangle), tostring(out_l), tostring(out_r))
+        --]]
         
         motor_left.set.moving_speed( left_mult*out_l )
         motor_right.set.moving_speed( right_mult*out_r )
         
-        sched.signal(sig_drive_out, fmodulo, -fangle)
+        sched.signal(sig_drive_out, fmodulo, -fangle_local)
       end)
       log('DM1', 'INFO', 'Motors left %s and right %s ready', chassis.left, chassis.right)
 
