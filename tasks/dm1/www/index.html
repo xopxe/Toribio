@@ -122,12 +122,22 @@ function output_position (x,y) {
 	ctx.stroke();	
 	
 	//socket_lm.send("d " + color + " " + last_x + " " + last_y + " " + x + ' ' + y + ';');
-	var left, right
-	left = -(y+x-500)/2	
-	right = -(y-x)/2	
-	
+	var vel, angle, xc, yc; 
+	xc = x-250;
+	yc = 250-y;
+	if (yc==0 && xc>=0) {
+		angle = 3.141592654 / 2.0;
+	} else if (yc==0 && xc<0) {
+		angle = -3.141592654 / 2.0;
+	} else {
+		angle = Math.atan2(xc, yc); //(xc/yc);
+	}
+	vel = Math.sqrt(yc*yc+xc*xc) / 2.5;
+	if (vel>100) vel=100;
+
+
 	//socket_lm.send('' + left + ',' + right);
-	socket_lm.send('{ "action":"drive", "left":' + left + ', "right":' + right + ' }');
+	socket_lm.send('{ "action":"drive", "module":' + vel + ', "angle":' + angle + ' }');
 }
 
 function ev_mousedown (ev) {

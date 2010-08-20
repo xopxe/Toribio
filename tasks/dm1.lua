@@ -23,20 +23,14 @@ local function read_pote(filepot)
   local fdpot = assert(io_open(filepot, 'rb'))
   local data, err = fdpot:read('*l')
   fdpot:close()
-return data, err
+  return data, err
+end
 
 M.init = function(conf)
   
   for i, chassis in ipairs(conf.motors) do
     log('DM1', 'INFO', 'Initializing chassis %i', i)
-    
-    local pot_calibration = conf.pots[i].calibration or conf.pot.calibration{{0,-90}, {2048, 0}, {4096, 90}}
-    log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
-    tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
-    tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
-    tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
-    local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
-    
+      
     local sig_angle = {}
     sigs_drive[i] = {}
     
@@ -44,6 +38,14 @@ M.init = function(conf)
     
     if i>1 then 
       local ipot=i-1
+      
+      local pot_calibration = conf.pots[ipot].calibration or conf.pot.calibration or {{0,-90}, {2048, 0}, {4096, 90}}
+      log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
+      tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
+      tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
+      tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
+      local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
+    
       local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
       log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
      
@@ -71,24 +73,30 @@ M.init = function(conf)
       motor_left.set.rotation_mode('wheel')
       motor_right.set.rotation_mode('wheel')
       local sig_drive = sigs_drive[i]
-      sched.sigrun( {sig_drive, sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
-        if sig==sig_drive then fmodule, fangle = in_fmodule, in_fangle end
-        
+      sched.sigrun( {sigs_drive[i-1], sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
+        if sig==sigs_drive[i-1] then fmodule, fangle = in_fmodule, in_fangle end
+        log('DM1', 'DEBUG', 'Drive: module %s, angle %s', tostring(fmodule), tostring(fangle))
+
         local fx = fmodule * cos(fangle)
-        local fy = fmodule * cos(fangle)
+        local fy = fmodule * sin(fangle)
         
-        local out_r = 0.5*(fx + d_p*fy)
-        local out_l = 0.5*(fx - d_p*fy)
+        local out_r = (fx - d_p*fy)
+        local out_l = (fx + d_p*fy)
                      
         --print("!U2", l2, r2, angle) 
         if math.abs(out_r) > 100 then print ('!!!! R', out_r) end
         if math.abs(out_l) > 100 then print ('!!!! R', out_r) end
         
-        motor_left.set.moving_speed(out_r)
-        motor_right.set.moving_speed(-out_l)
+        
+        log('DM1', 'DEBUG', 'Out: left %s, right %s', tostring(out_l), tostring(out_r))
+
+        motor_left.set.moving_speed(-out_r)
+        motor_right.set.moving_speed(out_l)
       end)
+      log('DM1', 'INFO', 'Motors left %s and right %s ready', chassis.left, chassis.right)
+
     end)
-    
+ 
   end
 
   -- HTTP RC
@@ -102,6 +110,7 @@ M.init = function(conf)
       sched.run(function()
         while true do
           local message,opcode = ws:receive()
+          log('DM1', 'DEBUG', 'websocket traffic "%s"', tostring(message))
           if not message then
             sched.signal(sig_drive_control, 0, 0)
             ws:close()
