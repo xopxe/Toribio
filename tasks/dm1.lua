@@ -82,7 +82,7 @@ M.init = function(conf)
         local a = calibrator(tonumber(data))
         if abs(a-angle) < threshold then
           angle = a
-          sched.signal()
+          sched.signal(sig_angle)
         end
         sched.sleep(rate)
       end
