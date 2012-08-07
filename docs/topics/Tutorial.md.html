@@ -82,11 +82,33 @@
  # sudo make install
 </pre>
 
-<p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example "make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-"</p>
+<p>If there are errors when compiling, edit the Makefile and change the line 86:</p>
 
 
-<p>Then, download the <a href="https://github.com/xopxe/Lumen/tarball/master">latest version</a> of Toribio</p>
+<pre>
+ $(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
+</pre>
 
+<p>so it is:</p>
+
+
+<pre>
+ $(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
+</pre>
+
+<p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example "make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-" to crosscompile for ARM.</p>
+
+<p>Then, download the latest version of <a href="https://github.com/xopxe/Toribio">Toribio</a>. You can either get the <a href="https://github.com/xopxe/Toribio/tarball/master">tarball</a> , or use git:</p>
+
+
+<pre>
+ # git clone git@github.com:xopxe/Toribio.git
+ # cd Toribio
+ # git submodule init
+ # git submodule update
+</pre>
+
+<p>Finally, to use the filedev device-loader make sure you have the inotifywait program installed (on Ubuntu, do a <code>sudo apt-get install inotify-tools</code>).</p>
 
 <p><a name="Data_logger"></a></p>
 <h2>Data logger</h2>
@@ -102,7 +124,7 @@ and register the new task, adding the configuration parameters we might use. We 
  deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
  tasks.axlogger.<span class="global">load</span>=<span class="keyword">true</span>
  tasks.axlogger.motorname=<span class="string">'AX12:5'</span>
- tasks.axlogger.interval=<span class="number">5</span>
+ tasks.axlogger.interval=<span class="number">1</span>
  tasks.axlogger.outfile=<span class="string">'motor.log'</span>
 </pre>
 
@@ -137,7 +159,7 @@ Notice how in the program we provide default values for configuration parameters
 
 
 <pre>
- sudo lua toribio-go.lua
+ lua toribio-go.lua
 </pre>
 
 
