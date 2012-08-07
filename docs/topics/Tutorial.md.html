@@ -34,6 +34,8 @@
 <ul>
 <li><a href="#Install_Toribio">Install Toribio</a></li>
 <li><a href="#Data_logger">Data logger</a></li>
+<li><a href="#Remote_control">Remote control</a></li>
+<li><a href="#Reactive_line_follower">Reactive line follower</a></li>
 </ul>
 
 
@@ -72,7 +74,7 @@
 <p><a name="Install_Toribio"></a></p>
 <h2>Install Toribio</h2>
 
-<p>First, install nixio:</p>
+<p>First, install <a href="https://github.com/Neopallium/nixio">nixio</a>:</p>
 
 
 <pre>
@@ -135,6 +137,7 @@ and register the new task, adding the configuration parameters we might use. We 
  <span class="keyword">local</span> M = {}
  <span class="keyword">local</span> sched=<span class="global">require</span> <span class="string">'sched'</span>
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
+
  M.start = <span class="keyword">function</span>(conf)
      sched.run(<span class="keyword">function</span>()
          <span class="keyword">local</span> file = <span class="global">io</span>.open(conf.outfile <span class="keyword">or</span> <span class="string">'data.log'</span>, <span class="string">'w'</span>)
@@ -162,6 +165,15 @@ Notice how in the program we provide default values for configuration parameters
  lua toribio-go.lua
 </pre>
 
+<p><a name="Remote_control"></a></p>
+<h2>Remote control</h2>
+
+<p>TODO</p>
+
+<p><a name="Reactive_line_follower"></a></p>
+<h2>Reactive line follower</h2>
+
+<p>TODO</p>
 
 
 </div> <!-- id="content" -->

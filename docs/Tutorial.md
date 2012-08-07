@@ -4,7 +4,7 @@ Here we will build a few programs, step-by-step.
 
 ## Install Toribio
 
-First, install nixio:
+First, install [nixio](https://github.com/Neopallium/nixio):
 
     # git clone https://github.com/Neopallium/nixio.git
     # cd nixio
@@ -13,11 +13,11 @@ First, install nixio:
 
 If there are errors when compiling, edit the Makefile and change the line 86:
 
-	$(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
+    $(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
 
 so it is:
 
-    	$(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
+    $(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
 
 If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example "make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-" to crosscompile for ARM.
 
@@ -49,6 +49,7 @@ Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:
     local M = {}
     local sched=require 'sched'
     local toribio = require 'toribio'
+
     M.start = function(conf)
     	sched.run(function()
     		local file = io.open(conf.outfile or 'data.log', 'w')
@@ -72,6 +73,10 @@ Finally, we run the program:
 
     lua toribio-go.lua
 
+## Remote control
 
+TODO
 
- 
+## Reactive line follower
+
+TODO
