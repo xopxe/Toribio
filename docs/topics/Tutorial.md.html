@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Toribio</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Install_Toribio">Install Toribio</a></li>
+<li><a href="#Data_logger">Data logger</a></li>
+</ul>
+
+
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
+  <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/README.md.html">README.md</a></li>
+  <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
+  <li><strong>Tutorial.md</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/bobot.html">bobot</a></li>
+  <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
+  <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/mice.html">mice</a></li>
+  <li><a href="../modules/toribio.html">toribio</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul>
+  <li><a href="../scripts/toribio-go.html">toribio-go</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Topic <code>Tutorial.md</code></h1>
+
+    
+<h1>Tutorial.</h1>
+
+<p>Here we will build a few programs, step-by-step.</p>
+
+<p><a name="Install_Toribio"></a></p>
+<h2>Install Toribio</h2>
+
+<p>First, install nixio:</p>
+
+
+<pre>
+ # git clone https://github.com/Neopallium/nixio.git
+ # cd nixio
+ # make
+ # sudo make install
+</pre>
+
+<p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example "make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-"</p>
+
+
+<p>Then, download the <a href="https://github.com/xopxe/Lumen/tarball/master">latest version</a> of Toribio</p>
+
+
+<p><a name="Data_logger"></a></p>
+<h2>Data logger</h2>
+
+<p>First we will do a data logger, that will save information read from an AX-12 motor to a file. We will call the task "axlogger".</p>
+
+<p>We start by editing the configuration file. We must configure two things: enable the dynamixel device loader,
+and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to toribio-go.conf:</p>
+
+
+<pre>
+ deviceloaders.dynamixel.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
+ tasks.axlogger.<span class="global">load</span>=<span class="keyword">true</span>
+ tasks.axlogger.motorname=<span class="string">'AX12:5'</span>
+ tasks.axlogger.interval=<span class="number">5</span>
+ tasks.axlogger.outfile=<span class="string">'motor.log'</span>
+</pre>
+
+<p>Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:</p>
+
+
+<pre>
+ <span class="keyword">local</span> M = {}
+ <span class="keyword">local</span> sched=<span class="global">require</span> <span class="string">'sched'</span>
+ <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
+ M.start = <span class="keyword">function</span>(conf)
+     sched.run(<span class="keyword">function</span>()
+         <span class="keyword">local</span> file = <span class="global">io</span>.open(conf.outfile <span class="keyword">or</span> <span class="string">'data.log'</span>, <span class="string">'w'</span>)
+         <span class="keyword">local</span> motor = toribio.wait_for_device(conf.motorname)
+         <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+             <span class="keyword">local</span> l = motor:get_load()
+             file:write(l..<span class="string">'\n'</span>)
+             file:flush()
+             sched.sleep(conf.interval <span class="keyword">or</span> <span class="number">5</span>)
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>)
+ <span class="keyword">end</span>
+
+ <span class="keyword">return</span> M
+</pre>
+
+<p>The log file will contain motor load readings. The task (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. The wait_for_device call will block until the device is detected, so it is important to place that call <em>inside</em> the task (we do not want the main task blocking).
+The task then will loop reading data from the motor and logging it, and then sleeping for the specified interval.
+Notice how in the program we provide default values for configuration parameters in case they're missing (like a 5 second interval).</p>
+
+<p>Finally, we run the program:</p>
+
+
+<pre>
+ sudo lua toribio-go.lua
+</pre>
+
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

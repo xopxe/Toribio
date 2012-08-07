@@ -1,0 +1,611 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Toribio</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/bobot.html">bobot</a></li>
+  <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
+  <li><strong>dynamixel-motor</strong></li>
+  <li><a href="../modules/mice.html">mice</a></li>
+  <li><a href="../modules/toribio.html">toribio</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul>
+  <li><a href="../scripts/toribio-go.html">toribio-go</a></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
+  <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/README.md.html">README.md</a></li>
+  <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
+  <li><a href="../topics/Tutorial.md.html">Tutorial.md</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dynamixel-motor</code></h1>
+
+<p>Library for Dynamixel motors.</p>
+<p> This library allows to manipulate devices that use Dynamixel 
+ protocol, such as AX-12 robotic servo motors.
+ When available, each conected motor will be available
+ as a device in torobio.devices table, named
+ (for example) 'ax12:1', labeled as module 'ax'</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local toribio = require 'toribio'
+local motor = toribio.wait_for_device('ax12:5')
+motor.set_led(true)</pre>
+    </ul>
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#reset">reset&nbsp;()</a></td>
+	<td class="summary">Reset configuration.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_model">get_model&nbsp;()</a></td>
+	<td class="summary">Get model.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_firmware_version">get_firmware_version&nbsp;()</a></td>
+	<td class="summary">Get firmware version.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_id">get_id&nbsp;()</a></td>
+	<td class="summary">Get actuator's ID.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#init_mode_wheel">init_mode_wheel&nbsp;()</a></td>
+	<td class="summary">Set wheel mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#init_mode_joint">init_mode_joint&nbsp;(min, max)</a></td>
+	<td class="summary">Set joint mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#ping">ping&nbsp;()</a></td>
+	<td class="summary">Ping the motor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_led">set_led&nbsp;(value)</a></td>
+	<td class="summary">Control motor's led.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_torque_enable">set_torque_enable&nbsp;(value)</a></td>
+	<td class="summary">Enables motor torque.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_torque_enable">get_torque_enable&nbsp;()</a></td>
+	<td class="summary">Get torque mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_speed">get_speed&nbsp;()</a></td>
+	<td class="summary">Get motor speed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_speed">set_speed&nbsp;(value)</a></td>
+	<td class="summary">Set motor speed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_operating_voltage">get_operating_voltage&nbsp;()</a></td>
+	<td class="summary">Get operating voltage.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_operating_voltage">set_operating_voltage&nbsp;(min, max)</a></td>
+	<td class="summary">Set operating voltage range.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_position">get_position&nbsp;()</a></td>
+	<td class="summary">Get motor position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_position">set_position&nbsp;(value)</a></td>
+	<td class="summary">Set motor position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_torque_limit">get_torque_limit&nbsp;()</a></td>
+	<td class="summary">Get the torque limit.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_torque_limit">set_torque_limit&nbsp;(value)</a></td>
+	<td class="summary">Set the torque limit.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_load">get_load&nbsp;()</a></td>
+	<td class="summary">Get the motor's load.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_temperature">get_temperature&nbsp;()</a></td>
+	<td class="summary">Get motor's temperature.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_moving">is_moving&nbsp;()</a></td>
+	<td class="summary">Get if motor is moving.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#name">name</a></td>
+	<td class="summary">Name of the device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#module">module</a></td>
+	<td class="summary">Module name ('ax' in this case)</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#filename">filename</a></td>
+	<td class="summary">Device file of the bus.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#busdevice">busdevice</a></td>
+	<td class="summary">Bus device.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "reset"></a>
+    <strong>reset&nbsp;()</strong>
+    </dt>
+    <dd>
+    Reset configuration. 
+ This will reset configuration to factory defaults.
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_model"></a>
+    <strong>get_model&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get model. 
+ Returns the model of the actuator
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Model number
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "get_firmware_version"></a>
+    <strong>get_firmware_version&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get firmware version. 
+ Get the version of the actuator's firmware
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Firmware version
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "get_id"></a>
+    <strong>get_id&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get actuator's ID. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        ID number
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "init_mode_wheel"></a>
+    <strong>init_mode_wheel&nbsp;()</strong>
+    </dt>
+    <dd>
+    Set wheel mode. 
+Set the motor to continuous rotation mode.
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "init_mode_joint"></a>
+    <strong>init_mode_joint&nbsp;(min, max)</strong>
+    </dt>
+    <dd>
+    Set joint mode. 
+ Set the motor to joint mode. Angles are provided in degrees,
+ in the full servo coverage (0 - 300 degrees arc)
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>min</em></code>:  the minimum joint angle (defaults to 0)</li>
+       <li><code><em>max</em></code>:  the maximum joint angle (defaults to 300)</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "ping"></a>
+    <strong>ping&nbsp;()</strong>
+    </dt>
+    <dd>
+    Ping the motor. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Error code.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_led"></a>
+    <strong>set_led&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Control motor's led. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  true switches on, false switches off.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_torque_enable"></a>
+    <strong>set_torque_enable&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Enables motor torque. 
+ This activates the motor. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  true switches on, false switches off.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_torque_enable"></a>
+    <strong>get_torque_enable&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get torque mode. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        true if torque enabled
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "get_speed"></a>
+    <strong>get_speed&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get motor speed. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        If motor in joint mode, speed in deg/sec. If in wheel
+ mode, as a fraction of max torque.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_speed"></a>
+    <strong>set_speed&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set motor speed. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
+ (0 means max available speed). 
+ If in wheel mode, as a fraction of max torque (in the -1 .. 1 range).</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_operating_voltage"></a>
+    <strong>get_operating_voltage&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get operating voltage. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The voltage in volts.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_operating_voltage"></a>
+    <strong>set_operating_voltage&nbsp;(min, max)</strong>
+    </dt>
+    <dd>
+    Set operating voltage range. 
+ If the operating voltage get out of the specified range, an
+ alarm is set.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>min</em></code>:  Minimum voltage in volts</li>
+       <li><code><em>max</em></code>:  Maximum voltage in volts</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_position"></a>
+    <strong>get_position&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get motor position. 
+ Read the axle position from the motor.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The angle in deg. The reading is only valid in the 
+ 0 .. 300deg range
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_position"></a>
+    <strong>set_position&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set motor position. 
+ Set the target position for the motor's axle. Only works in
+ joint mode.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  Angle in degrees, in the 0 .. 300deg range.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_torque_limit"></a>
+    <strong>get_torque_limit&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the torque limit. 
+ Returns the torque limit set in the motor.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Fraction of max torque (0..1 range).
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_torque_limit"></a>
+    <strong>set_torque_limit&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set the torque limit. 
+ Sets the torque limit in the motor.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  Fraction of max torque (0..1 range).</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_load"></a>
+    <strong>get_load&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the motor's load. 
+ The torque value returned is an internal torque value, and
+ should not be used to infeer weight or moments.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Fraction of max torque, in the -1..1 range.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "get_temperature"></a>
+    <strong>get_temperature&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get motor's temperature. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        Temperature in degrees Celsius.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "is_moving"></a>
+    <strong>is_moving&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get if motor is moving. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        If the motor has reached target position, return false.
+ Otherwhise return true.
+    </ol>
+
+
+</dd>
+</dl>
+    <h2><a name="Fields"></a>Fields</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "name"></a>
+    <strong>name</strong>
+    </dt>
+    <dd>
+    Name of the device. 
+ Of the form 'ax12:5'
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "module"></a>
+    <strong>module</strong>
+    </dt>
+    <dd>
+    Module name ('ax' in this case) 
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "filename"></a>
+    <strong>filename</strong>
+    </dt>
+    <dd>
+    Device file of the bus. 
+ Filename of the bus to which the motor is connected.
+ For example, '/dev/ttyUSB0'
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "busdevice"></a>
+    <strong>busdevice</strong>
+    </dt>
+    <dd>
+    Bus device. 
+ The dynamixel bus Device to which the motor is connected
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

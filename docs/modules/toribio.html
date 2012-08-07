@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Toribio</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/bobot.html">bobot</a></li>
+  <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
+  <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/mice.html">mice</a></li>
+  <li><strong>toribio</strong></li>
+</ul>
+<h2>Scripts</h2>
+<ul>
+  <li><a href="../scripts/toribio-go.html">toribio-go</a></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
+  <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/README.md.html">README.md</a></li>
+  <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
+  <li><a href="../topics/Tutorial.md.html">Tutorial.md</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>toribio</code></h1>
+
+<p>Embedded Robotics Library.</p>
+<p> Toribio is a library for developing robotics applications. It is based on Lumen cooperative
+ scheduler, and allows to write coroutine, signal and callback based applications.
+ Toribio provides a mechanism for easily accesing hardware, and is geared towards
+ low end hardware, such as Single-Board Computers.</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local toribio = require 'toribio'</pre>
+    </ul>
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#wait_for_device">wait_for_device&nbsp;(name)</a></td>
+	<td class="summary">Return a device with a given name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#register_callback">register_callback&nbsp;(device, event, f)</a></td>
+	<td class="summary">Register a callback for a device's signal.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#devices">devices</a></td>
+	<td class="summary">Available devices.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#signals">signals</a></td>
+	<td class="summary">Signals that toribio can emit.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#configuration">configuration</a></td>
+	<td class="summary">The configuration table.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#task">task</a></td>
+	<td class="summary">Toribio's task.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "wait_for_device"></a>
+    <strong>wait_for_device&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Return a device with a given name. 
+ If no such device exists, will block until it appears.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>name</em></code>:  The name of the device</li>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local mice = toribio.wait_for_device('mice')</pre>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        device the device with the given name.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "register_callback"></a>
+    <strong>register_callback&nbsp;(device, event, f)</strong>
+    </dt>
+    <dd>
+    Register a callback for a device's signal. 
+ Only one instance of the callback function will be executed at a time. This means 
+ that if a event happens again while a callback is running, the new callback will 
+ be fired only when the first finishes. Can be invoked also as 
+ device:register_callback(event, f)
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>device</em></code>:  The device to watch.</li>
+       <li><code><em>event</em></code>:  the name of the event to watch.</li>
+       <li><code><em>f</em></code>:  the callback function. It will be passed the signal's parameters.</li>
+    </ul>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Tables"></a>Tables</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "devices"></a>
+    <strong>devices</strong>
+    </dt>
+    <dd>
+    Available devices. 
+ This is a table containing the name and associated object for all available devices
+ in the system.
+ When toribio adds or removes a device, <a href="../modules/toribio.html#signals">signals</a> are emitted. For easily 
+ accesing this table, use <a href="../modules/toribio.html#wait_for_device">wait_for_device</a>
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">for name, _ in pairs(toribio.devices) do
+  print(name)
+end</pre>
+    </ul>
+
+
+
+</dd>
+    <dt>
+    <a name = "signals"></a>
+    <strong>signals</strong>
+    </dt>
+    <dd>
+    Signals that toribio can emit. 
+ The emitter of these signals will be the task returned by <a href="../modules/toribio.html#task">task</a>
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>new_device</em></code>:  A new device is added. The first parameter is the device object.</li>
+       <li><code><em>removed_device</em></code>:  A device was removed. The first parameter is the device.</li>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local sched = require 'sched'
+sched.sigrun({emitter=toribio.task, signals={toribio.signals.new_device}}, print)</pre>
+    </ul>
+
+
+
+</dd>
+    <dt>
+    <a name = "configuration"></a>
+    <strong>configuration</strong>
+    </dt>
+    <dd>
+    The configuration table. 
+ This table contains the configurations specified in toribio-go.conf file.
+
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Fields"></a>Fields</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "task"></a>
+    <strong>task</strong>
+    </dt>
+    <dd>
+    Toribio's task. 
+ This is the task that emits toribios <a href="../modules/toribio.html#signals">signals</a>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

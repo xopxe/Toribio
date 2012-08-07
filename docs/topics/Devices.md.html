@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Toribio</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Device_Loaders">Device Loaders</a></li>
+<li><a href="#Accessing_devices">Accessing devices</a></li>
+<li><a href="#Using_devices">Using devices</a></li>
+<li><a href="#Creating_your_own_devices">Creating your own devices</a></li>
+</ul>
+
+
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
+  <li><strong>Devices.md</strong></li>
+  <li><a href="../topics/README.md.html">README.md</a></li>
+  <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
+  <li><a href="../topics/Tutorial.md.html">Tutorial.md</a></li>
+</ul>
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/bobot.html">bobot</a></li>
+  <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
+  <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/mice.html">mice</a></li>
+  <li><a href="../modules/toribio.html">toribio</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul>
+  <li><a href="../scripts/toribio-go.html">toribio-go</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Topic <code>Devices.md</code></h1>
+
+    
+<h1>Devices.</h1>
+
+<p>A device object represent some piece of hardware or service. 
+Devices have a unique "name" field, and a "module" field, which
+is Device's type.</p>
+
+<p><a name="Device_Loaders"></a></p>
+<h2>Device Loaders</h2>
+
+<p>Usually, devices are detected and instantiated by tasks in
+the deviceloaders/ directory. To use them, you should enable them
+in the toribio-go.conf configuration file.</p>
+
+<p>Some of the deviceloaders are:</p>
+
+<h3>accelxo</h3>
+
+<p>Supports the accelerometer installed in the OLPC XO-1.75 laptops. 
+The device is name "accelxo", and the module is also "accelxo".</p>
+
+<h3>bobot</h3>
+
+<p>Uses the bobot library to access the usb4butia modules. A device will
+be instantiated for each module. Hotplug is supported. The device's name
+and module is defined by bobot. Sample configuration:</p>
+
+
+<pre>
+ deviceloaders.bobot.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.bobot.comms = {<span class="string">"usb"</span>, <span class="string">"serial"</span>} <span class="comment">--comms services to use
+</span>
+</pre>
+
+<h3>dynamixel</h3>
+
+<p>Provides support for dynamixel servos. Sample configuration:</p>
+
+
+<pre>
+ deviceloaders.dynamixel.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
+</pre>
+
+<p>It will create a device for the dynamixel bus (named 'dynamixel:/dev/ttyUSB0' 
+in the example and module "dynamixel"), plus a device for each motor (named, for example, 
+'ax12:5' and module 'ax')</p>
+
+<h3>mice</h3>
+
+<p>This device allows you to read a mouse.</p>
+
+<h3>filedev</h3>
+
+<p>This is a special loader, that watches for a serie of files and starts an associated
+loader when a file appears. When a file dissapears, it will remove all depending devices.</p>
+
+
+<pre>
+ deviceloaders.filedev.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.filedev.<span class="global">module</span>.mice = <span class="string">'/dev/input/mice'</span>
+ deviceloaders.filedev.<span class="global">module</span>.dynamixel = <span class="string">'/dev/ttyUSB*'</span>
+ deviceloaders.filedev.<span class="global">module</span>.accelxo = <span class="string">'/sys/devices/platform/lis3lv02d'</span>
+</pre>
+
+<p>When a file described by the mask appears, filedev will set the "filename" configuration 
+parameters for the corresponing task, and start it. Aditional parameters for the 
+autostarted task can be provided in it's own section, tough the load atribute for it must
+not be set.</p>
+
+<p>When fieldev detects a file removal, it will remove all devices that have it in the filename
+attribute.</p>
+
+<p>Filedev uses the tasks/inotifier.lua task, and therefore depends on the inotifywait program.</p>
+
+<p><a name="Accessing_devices"></a></p>
+<h2>Accessing devices</h2>
+
+<p>Devices are available trough de toribio.devices table, or using the 
+toribio.wait_for_device(name) method.</p>
+
+<p>To iterate all devices, you can do:</p>
+
+
+<pre>
+ <span class="keyword">for</span> name,device <span class="keyword">in</span> <span class="global">pairs</span>(toribio.devices)<span class="keyword">do</span>
+     <span class="global">print</span>(name, device.<span class="global">module</span>)
+ <span class="keyword">end</span>
+</pre>
+
+<p>This will print out all the devices, with their name and what 
+type (module) are they.</p>
+
+<p>If you know the name of the object, you can retrieve it directly.
+Some devices can be detected after your task started,
+so instead of going directly to the table you can use the 
+toribio.wait_for_device(name) method. If the given device exists, 
+it will be returned inmediatelly. Otherwise the call will block 
+until said device appears.</p>
+
+
+<pre>
+ <span class="keyword">local</span> mice = toribio.wait_for_device(<span class="string">'mice:/dev/input/mice'</span>)
+</pre>
+
+<p>Some devices can connect and disconnect at runtime. If you're 
+interested in these events, you can listen for the 'new_device' and
+'removed_device' events. For example:</p>
+
+
+<pre>
+ sched.sigrun(
+     {
+         emitter=toribio.task, 
+         signals={toribio.signals.new_device}
+     }, 
+     <span class="keyword">function</span>(device) 
+         <span class="global">print</span>(<span class="string">'new device!'</span>, device.name)
+     <span class="keyword">end</span>
+ )
+</pre>
+
+<p><a name="Using_devices"></a></p>
+<h2>Using devices</h2>
+
+<p>Devices have a set of common methods and fields, plus methods specific 
+to the instance.</p>
+
+<h3>Common fields</h3>
+
+<ul>
+    <li>device.name</li>
+</ul>
+
+<p>Device's unique name.</p>
+
+<ul>
+    <li>device.module</li>
+</ul>
+
+<p>Device's type. For example it can be "mice" for a mouse or "dist" 
+for a distence sensor.</p>
+
+<ul>
+    <li>device.task</li>
+</ul>
+
+<p>If the device has a long-running task associated, it will be 
+available here. This is also the task that emits device's events.</p>
+
+<ul>
+    <li>device.signals</li>
+</ul>
+
+<p>A table containing the signals that the device can emit.</p>
+
+<ul>
+    <li>device.filename</li>
+</ul>
+
+<p>If the device depends on a device file, it will be here.</p>
+
+<ul>
+    <li>device:register_callback()</li>
+</ul>
+
+<p>OO-styled synonim for toribio.register_callback()</p>
+
+<h3>device-dependant fields</h3>
+
+<p>Each device will have a set of methods that allow to manipulate 
+the device. Usually all evices with equal module will have the 
+same methods. For example a device with moule "dist" could
+have a device.get_distance() method.</p>
+
+<p><a name="Creating_your_own_devices_"></a></p>
+<h2>Creating your own devices.</h2>
+
+<p>TODO</p>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
