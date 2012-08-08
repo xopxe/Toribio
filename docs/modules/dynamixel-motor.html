@@ -363,7 +363,7 @@ Set the motor to continuous rotation mode.
     <h3>Returns:</h3>
     <ol>
         If motor in joint mode, speed in deg/sec. If in wheel
- mode, as a fraction of max torque.
+ mode, as a % of max torque.
     </ol>
 
 
@@ -379,7 +379,7 @@ Set the motor to continuous rotation mode.
     <ul>
        <li><code><em>value</em></code>:  If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
  (0 means max available speed). 
- If in wheel mode, as a fraction of max torque (in the -1 .. 1 range).</li>
+ If in wheel mode, as a % of max torque (in the -100% .. 100% range).</li>
     </ul>
 
 
@@ -469,7 +469,7 @@ Set the motor to continuous rotation mode.
 
     <h3>Returns:</h3>
     <ol>
-        Fraction of max torque (0..1 range).
+        Percentage of max torque (0% .. 100% range).
     </ol>
 
 
@@ -484,7 +484,7 @@ Set the motor to continuous rotation mode.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>value</em></code>:  Fraction of max torque (0..1 range).</li>
+       <li><code><em>value</em></code>:  Percentage of max torque (0% ..100% range).</li>
     </ul>
 
 
@@ -498,13 +498,13 @@ Set the motor to continuous rotation mode.
     <dd>
     Get the motor's load. 
  The torque value returned is an internal torque value, and
- should not be used to infeer weight or moments.
+ should not be used to infer weights or moments.
 
 
 
     <h3>Returns:</h3>
     <ol>
-        Fraction of max torque, in the -1..1 range.
+        Percentage of max torque, in the -100% .. 100% range.
     </ol>
 
 

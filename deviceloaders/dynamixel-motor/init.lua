@@ -156,7 +156,7 @@ local M = function (busdevice, id)
 	
 	--- Get motor speed.
 	-- @return If motor in joint mode, speed in deg/sec. If in wheel
-	-- mode, as a fraction of max torque.
+	-- mode, as a % of max torque.
 	Motor.get_speed = function()
 		local ret = read_data(idb,0x26,2)
 		local vel = ret:byte(1) + 256*ret:byte(2)
@@ -164,13 +164,13 @@ local M = function (busdevice, id)
 		if mode=='joint' then 
 			return vel / 1.496 --rpm
 		else --mode=='wheel'
-			return vel/1023 --fraction of max torque
+			return vel/10.23 --% of max torque
 		end
 	end
 	--- Set motor speed.
 	-- @param value If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
 	-- (0 means max available speed). 
-	-- If in wheel mode, as a fraction of max torque (in the -1 .. 1 range).
+	-- If in wheel mode, as a % of max torque (in the -100% .. 100% range).
 	Motor.set_speed = function(value)
 		if mode=='joint' then
 			-- 0 .. 684 deg/sec
@@ -179,8 +179,8 @@ local M = function (busdevice, id)
 			local ret = busdevice.write_data(idb,0x20,string.char(lowb,highb))
 			if ret then return ret:byte() end
 		else --mode=='wheel'
-			-- -1 ..  +1 max torque
-			local vel=math.floor(value * 1023)
+			-- -100% ..  +100% max torque
+			local vel=math.floor(value * 10.23)
 			local lowb, highb = get2bytes_signed(vel)
 			local ret = busdevice.write_data(idb,0x20,string.char(lowb,highb))
 			if ret then return ret:byte() end
@@ -229,32 +229,32 @@ local M = function (busdevice, id)
 	
 	--- Get the torque limit.
 	-- Returns the torque limit set in the motor.
-	-- @return Fraction of max torque (0..1 range).
+	-- @return Percentage of max torque (0% .. 100% range).
 	Motor.get_torque_limit = function()
 		local ret = read_data(idb,0x22,2)
 		local torque = ret:byte(1) + 256*ret:byte(2)
-		return torque/1023 --fraction of max torque
+		return torque/10.23 --% of max torque
 	end
 	--- Set the torque limit.
 	-- Sets the torque limit in the motor.
-	-- @param value Fraction of max torque (0..1 range).
+	-- @param value Percentage of max torque (0% ..100% range).
 	Motor.set_torque_limit = function(value)
-		-- 0 ..  1 max torque
-		local torque=math.floor(value * 1023)
+		-- 0% ..  100% max torque
+		local torque=math.floor(value * 10.23)
 		local lowb, highb = get2bytes_unsigned(torque)
 		local ret = busdevice.write_data(idb,0x22,string.char(lowb,highb))
 		if ret then return ret:byte() end
 	end
 	--- Get the motor's load.
 	-- The torque value returned is an internal torque value, and
-	-- should not be used to infeer weight or moments.
-	-- @return Fraction of max torque, in the -1..1 range.
+	-- should not be used to infer weights or moments.
+	-- @return Percentage of max torque, in the -100% .. 100% range.
 	Motor.get_load = function()
 		local ret = read_data(idb,0x28,2)
 		if ret then 
 			local load = ret:byte(1) +256*ret:byte(2)
 			if load > 1023 then load = 1024-load end
-			return load/1023 -- fraction of torque max
+			return load/10.23 -- % of torque max
 		end
 	end
 	--- Get motor's temperature.
