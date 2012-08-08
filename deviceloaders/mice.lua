@@ -59,7 +59,6 @@ M.start = function(conf)
 			
 			if dx~=0 or dy~=0 then
 				sched.signal(device.signals.move, x, y, dx, dy)
-
 			end
 		end 
 	end)
@@ -110,6 +109,12 @@ M.start = function(conf)
 		x, y = newx, newy
 	end
 
+	--- Pause the event generation.
+	-- While the device is paused, no events are generated, nor movements tracked.
+	-- @param pause mode, true to pause, false to unpause
+	device.set_pause = function ( pause )
+		device.task:set_pause( pause )
+	end
 	
 	toribio.add_device(device)
 end

@@ -82,7 +82,7 @@
 	<td class="summary">Return a device with a given name.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#register_callback">register_callback&nbsp;(device, event, f)</a></td>
+	<td class="name" nowrap><a href="#register_callback">register_callback&nbsp;(device, event, f, timeout)</a></td>
 	<td class="summary">Register a callback for a device's signal.</td>
 	</tr>
 </table>
@@ -143,7 +143,7 @@
 </dd>
     <dt>
     <a name = "register_callback"></a>
-    <strong>register_callback&nbsp;(device, event, f)</strong>
+    <strong>register_callback&nbsp;(device, event, f, timeout)</strong>
     </dt>
     <dd>
     Register a callback for a device's signal. 
@@ -157,6 +157,8 @@
        <li><code><em>device</em></code>:  The device to watch.</li>
        <li><code><em>event</em></code>:  the name of the event to watch.</li>
        <li><code><em>f</em></code>:  the callback function. It will be passed the signal's parameters.</li>
+       <li><code><em>timeout</em></code>:  Timeout on wait. On expiration, f will be invoked with 
+ nil, 'timeout' as parameters.</li>
     </ul>
 
 

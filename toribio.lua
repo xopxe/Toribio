@@ -83,7 +83,9 @@ end
 -- @param device The device to watch.
 -- @param event the name of the event to watch.
 -- @param f the callback function. It will be passed the signal's parameters.
-M.register_callback = function(device, event, f)
+-- @param timeout Timeout on wait. On expiration, f will be invoked with 
+-- nil, 'timeout' as parameters.
+M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
 	assert(device.task, "Device has no task associated")
 	assert(device.signals, "Device has no signals associated")
@@ -92,6 +94,7 @@ M.register_callback = function(device, event, f)
 	local waitd = {
 		emitter=device.task,
 		events={device.signals[event]},
+		timeout=timeout,
 	}
 	local mx = require 'mutex'()
 	local fsynched = mx.synchronize(f)
