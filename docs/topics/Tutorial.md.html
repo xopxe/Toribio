@@ -228,9 +228,7 @@ and register the new task, adding the configuration parameters we might use. We 
  <span class="keyword">local</span> <span class="keyword">function</span> generate_output(x, y)
      <span class="keyword">local</span> left = (y + x)/<span class="number">2</span>
      <span class="keyword">local</span> right = (y - x)/<span class="number">2</span>
-     <span class="keyword">local</span> msg = left..<span class="string">','</span>..right
-     udp:send(msg)
-     <span class="global">print</span> (msg)
+     udp:send(left..<span class="string">','</span>..right)
  <span class="keyword">end</span>
 </pre>
 

@@ -127,9 +127,7 @@ The only part missing is the generate\_output function. We will use nixio to cre
     local function generate_output(x, y)
     	local left = (y + x)/2
     	local right = (y - x)/2
-    	local msg = left..','..right
-    	udp:send(msg)
-    	print (msg)
+    	udp:send(left..','..right)
     end
 
 This program can be easily improved adding a callback that would react to mouse clicks. For example adding the following callback allows to stop the robot clicking the left button.

@@ -11,18 +11,15 @@ local M = {}
 
 local TIMEOUT_REFRESH = 3 -- -1
 
-local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
-package.path = package.path .. ";"..my_path.."../../bobot/?.lua"
+--local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
+--package.path = package.path .. ";"..my_path.."../../bobot/?.lua"
 
 local sched=require 'sched'
 local toribio = require 'toribio'
-local bobot = require 'bobot'
+local bobot  -- = require 'bobot'
 
 --propagate debug print to bobot
-if debugprint then 
-	bobot.debugprint = debugprint
-end
-debugprint=debugprint or print
+local debugprint = _G.debugprint
 
 local devices_attached = {}
 
@@ -108,6 +105,23 @@ end
 
 
 M.start = function (conf)
+
+	if conf.path then 
+		if conf.path:sub(1,1)=='/' then
+			package.path = package.path .. ";"..conf.path..'/?.lua'
+		else
+			local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
+			package.path = package.path .. ";"..my_path..conf.path..'/?.lua'
+		end
+	end
+	
+	bobot  = require 'bobot'
+
+	if debugprint then 
+		bobot.debugprint = debugprint
+	end
+	debugprint=debugprint or function() end
+	
 	bobot.init(conf.comms)
 	read_devices_list()
 	sched.sigrun({
