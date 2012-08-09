@@ -170,7 +170,7 @@ and register the new task, adding the configuration parameters we might use. We 
 <p><a name="Remote_controlled_robot"></a></p>
 <h2>Remote controlled robot</h2>
 
-<p>We will do a remote controlled robot. One instance of toribio will read imputs from the mouse, an generate commands over a UDP link to Toribio instance in a robot with two motors (left and rigth).</p>
+<p>We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, an generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).</p>
 
 <h3>Remote Control</h3>
 
@@ -184,7 +184,7 @@ and register the new task, adding the configuration parameters we might use. We 
 </span> tasks.rc_control.port=<span class="number">9999</span>
 </pre>
 
-<p>The remote control will behave as follows: it tracks mouse's movements, generate messages of the form "left, right" and send them over udp. It sends a message at least each 0.5 seconds, so if we stop transmitting the robot can deduce it must stop. The skeleton for the tasks/rc_control.lua file is as follows:</p>
+<p>The remote control will behave as follows: it tracks mouse's movements, generates messages of the form "left, right" and sends them over udp. A message is sent at least each 0.5 seconds, so if we stop transmitting the robot can deduce it must stop. The skeleton for the tasks/rc_control.lua file is as follows:</p>
 
 
 <pre>
@@ -253,11 +253,13 @@ and register the new task, adding the configuration parameters we might use. We 
 
 
 <pre>
+ deviceloaders.dynamixel.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
  tasks.rc_bot.<span class="global">load</span> = <span class="keyword">true</span>
  tasks.rc_bot.ip = <span class="string">'127.0.0.1'</span> <span class="comment">--change with the ip adress of the robot
 </span> tasks.rc_bot.port = <span class="number">9999</span>
- tasks.rc_bot.motor_left = <span class="string">'AX12:3'</span>
- tasks.rc_bot.motor_right = <span class="string">'AX12:12'</span>
+ tasks.rc_bot.motor_left = <span class="string">'ax12:3'</span>
+ tasks.rc_bot.motor_right = <span class="string">'ax12:12'</span>
 </pre>
 
 <p>And the tasks/rc_bot.lua skeleton:</p>
@@ -309,7 +311,7 @@ and register the new task, adding the configuration parameters we might use. We 
  lua toribio-go.lua
 </pre>
 
-<p>Notice that rc_control might have to be run as sudo, if your distribution  request such thing for accesing /dev/input/mice.</p>
+<p>Notice that rc_control might have to be run as sudo, if your distribution request such thing for accesing /dev/input/mice.</p>
 
 <p><a name="Reactive_line_follower"></a></p>
 <h2>Reactive line follower</h2>

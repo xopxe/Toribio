@@ -77,7 +77,7 @@ Finally, we run the program:
 
 ## Remote controlled robot
 
-We will do a remote controlled robot. One instance of toribio will read imputs from the mouse, an generate commands over a UDP link to Toribio instance in a robot with two motors (left and rigth).
+We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, an generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).
 
 ### Remote Control
 
@@ -88,7 +88,7 @@ We will need the mice device, and a task to process mice input and generate comm
     tasks.rc_control.ip='127.0.0.1' --change with the ip adress of the robot
     tasks.rc_control.port=9999
 
-The remote control will behave as follows: it tracks mouse's movements, generate messages of the form "left, right" and send them over udp. It sends a message at least each 0.5 seconds, so if we stop transmitting the robot can deduce it must stop. The skeleton for the tasks/rc_control.lua file is as follows:
+The remote control will behave as follows: it tracks mouse's movements, generates messages of the form "left, right" and sends them over udp. A message is sent at least each 0.5 seconds, so if we stop transmitting the robot can deduce it must stop. The skeleton for the tasks/rc_control.lua file is as follows:
 
     local M = {}
     local toribio = require 'toribio'
@@ -146,11 +146,13 @@ This program can be easily improved adding a callback that would react to mouse 
 
 The bot listens for UDP packets, parses them and set motor velocities. As allways, the configuration in toribio-go.conf:
 
+    deviceloaders.dynamixel.load = true
+    deviceloaders.dynamixel.filename = '/dev/ttyUSB0'
     tasks.rc_bot.load = true
     tasks.rc_bot.ip = '127.0.0.1' --change with the ip adress of the robot
     tasks.rc_bot.port = 9999
-    tasks.rc_bot.motor_left = 'AX12:3'
-    tasks.rc_bot.motor_right = 'AX12:12'
+    tasks.rc_bot.motor_left = 'ax12:3'
+    tasks.rc_bot.motor_right = 'ax12:12'
 
 And the tasks/rc\_bot.lua skeleton:
 
@@ -195,7 +197,7 @@ Now we run toribio with rc\_control task enabled on one machine, connected to a 
 
     lua toribio-go.lua
 
-Notice that rc\_control might have to be run as sudo, if your distribution  request such thing for accesing /dev/input/mice.
+Notice that rc\_control might have to be run as sudo, if your distribution request such thing for accesing /dev/input/mice.
 
 ## Reactive line follower
 
