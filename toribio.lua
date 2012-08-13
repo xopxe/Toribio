@@ -44,7 +44,10 @@ end
 --- Signals that toribio can emit.
 -- The emitter of these signals will be the task returned by @{task}
 -- @usage local sched = require 'sched'
---sched.sigrun({emitter=toribio.task, signals={toribio.signals.new_device}}, print)
+--sched.sigrun_task(
+--    {emitter=toribio.task, signals={toribio.signals.new_device}}, 
+--    print
+--)
 -- @field new_device A new device is added. The first parameter is the device object.
 -- @field removed_device A device was removed. The first parameter is the device.
 -- @table signals
@@ -85,6 +88,7 @@ end
 -- @param f the callback function. It will be passed the signal's parameters.
 -- @param timeout Timeout on wait. On expiration, f will be invoked with 
 -- nil, 'timeout' as parameters.
+-- @return The callback task
 M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
 	assert(device.task, "Device has no task associated")
@@ -101,7 +105,7 @@ M.register_callback = function(device, event, f, timeout)
 	local wrapper = function(_, _, ...)
 		return fsynched(...)
 	end
-	sched.sigrun(waitd, wrapper)
+	return sched.sigrun(waitd, wrapper)
 end
 
 local signal_new_device = {}

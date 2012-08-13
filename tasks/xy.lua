@@ -16,6 +16,9 @@ M.start = function(conf)
 		print('xy got motor_x',motor_x)
 		local motor_y = toribio.wait_for_device(conf.motor_y)
 		print('xy got motor_y',motor_y)
+
+		motor_x.init_mode_joint()
+		motor_y.init_mode_joint()
 		
 		--debugprint ('torqueenable:', dynamixelbus.get_broadcaster().set_torque_enable(false))
 		dynamixelbus.get_broadcaster().set_speed(0)

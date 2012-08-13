@@ -45,6 +45,14 @@ end
 
 load_configuration('toribio-go.conf')
 
+if toribio.configuration.shell and toribio.configuration.shell.load then
+	local ip = toribio.configuration.shell.ip or '*'
+	local port = toribio.configuration.shell.port or 2012
+	debugprint ('Starting Shell on', ip, port)
+	local shell = require 'tasks/shell'
+	shell.init(ip, port)
+end
+
 sched.run(function()
 	for _, section in ipairs({'deviceloaders', 'tasks'}) do
 		for task, conf in pairs(toribio.configuration[section]) do
