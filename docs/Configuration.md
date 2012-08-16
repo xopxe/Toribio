@@ -38,7 +38,17 @@ as needed. For example:
 creates a table named "module", which will have two fields, "mice" and 
 "dynamixel".
 
-## Parametes on the commandline
+## Interactive shell
+
+It is possible to enable an interactive shell, accesible trough telnet. To 
+enable it, add the following
+
+    shell.load = true
+    shell.ip = 127.0.0.1 --defaults t '*'
+    shell.port = 2012 --defaults to 2012
+
+
+## Parameters on the commandline
 
 TODO
 

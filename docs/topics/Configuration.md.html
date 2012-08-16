@@ -33,7 +33,8 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#File_Format">File Format</a></li>
-<li><a href="#Parametes_on_the_commandline">Parametes on the commandline</a></li>
+<li><a href="#Interactive_shell">Interactive shell</a></li>
+<li><a href="#Parameters_on_the_commandline">Parameters on the commandline</a></li>
 </ul>
 
 
@@ -41,6 +42,7 @@
 <ul>
   <li><strong>Configuration.md</strong></li>
   <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/Installation.md.html">Installation.md</a></li>
   <li><a href="../topics/README.md.html">README.md</a></li>
   <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
   <li><a href="../topics/Tutorial.md.html">Tutorial.md</a></li>
@@ -112,8 +114,22 @@ as needed. For example:</p>
 <p>creates a table named "module", which will have two fields, "mice" and 
 "dynamixel".</p>
 
-<p><a name="Parametes_on_the_commandline"></a></p>
-<h2>Parametes on the commandline</h2>
+<p><a name="Interactive_shell"></a></p>
+<h2>Interactive shell</h2>
+
+<p>It is possible to enable an interactive shell, accesible trough telnet. To 
+enable it, add the following</p>
+
+
+<pre>
+ shell.<span class="global">load</span> = <span class="keyword">true</span>
+ shell.ip = <span class="number">127.0</span>.<span class="number">0.1</span> <span class="comment">--defaults t '*'
+</span> shell.port = <span class="number">2012</span> <span class="comment">--defaults to 2012
+</span>
+</pre>
+
+<p><a name="Parameters_on_the_commandline"></a></p>
+<h2>Parameters on the commandline</h2>
 
 <p>TODO</p>
 

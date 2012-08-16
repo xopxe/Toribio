@@ -11,5 +11,5 @@ examples={'tests/test.lua', 'tests/test-buff.lua', 'tests/test-nixiorator.lua'
 --]]
 --readme = "README.md"
 topics = {"README.md", "docs/Configuration.md", "docs/Devices.md", "docs/Tasks.md",
-	"docs/Tutorial.md"}
+	"docs/Installation.md", "docs/Tutorial.md"}
 

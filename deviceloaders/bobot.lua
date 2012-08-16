@@ -49,11 +49,11 @@ local function get_device_name(d)
 end
 
 local function read_devices_list()
-	debugprint("=Listing Devices")
+	--debugprint("=Listing Devices")
 	local bfound
 	local devices_attached_now = {}
 	for _, bb in ipairs(bobot.baseboards) do
-		debugprint("===board ", bb.idBoard)
+		--debugprint("===board ", bb.idBoard)
 		for _,d in ipairs(bb.devices) do
 			local regname = get_device_name(d)
 			d.name=regname
@@ -84,7 +84,7 @@ local function read_devices_list()
 				}
 				for fn, ff in pairs(d.api or {}) do device[fn]=ff.call end
 				toribio.add_device(device)
-				devices_attached[device.name]=true
+				devices_attached[regname]=device
 			else
 				print ('Error opening', d.name)
 			end

@@ -32,7 +32,6 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Install_Toribio">Install Toribio</a></li>
 <li><a href="#Data_logger">Data logger</a></li>
 <li><a href="#Remote_controlled_robot">Remote controlled robot</a></li>
 <li><a href="#Reactive_line_follower">Reactive line follower</a></li>
@@ -43,6 +42,7 @@
 <ul>
   <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
   <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/Installation.md.html">Installation.md</a></li>
   <li><a href="../topics/README.md.html">README.md</a></li>
   <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
   <li><strong>Tutorial.md</strong></li>
@@ -71,46 +71,6 @@
 
 <p>Here we will build a few programs, step-by-step.</p>
 
-<p><a name="Install_Toribio"></a></p>
-<h2>Install Toribio</h2>
-
-<p>First, install <a href="https://github.com/Neopallium/nixio">nixio</a>:</p>
-
-
-<pre>
- # git clone https://github.com/Neopallium/nixio.git
- # cd nixio
- # make
- # sudo make install
-</pre>
-
-<p>If there are errors when compiling, edit the Makefile and change the line 86:</p>
-
-
-<pre>
- $(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
-</pre>
-
-<p>so it is:</p>
-
-
-<pre>
- $(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
-</pre>
-
-<p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example <code>make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-</code> to crosscompile for ARM.</p>
-
-<p>Then, download the latest version of <a href="https://github.com/xopxe/Toribio">Toribio</a>. You can either get the <a href="https://github.com/xopxe/Toribio/tarball/master">tarball</a> , or use git:</p>
-
-
-<pre>
- # git clone git@github.com:xopxe/Toribio.git
- # cd Toribio
- # git submodule init
- # git submodule update
-</pre>
-
-<p>Finally, to use the filedev device-loader make sure you have the inotifywait program installed (on Ubuntu, do a <code>sudo apt-get install inotify-tools</code>).</p>
 
 <p><a name="Data_logger"></a></p>
 <h2>Data logger</h2>

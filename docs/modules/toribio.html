@@ -54,6 +54,7 @@
 <ul>
   <li><a href="../topics/Configuration.md.html">Configuration.md</a></li>
   <li><a href="../topics/Devices.md.html">Devices.md</a></li>
+  <li><a href="../topics/Installation.md.html">Installation.md</a></li>
   <li><a href="../topics/README.md.html">README.md</a></li>
   <li><a href="../topics/Tasks.md.html">Tasks.md</a></li>
   <li><a href="../topics/Tutorial.md.html">Tutorial.md</a></li>
@@ -162,6 +163,10 @@
     </ul>
 
 
+    <h3>Returns:</h3>
+    <ol>
+        The callback task
+    </ol>
 
 
 </dd>
@@ -208,7 +213,10 @@ end</pre>
     <h3>Usage:</h3>
     <ul>
         <pre class="example">local sched = require 'sched'
-sched.sigrun({emitter=toribio.task, signals={toribio.signals.new_device}}, print)</pre>
+sched.sigrun_task(
+    {emitter=toribio.task, signals={toribio.signals.new_device}}, 
+    print
+)</pre>
     </ul>
 
 
