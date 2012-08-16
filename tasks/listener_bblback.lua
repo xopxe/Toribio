@@ -9,7 +9,7 @@ M.start = function()
 		
 		while true do
 			lback.send(sched.get_time())
-			--sched.sleep(1)
+			sched.sleep(5)
 			print(lback.read())
 			--sched.sleep(1)
 			sched.yield()

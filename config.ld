@@ -10,6 +10,11 @@ examples={'tests/test.lua', 'tests/test-buff.lua', 'tests/test-nixiorator.lua'
 	, 'tests/test-multiwait.lua', 'tests/test-mutex.lua'}
 --]]
 --readme = "README.md"
-topics = {"README.md", "docs/Configuration.md", "docs/Devices.md", "docs/Tasks.md",
-	"docs/Installation.md", "docs/Tutorial.md"}
+topics = {"README.md", 
+	"docs/0-Installation.md",
+	"docs/1-Tutorial.md",
+	"docs/2-Configuration.md", 
+	"docs/3-Tasks.md",
+	"docs/4-Devices.md", 
+}
 
