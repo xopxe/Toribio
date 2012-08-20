@@ -40,12 +40,13 @@ creates a table named "module", which will have two fields, "mice" and
 
 ## Interactive shell
 
-It is possible to enable an interactive shell, accesible trough telnet. To 
+Besides Toribio provided tasks, Lumen's task are also available. For example, 
+there is an interactive shell, accesible trough telnet. To 
 enable it, add the following
 
-    shell.load = true
-    shell.ip = 127.0.0.1 --defaults t '*'
-    shell.port = 2012 --defaults to 2012
+    tasks.shell.load = true
+    tasks.shell.ip = 127.0.0.1 --defaults t '*'
+    tasks.shell.port = 2012 --defaults to 2012
 
 
 ## Parameters on the commandline

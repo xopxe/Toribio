@@ -45,22 +45,20 @@ end
 
 load_configuration('toribio-go.conf')
 
-if toribio.configuration.shell and toribio.configuration.shell.load then
-	local ip = toribio.configuration.shell.ip or '*'
-	local port = toribio.configuration.shell.port or 2012
-	debugprint ('Starting Shell on', ip, port)
-	local shell = require 'tasks/shell'
-	shell.init(ip, port)
-end
-
 sched.run(function()
 	for _, section in ipairs({'deviceloaders', 'tasks'}) do
 		for task, conf in pairs(toribio.configuration[section]) do
-			conf = conf or {}
-			print ('processing conf', section, task, conf.load or false)
-			if conf.load==true then
+			print ('processing conf', section, task, (conf and conf.load) or false)
+
+			if conf and conf.load==true then
+				--[[
 				local taskmodule = require (section..'/'..task)
-				taskmodule.start(conf)
+				if taskmodule.start then
+					local ok = pcall(taskmodule.start,conf)
+					debugprint('module started:', ok)
+				end
+				--]]
+				toribio.start(section, task)
 			end
 		end
 	end

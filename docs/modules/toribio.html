@@ -79,12 +79,16 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#wait_for_device">wait_for_device&nbsp;(name)</a></td>
-	<td class="summary">Return a device with a given name.</td>
+	<td class="name" nowrap><a href="#wait_for_device">wait_for_device&nbsp;(devdesc)</a></td>
+	<td class="summary">Return a device with a given name or matching a filter.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#register_callback">register_callback&nbsp;(device, event, f, timeout)</a></td>
 	<td class="summary">Register a callback for a device's signal.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#start">start&nbsp;(section, taskname)</a></td>
+	<td class="summary">Start a task.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
@@ -119,20 +123,24 @@
     <dl class="function">
     <dt>
     <a name = "wait_for_device"></a>
-    <strong>wait_for_device&nbsp;(name)</strong>
+    <strong>wait_for_device&nbsp;(devdesc)</strong>
     </dt>
     <dd>
-    Return a device with a given name. 
+    Return a device with a given name or matching a filter. 
+ If the parameter provided is a string, will look for a
+ device with it as a name. Alternativelly, it can be a table
+ specifying a criterion a device must match.
  If no such device exists, will block until it appears.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>name</em></code>:  The name of the device</li>
+       <li><code><em>devdesc</em></code>:  The name of the device or a filter.</li>
     </ul>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">local mice = toribio.wait_for_device('mice')</pre>
+        <pre class="example">local mice = toribio.wait_for_device('mice')
+local some_button = toribio.wait_for_device({module='bb-button'})</pre>
     </ul>
 
     <h3>Returns:</h3>
@@ -166,6 +174,28 @@
     <h3>Returns:</h3>
     <ol>
         The callback task
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "start"></a>
+    <strong>start&nbsp;(section, taskname)</strong>
+    </dt>
+    <dd>
+    Start a task. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>section</em></code>:  The section to which the task belongs
+ (possible values are 'deviceloaers' and 'tasks')</li>
+       <li><code><em>taskname</em></code>:  The name of the task</li>
+    </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        true on success.
     </ol>
 
 

@@ -57,25 +57,58 @@ local signals = {
 }
 M.signals = signals
 
---- Return a device with a given name.
+--- Return a device with a given name or matching a filter.
+-- If the parameter provided is a string, will look for a
+-- device with it as a name. Alternativelly, it can be a table
+-- specifying a criterion a device must match.
 -- If no such device exists, will block until it appears.
--- @param name The name of the device
+-- @param devdesc The name of the device or a filter.
 -- @return device the device with the given name.
 -- @usage local mice = toribio.wait_for_device('mice')
-M.wait_for_device = function(name)
+--local some_button = toribio.wait_for_device({module='bb-button'})
+M.wait_for_device = function(devdesc)
 	assert(sched.running_task, 'Must run in a task')
-	if devices[name] then 
-		return devices[name] 
+	local device_in_devices, device_matches --matching function
+	
+	if type (devdesc) == 'string' then 
+		device_matches = function (device, dd)
+			return device.name == dd
+		end
+		device_in_devices = function (dd)
+			return devices[dd]
+		end
+	else
+		device_matches = function (device, dd)
+			local matches = true
+			for key, value in pairs(dd) do
+				if device[key]~=value then
+					matches=false
+					break
+				end
+			end
+			return matches
+		end
+		device_in_devices = function (dd)
+			for _, device in pairs(devices) do
+				if device_matches(device, dd) then return device end
+			end
+		end
+	end
+
+	local in_devices=device_in_devices(devdesc)
+	if in_devices then 
+		return in_devices
 	else
 		local tortask = catalog.waitfor('toribio')
 		local waitd = {emitter=tortask, events={M.signals.new_device}}
 		while true do
 			local _, _, device = sched.wait(waitd) 
-			if device.name==name then
+			if device_matches (device, devdesc) then
 				return device 
 			end
 		end
 	end
+	
 end
 
 --- Register a callback for a device's signal.
@@ -142,6 +175,24 @@ M.remove_device = function(device)
 	if device.task then sched.kill(device.task) end
 	devices[device.name]=nil
 	sched.signal(signal_remove_device, device )
+end
+
+--- Start a task.
+-- @param section The section to which the task belongs
+-- (possible values are 'deviceloaders' and 'tasks')
+-- @param taskname The name of the task
+-- @return true on success.
+M.start = function(section, taskname)
+	local ok
+	local sect = M.configuration[section] or {}
+	local conf = sect[taskname] or {}
+	local taskmodule = require (section..'/'..taskname)
+	_G.debugprint('module loaded:', taskmodule)
+	if taskmodule and taskmodule.start then
+		ok = pcall(taskmodule.start, conf)
+		_G.debugprint('module started:', ok)
+	end
+	return ok
 end
 
 --- Toribio's task.
