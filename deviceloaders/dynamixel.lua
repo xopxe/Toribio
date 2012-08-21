@@ -322,7 +322,7 @@ M.start = function (conf)
 	sched.run(function()
 		--local dm = busdevice.api
 		sched.signal('discoverystart')
-		for i = 1, 253 do
+		for i = 0, 253 do
 			local motor = busdevice.get_motor(i)
 			if motor then 
 				--print('XXXXXXXX',i) 
