@@ -107,8 +107,8 @@ Notice that the full configuration table is available at
 toribio.configuration.</p>
 
 <p>The start() call must start the Lumen tasks (there might be several), 
-register callbacks, etc. Optionally, the module can provide further tasks
-to use the tasks module. For example, a task that will print "tick" at a
+register callbacks, etc. Optionally, the module can provide further methods. 
+For example, a task that will print "tick" at a
 regulable intervals of time can be as follows:</p>
 
 
@@ -129,6 +129,36 @@ regulable intervals of time can be as follows:</p>
              <span class="global">print</span>(<span class="string">'tick'</span>)
          <span class="keyword">end</span>
      <span class="keyword">end</span>)
+ <span class="keyword">end</span>
+
+ <span class="keyword">return</span> M
+</pre>
+
+<p>Another example of an extra method is a stop() call. The previous program 
+could be modified as follows:</p>
+
+
+<pre>
+ <span class="keyword">local</span> M = {}
+
+ <span class="keyword">local</span> interval = <span class="number">1</span>
+
+ <span class="keyword">function</span> M.set_interval (v)
+     interval=v
+ <span class="keyword">end</span>
+
+ <span class="keyword">function</span> M.start (conf)
+     <span class="keyword">local</span> sched=<span class="global">require</span> <span class="string">'sched'</span>
+     M.task = M.task <span class="keyword">or</span> sched.run(<span class="keyword">function</span>()
+         <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+             sched.sleep(interval)
+             <span class="global">print</span>(<span class="string">'tick'</span>)
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>)
+ <span class="keyword">end</span>
+
+ <span class="keyword">function</span> M.stop()
+     <span class="keyword">if</span> M.task <span class="keyword">then</span> M.task:kill() <span class="keyword">end</span>
  <span class="keyword">end</span>
 
  <span class="keyword">return</span> M

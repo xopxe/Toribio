@@ -9,8 +9,6 @@
 
 local M = {}
 
-local TIMEOUT_REFRESH = 3 -- -1
-
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 --package.path = package.path .. ";"..my_path.."../../bobot/?.lua"
 
@@ -25,7 +23,7 @@ local devices_attached = {}
 
 local function check_open_device(d, ep1, ep2)
 	if not d then return end
-	if d.handler or not d.open then return true end
+	if d.handler or not d.open or d.name=='pnp' then return true end --FIXME bug in usb4butia pnp module
 
         -- if the device is not open, then open the device
 	debugprint ("Opening", d.name, d.handler)
@@ -106,6 +104,8 @@ end
 
 M.start = function (conf)
 
+	local timeout_refresh = conf.timeout_refresh or -1
+
 	if conf.path then 
 		if conf.path:sub(1,1)=='/' then
 			package.path = package.path .. ";"..conf.path..'/?.lua'
@@ -127,7 +127,7 @@ M.start = function (conf)
 	sched.sigrun({
 		emitter='*', 
 		buff_size=1, 
-		timeout=TIMEOUT_REFRESH, 
+		timeout=timeout_refresh, 
 		events={'do_bobot_refresh'}
 	}, server_refresh)
 end

@@ -34,7 +34,7 @@
 <ul>
 <li><a href="#Data_logger">Data logger</a></li>
 <li><a href="#Remote_controlled_robot">Remote controlled robot</a></li>
-<li><a href="#Reactive_line_follower">Reactive line follower</a></li>
+<li><a href="#Reactive_robotics">Reactive robotics</a></li>
 </ul>
 
 
@@ -77,8 +77,7 @@
 
 <p>First we will do a data logger, that will save information read from an AX-12 motor to a file. We will call the task "axlogger".</p>
 
-<p>We start by editing the configuration file. We must configure two things: enable the dynamixel device loader,
-and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to toribio-go.conf:</p>
+<p>We start by editing the configuration file. We must configure two things: enable the dynamixel device loader, and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to toribio-go.conf:</p>
 
 
 <pre>
@@ -104,7 +103,7 @@ and register the new task, adding the configuration parameters we might use. We 
          <span class="keyword">local</span> motor = toribio.wait_for_device(conf.motorname)
          <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
              <span class="keyword">local</span> l = motor:get_load()
-             file:write(l..<span class="string">'\n'</span>)
+             file:write(sched.get_time()..<span class="string">' '</span>..l..<span class="string">'\n'</span>)
              file:flush()
              sched.sleep(conf.interval <span class="keyword">or</span> <span class="number">5</span>)
          <span class="keyword">end</span>
@@ -114,9 +113,9 @@ and register the new task, adding the configuration parameters we might use. We 
  <span class="keyword">return</span> M
 </pre>
 
-<p>The log file will contain motor load readings. The task (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. The wait_for_device call will block until the device is detected, so it is important to place that call <em>inside</em> the task (we do not want the main task blocking).</p>
+<p>The log file will contain motor load readings. The process (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. The wait_for_device call will block until the device is detected, so it is important to place that call <em>inside</em> the process (we do not want the main process blocking).</p>
 
-<p>The task then will loop reading data from the motor and logging it, and then sleeping for the specified interval.</p>
+<p>The process will loop reading data from the motor and logging it, and then sleeping for the specified interval.</p>
 
 <p>Notice how in the program we provide default values for configuration parameters in case they're missing (like a 5 second interval).</p>
 
@@ -176,7 +175,7 @@ and register the new task, adding the configuration parameters we might use. We 
  <span class="keyword">return</span> M
 </pre>
 
-<p>In this program we use the register_callback method, instead of the explicit loop with a sched.wait inside as in the first program. This will start yet another task (the one listening for the signal), that will keep runing while the first task (the one started with sched.run) will finish immediatelly. The register_callback method has a timeout parameter set (the 0.5 at the end). When the timeout runs out wihtout signals, it will wake our function with nil, 'timeout' as parameters: that's why we check for x to see wether we have a new coordinate, or must use the last recorded set of coordinates.</p>
+<p>In this program we use the register_callback method, instead of the explicit loop with a sched.wait inside as in the first program. This will start yet another process (the one listening for the signal), that will keep runing while the first process (the one started with sched.run) will finish immediatelly. The register_callback method has a timeout parameter set (the 0.5 at the end). When the timeout runs out wihtout signals, it will wake our function with nil, 'timeout' as parameters: that's why we check for x to see wether we have a new coordinate, or must use the last recorded set of coordinates.</p>
 
 <p>The only part missing is the generate_output function. We will use nixio to create a UDP socket and use it to send the messages.</p>
 
@@ -216,8 +215,6 @@ and register the new task, adding the configuration parameters we might use. We 
  tasks.rc_bot.<span class="global">load</span> = <span class="keyword">true</span>
  tasks.rc_bot.ip = <span class="string">'127.0.0.1'</span> <span class="comment">--change with the ip adress of the robot
 </span> tasks.rc_bot.port = <span class="number">9999</span>
- tasks.rc_bot.motor_left = <span class="string">'ax12:3'</span>
- tasks.rc_bot.motor_right = <span class="string">'ax12:12'</span>
 </pre>
 
 <p>And the tasks/rc_bot.lua skeleton:</p>
@@ -232,8 +229,8 @@ and register the new task, adding the configuration parameters we might use. We 
 
      sched.run(<span class="keyword">function</span>()
          <span class="comment">--initialize motors
-</span>         <span class="keyword">local</span> motor_left = toribio.wait_for_device(conf.motor_left)
-         <span class="keyword">local</span> motor_right = toribio.wait_for_device(conf.motor_right)
+</span>         <span class="keyword">local</span> motor_left = toribio.wait_for_device({<span class="global">module</span>=<span class="string">'ax'</span>})
+         <span class="keyword">local</span> motor_right = toribio.wait_for_device({<span class="global">module</span>=<span class="string">'ax'</span>})
          motor_left.init_mode_wheel()
          motor_right.init_mode_wheel()
 
@@ -260,7 +257,8 @@ and register the new task, adding the configuration parameters we might use. We 
  <span class="keyword">return</span> M
 </pre>
 
-<p>Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
+<p>Unlike the first program, we do not configure a device name for the motors: we request them using a table filter. The left motor will be the first device that matches "module='ax'", and the next one will be our right motor.
+Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
 
 <p>Now we run toribio with rc_control task enabled on one machine, connected to a second machine with rc_bot enabled.</p>
 
@@ -271,10 +269,89 @@ and register the new task, adding the configuration parameters we might use. We 
 
 <p>Notice that rc_control might have to be run as sudo, if your distribution request such thing for accesing /dev/input/mice.</p>
 
-<p><a name="Reactive_line_follower"></a></p>
-<h2>Reactive line follower</h2>
+<p><a name="Reactive_robotics"></a></p>
+<h2>Reactive robotics</h2>
 
-<p>TODO</p>
+<p>In this example, we will use a usb4butia IO board. Our task will be called bootia, and we will use the deviceloader/bobot task to access the hardware. Thus, our toribio-go.conf will have the following:</p>
+
+
+<pre>
+ deviceloaders.bobot.<span class="global">load</span> = <span class="keyword">true</span>
+ deviceloaders.bobot.path = <span class="string">'../bobot'</span> <span class="comment">--path to bobot library
+</span> deviceloaders.bobot.comms = {<span class="string">"usb"</span>}
+ tasks.bootia.<span class="global">load</span>=<span class="keyword">true</span>
+</pre>
+
+<p>The code for the tasks/bootia.lua might be as follows:</p>
+
+
+<pre>
+ <span class="keyword">local</span> M = {}
+ <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
+ <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
+ M.start = <span class="keyword">function</span>()
+     sched.run(<span class="keyword">function</span>()
+         <span class="keyword">local</span> button =  toribio.wait_for_device({<span class="global">module</span>=<span class="string">'bb-button'</span>})
+         <span class="keyword">local</span> pressed = <span class="keyword">false</span>
+         <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+             <span class="keyword">local</span> now = ( button.getValue()==<span class="number">1</span> )
+             <span class="keyword">if</span> pressed <span class="keyword">and</span> <span class="keyword">not</span> now <span class="keyword">then</span> 
+                 <span class="global">print</span> (<span class="string">"pressed!"</span>)
+                 pressed=now
+             <span class="keyword">elseif</span> <span class="keyword">not</span> pressed <span class="keyword">and</span> now <span class="keyword">then</span>
+                 <span class="global">print</span> (<span class="string">"released!"</span>)
+                 pressed=now
+             <span class="keyword">end</span>
+             sched.sleep(<span class="number">0.1</span>)
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>)
+ <span class="keyword">end</span>
+ <span class="keyword">return</span> M
+</pre>
+
+<p>This process polls a button connected to the usb4butia board (any button will do), and prints "pressed!" or "released!" when the button changes state. You can change the polling rate in the sched.sleep() call. The asbolutely minimum you can expect to work is at least call sched.yield() from time to time, to give opportunity to other processes to do their stuff.</p>
+
+<p>Now suppose you have a usb4butia powered robot that only goes forward and backwards, changind the direction with a button press. You could put the direction changind code right in the previous process, but we will do it using a more flexible method: signalling. </p>
+
+<p>The idea is that there will be a signal that requests a direction change, and a separate process that will wait for these signals an apply them. The previous process will be modified to emit a signal as follows:</p>
+
+
+<pre>
+ <span class="keyword">if</span> pressed <span class="keyword">and</span> <span class="keyword">not</span> now <span class="keyword">then</span> 
+     sched.signal(<span class="string">'change direction!'</span>)
+     pressed=now
+ <span class="keyword">elseif</span> <span class="keyword">not</span> pressed <span class="keyword">and</span> now <span class="keyword">then</span>
+     pressed=now
+ <span class="keyword">end</span>
+</pre>
+
+<p>Now that button process fires events, we can start another process that will listen for them and change the 
+motor direction (the motors will start moving at the first button press):</p>
+
+
+<pre>
+ sched.run(<span class="keyword">function</span>()
+     <span class="keyword">local</span> motors = toribio.wait_for_device(<span class="string">'bb-motors'</span>)
+     <span class="keyword">local</span> direction = <span class="number">1</span>
+     sched.sigrun({emitter=<span class="string">'*'</span>, events={<span class="string">'change direction!'</span>}}, <span class="keyword">function</span>()
+         motors.setvel2mtr(direction, <span class="number">500</span>, direction, <span class="number">500</span>)
+         direction=<span class="number">1</span>-direction
+     <span class="keyword">end</span>)
+ <span class="keyword">end</span>)
+</pre>
+
+<p>Because our wait descriptor for changing direction accepts events from anyone (the <code>emitter='*'</code> field), we can have more processes that fire it. Suppose that we want to add the behavior that the robot will change direction randomly, anywhere between 10 to 20 seconds. We can have it simply adding another process:</p>
+
+
+<pre>
+ sched.run(<span class="keyword">function</span>()
+     <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+         sched.sleep(<span class="number">10</span> + <span class="number">10</span>*<span class="global">math</span>.random())
+         sched.signal(<span class="string">'change direction!'</span>)
+     <span class="keyword">end</span>
+ <span class="keyword">end</span>)
+</pre>
+
 
 
 </div> <!-- id="content" -->

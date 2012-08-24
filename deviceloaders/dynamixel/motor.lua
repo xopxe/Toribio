@@ -1,7 +1,7 @@
 --- Library for Dynamixel motors.
 -- This library allows to manipulate devices that use Dynamixel 
 -- protocol, such as AX-12 robotic servo motors.
--- When available, each conected motor will be available
+-- When available, each conected motor will be published
 -- as a device in torobio.devices table, named
 -- (for example) 'ax12:1', labeled as module 'ax'
 -- @module dynamixel-motor
@@ -14,7 +14,9 @@
 
 local debugprint=_G.debugprint
 
-local M = function (busdevice, id)
+local M = {}
+
+M.get_motor= function (busdevice, id)
 	local ping = busdevice.ping
 	local reset = busdevice.reset
 	local read_data = busdevice.read_data
@@ -40,20 +42,9 @@ local M = function (busdevice, id)
 			return nil
 		end
 	end
-
-	local mode = 'joint'
 	
 	local Motor = {}
-
-
-	if id==0xFE then
-		--- Name of the device.
-		-- Of the form 'ax12:5'
-		Motor.name = 'ax12:broadcast'
-	else
-		Motor.name = 'ax12:'..id --..Motor.get_model()..':'..id
-	end
-
+	
 	--- Module name ('ax' in this case)
 	Motor.module = 'ax'
 
@@ -96,7 +87,7 @@ local M = function (busdevice, id)
 	--Set the motor to continuous rotation mode.
 	Motor.init_mode_wheel = function()
 		local ret = busdevice.write_data(idb,0x06,string.char(0x00,0x00,0x00,0x00))
-		mode='wheel'
+		Motor.mode='wheel'
 		if ret then return ret:byte() end
 	end
 	--- Set joint mode.
@@ -112,8 +103,18 @@ local M = function (busdevice, id)
 		local minlowb, maxhighb = get2bytes_unsigned(min)
 		local maxlowb, maxnhighb = get2bytes_unsigned(max)
 		local ret = busdevice.write_data(idb,0x06,string.char(minlowb, maxhighb, maxlowb, maxnhighb))
-		mode='joint'
+		Motor.mode='joint'
 		if ret then return ret:byte() end
+	end
+	--- Get the motor mode.
+	-- @return either 'wheel' or 'joint'
+	Motor.get_rotation_mode =  function()
+		local ret = read_data(idb,0x06,4)
+		if ret==string.char(0x00,0x00,0x00,0x00) then
+			return 'wheel'
+		else
+			return 'joint'
+		end
 	end
 	--- Ping the motor.
 	-- @return Error code.
@@ -161,7 +162,7 @@ local M = function (busdevice, id)
 		local ret = read_data(idb,0x26,2)
 		local vel = ret:byte(1) + 256*ret:byte(2)
 		if vel > 1023 then vel =1024-vel end
-		if mode=='joint' then 
+		if Motor.mode=='joint' then 
 			return vel / 1.496 --rpm
 		else --mode=='wheel'
 			return vel/10.23 --% of max torque
@@ -172,7 +173,7 @@ local M = function (busdevice, id)
 	-- (0 means max available speed). 
 	-- If in wheel mode, as a % of max torque (in the -100% .. 100% range).
 	Motor.set_speed = function(value)
-		if mode=='joint' then
+		if Motor.mode=='joint' then
 			-- 0 .. 684 deg/sec
 			local vel=math.floor(value * 1.496)
 			local lowb, highb = get2bytes_unsigned(vel)
@@ -272,6 +273,16 @@ local M = function (busdevice, id)
 		if ret then return ret:byte()==0x01 end
 	end
 	-- @section end
+
+	--- Name of the device.
+	-- Of the form 'ax12:5'
+	if id==0xFE then
+		Motor.name = 'ax:broadcast'
+	else
+		Motor.name = 'ax'..Motor.get_model()..':'..id
+	end
+	
+	Motor.mode = Motor.get_rotation_mode()
 	
 	debugprint('device object created', Motor.name)
 

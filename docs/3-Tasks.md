@@ -33,8 +33,8 @@ Notice that the full configuration table is available at
 toribio.configuration.
 
 The start() call must start the Lumen tasks (there might be several), 
-register callbacks, etc. Optionally, the module can provide further tasks
-to use the tasks module. For example, a task that will print "tick" at a
+register callbacks, etc. Optionally, the module can provide further methods. 
+For example, a task that will print "tick" at a
 regulable intervals of time can be as follows:
 
     local M = {}
@@ -53,6 +53,33 @@ regulable intervals of time can be as follows:
     			print('tick')
     		end
     	end)
+    end
+    
+    return M
+
+Another example of an extra method is a stop() call. The previous program 
+could be modified as follows:
+
+    local M = {}
+
+    local interval = 1
+
+    function M.set_interval (v)
+    	interval=v
+    end
+    
+    function M.start (conf)
+    	local sched=require 'sched'
+    	M.task = M.task or sched.run(function()
+    		while true do
+    			sched.sleep(interval)
+    			print('tick')
+    		end
+    	end)
+    end
+
+    function M.stop()
+    	if M.task then M.task:kill() end
     end
     
     return M

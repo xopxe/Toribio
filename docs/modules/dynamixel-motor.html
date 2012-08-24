@@ -68,7 +68,7 @@
 <p>Library for Dynamixel motors.</p>
 <p> This library allows to manipulate devices that use Dynamixel 
  protocol, such as AX-12 robotic servo motors.
- When available, each conected motor will be available
+ When available, each conected motor will be published
  as a device in torobio.devices table, named
  (for example) 'ax12:1', labeled as module 'ax'</p>
     <h3>Usage:</h3>
@@ -103,6 +103,10 @@ motor.set_led(true)</pre>
 	<tr>
 	<td class="name" nowrap><a href="#init_mode_joint">init_mode_joint&nbsp;(min, max)</a></td>
 	<td class="summary">Set joint mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_rotation_mode">get_rotation_mode&nbsp;()</a></td>
+	<td class="summary">Get the motor mode.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#ping">ping&nbsp;()</a></td>
@@ -167,10 +171,6 @@ motor.set_led(true)</pre>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#name">name</a></td>
-	<td class="summary">Name of the device.</td>
-	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#module">module</a></td>
 	<td class="summary">Module name ('ax' in this case)</td>
@@ -284,6 +284,22 @@ Set the motor to continuous rotation mode.
     </ul>
 
 
+
+
+</dd>
+    <dt>
+    <a name = "get_rotation_mode"></a>
+    <strong>get_rotation_mode&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the motor mode. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        either 'wheel' or 'joint'
+    </ol>
 
 
 </dd>
@@ -547,19 +563,6 @@ Set the motor to continuous rotation mode.
     <h2><a name="Fields"></a>Fields</h2>
     
     <dl class="function">
-    <dt>
-    <a name = "name"></a>
-    <strong>name</strong>
-    </dt>
-    <dd>
-    Name of the device. 
- Of the form 'ax12:5'
-
-
-
-
-
-</dd>
     <dt>
     <a name = "module"></a>
     <strong>module</strong>

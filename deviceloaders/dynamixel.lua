@@ -13,7 +13,7 @@ local toribio = require 'toribio'
 local sched = require 'sched'
 local catalog = require 'catalog'
 local mutex = require 'mutex'()
-local ax = require 'deviceloaders/dynamixel-motor/init'
+local ax = require 'deviceloaders/dynamixel/motor'
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -169,7 +169,6 @@ M.start = function (conf)
 		local packet = PACKET_START..data..string.char(checksum)
 		return packet
 	end
-	local motors = {}
 	
 	local waitd_protocol = {emitter=task_protocol, events='*', timeout = 0.01}
 	
@@ -232,18 +231,23 @@ M.start = function (conf)
 			return err
 		end
 	end)
-	local sync_write = mutex.synchronize(function(address,datas) --FIXME address no va?
-		local data= ''
-		for id, datafor in pairs (datas) do
-			data=data..string.char(id)..datafor
+	local sync_write = mutex.synchronize(function(ids, address,data) 
+		local dataout= address..string.char(#data)
+		for i=1, #ids do
+			local sid = ids[i]
+			dataout=dataout..sid..data
 		end
 		local sync_packet = buildAX12packet(BROADCAST_ID, 
-			INSTRUCTION_SYNC_WRITE..address..data)
+			INSTRUCTION_SYNC_WRITE..dataout)
 		fd:writeall(sync_packet)
 	end)
 	-- -----------------------------------------
 	
 	local busdevice = {}
+
+	--- Motors connected to the bus.
+	-- The keys are device numbers, the values are Motor objects.
+	busdevice.motors = {}
 	
 	--- Name of the device.
 	-- Of the form 'dynamixel:/dev/ttyUSB0'
@@ -311,14 +315,16 @@ M.start = function (conf)
 	-- @param id The numeric ID of the motor
 	-- @return A Motor object, or nil if not such ID found.
 	busdevice.get_motor = function(id)
-		if motors[id] then return motors[id] end
-		local motor=ax(busdevice, id)
-		motors[id] = motor
+		if busdevice.motors[id] then return busdevice.motors[id] end
+		local motor=ax.get_motor(busdevice, id)
+		busdevice.motors[id] = motor
 		return motor
 	end
 	
 	debugprint('device object created', busdevice.name)
 
+	toribio.add_device(busdevice)
+	
 	sched.run(function()
 		--local dm = busdevice.api
 		sched.signal('discoverystart')
@@ -334,8 +340,6 @@ M.start = function (conf)
 		end
 		sched.signal('discoveryend')
 	end)
-
-	toribio.add_device(busdevice)
 end
 
 return M

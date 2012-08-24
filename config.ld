@@ -1,5 +1,5 @@
 file = {"toribio.lua", "toribio-go.lua", "deviceloaders/dynamixel.lua",
-	"deviceloaders/dynamixel-motor", "deviceloaders/mice.lua",
+	"deviceloaders/dynamixel/motor.lua", "deviceloaders/mice.lua",
 	"deviceloaders/bobot.lua"}
 project = "Toribio"
 description = "Embedded Robotics Library."
