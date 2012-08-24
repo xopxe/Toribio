@@ -15,7 +15,7 @@ Some of the deviceloaders are:
 ### accelxo
 
 Supports the accelerometer installed in the OLPC XO-1.75 laptops. 
-The device is name "accelxo", and the module is also "accelxo".
+The device is name _'accelxo'_, and the module is also _'accelxo'_.
 
 ### bobot
 
@@ -24,7 +24,9 @@ be instantiated for each module. Hotplug is supported. The device's name
 and module is defined by bobot. Sample configuration:
 
     deviceloaders.bobot.load = true
-    deviceloaders.bobot.comms = {"usb", "serial"} --comms services to use
+    deviceloaders.bobot.comms = {'usb', 'serial'} --comms services to use
+    deviceloaders.bobot.path = '../bobot' --path to bobot library
+    deviceloaders.bobot.timeout_refresh = 10
 
 ### dynamixel
 
@@ -33,18 +35,19 @@ Provides support for dynamixel servos. Sample configuration:
     deviceloaders.dynamixel.load = true
     deviceloaders.dynamixel.filename = '/dev/ttyUSB0'
 
-It will create a device for the dynamixel bus (named 'dynamixel:/dev/ttyUSB0' 
-in the example and module "dynamixel"), plus a device for each motor (named, for example, 
-'ax12:5' and module 'ax')
+It will create a device for the dynamixel bus (named _'dynamixel:/dev/ttyUSB0'_ 
+in the example and module _'dynamixel'_), plus a device for each motor (named like 
+_'ax12:5'_ and module _'ax'_)
 
 ### mice
 
-This device allows you to read a mouse.
+This device allows you to read a mouse. As it reads from /dev/input/mice, you probably
+need to start toribio with sudo.
 
 ### filedev
 
-This is a special loader, that watches for a serie of files and starts an associated
-loader when a file appears. When a file dissapears, it will remove all depending devices.
+This is a special loader, that watches for a set of files and starts an associated
+loader when a file appears. When a file disappears, it will remove all depending devices.
 
     deviceloaders.filedev.load = true
     deviceloaders.filedev.module.mice = '/dev/input/mice'
@@ -52,19 +55,19 @@ loader when a file appears. When a file dissapears, it will remove all depending
     deviceloaders.filedev.module.accelxo = '/sys/devices/platform/lis3lv02d'
 
 When a file described by the mask appears, filedev will set the "filename" configuration 
-parameters for the corresponing task, and start it. Aditional parameters for the 
-autostarted task can be provided in it's own section, tough the load atribute for it must
+parameters for the corresponding task, and start it. Additional parameters for the 
+auto-started task can be provided in it's own section, tough the load attribute for it must
 not be set.
 
-When fieldev detects a file removal, it will remove all devices that have it in the filename
+When fieldev detects a file removal, it will remove all devices that have it in the "filename"
 attribute.
 
 Filedev uses the tasks/inotifier.lua task, and therefore depends on the inotifywait program.
 
 ## Accessing devices
 
-Devices are available trough de toribio.devices table, or using the 
-toribio.wait\_for\_device(name) method.
+Devices are available trough the toribio.devices table, or using the 
+`toribio.wait_for_device(name|filter)` method.
 
 To iterate all devices, you can do:
 
@@ -78,15 +81,24 @@ type (module) are they.
 If you know the name of the object, you can retrieve it directly.
 Some devices can be detected after your task started,
 so instead of going directly to the table you can use the 
-toribio.wait\_for\_device(name) method. If the given device exists, 
-it will be returned inmediatelly. Otherwise the call will block 
+`toribio.wait_for_device(name)` method. If the given device exists, 
+it will be returned immediately. Otherwise the call will block 
 until said device appears.
 
     local mice = toribio.wait_for_device('mice:/dev/input/mice')
 
+You can also retrieve devices providing a table containing a filter the 
+device must match. For example, if you are interested in a dynamixel 
+motor connected to a particular serial bus, you can do:
+
+    local motor =  toribio.wait_for_device({
+    	module = 'ax',
+    	filename = '/dev/ttyUSB1'
+    })
+
 Some devices can connect and disconnect at runtime. If you're 
-interested in these events, you can listen for the 'new\_device' and
-'removed\_device' events. For example:
+interested in these events, you can listen for the _'new\_device'_ and
+_'removed\_device'_ events. For example:
 
     sched.sigrun(
     	{
@@ -111,8 +123,8 @@ Device's unique name.
 
 * device.module
 
-Device's type. For example it can be "mice" for a mouse or "dist" 
-for a distence sensor.
+Device's type. For example it can be "mice" for a mouse or "bb-dist" 
+for a distance sensor.
 
 * device.task
 
@@ -121,26 +133,32 @@ available here. This is also the task that emits device's events.
 
 * device.signals
 
-A table containing the signals that the device can emit.
+A table containing the signals that the device can emit. The key is the
+name of the signal.
 
 * device.filename
 
 If the device depends on a device file, it will be here.
 
-* device:register_callback()
+* device:register_callback(...)
 
-OO-styled synonim for toribio.register_callback()
+OO-styled synonym for `toribio.register_callback(device, ...)`
 
 ### device-dependant fields
 
 Each device will have a set of methods that allow to manipulate 
-the device. Usually all evices with equal module will have the 
-same methods. For example a device with moule "dist" could
-have a device.get_distance() method.
+the device. Usually all devices with equal module will have the 
+same methods. For example a device with module "bb-dist" could
+have a `device.get_distance()` method.
 
 ## Creating your own devices.
 
-TODO
+Besides representing pieces of hardware, a Device can represent an 
+abstract service. The use can define it own device modules. For that
+it must instantiate a table with the appropriate structure, and feed it to 
+Toribio using `toribio.add_device(device)`. This will allow other tasks
+to easily request it (using `toribio.wait_for_device`), and register callbacks
+(using `toribio.wait_for_device`).
 
 
 

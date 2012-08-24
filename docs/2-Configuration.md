@@ -5,13 +5,13 @@ is available in toribio.configuration table.
 
 ## File Format
 
-The configuration file is actually a lua file, so usual lua syntax is valid:
-for example "--" starts a comment, {} denotes a table, etc.
+The configuration file is actually a lua file, so usual lua syntax is valid.
+For example "--" starts a comment, {} defines a table, etc. 
 
 The main task of the configuration file is to give value to atributes. An 
 attribute is just a index in a table structure.
 
-There are two principal main levels: 'tasks' and 'deviceloaders'. They specify
+There are two predefined main levels: 'tasks' and 'deviceloaders'. They specify
 the tasks to start and what parameters provide to them.
 
 For example:
@@ -21,11 +21,11 @@ For example:
     tasks.xy.motor_y = 'ax12:12'
 
 Describes a task available in the tasks/ folder, called 'xy' (thus, there
-is a tasks/xy.lua file). This task will be started automatically (the true 
+is a tasks/xy.lua file). This task will be started automatically (the `true` 
 value). When the task is started, it will be provided with a configuration
-table as follows: {motor\_x='ax12:3', motor\_y='ax12:12'}
+table as follows: `{motor_x='ax12:3', motor_y='ax12:12'}`
 
-To quickly disable a task, set the load field to false or just comment that
+To quickly disable a task, set the load field to `false` or just comment that
 line.
 
 When creating an attribute, intermediate tables are generated automatically

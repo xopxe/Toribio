@@ -3,7 +3,7 @@
 Toribio is a library for developing robotics applications. It is based on 
 [Lumen](https://github.com/xopxe/Lumen) cooperative
 scheduler, and allows to write coroutine, signal and callback based applications.
-Toribio provides a mechanism for easily accesing hardware, and is geared towards
+Toribio provides a mechanism for easily accessing hardware, and is geared towards
 low end hardware, such as Single-Board Computers.
 
 ## Description
@@ -11,7 +11,7 @@ low end hardware, such as Single-Board Computers.
 Using Toribio consists of writing Toribio tasks. These tasks are started automatically.
 When writing these tasks, the programmer have easy access to available devices and to an 
 asynchronous socket and file server. The tasks use Lumen as a cooperative scheduler, and 
-thus can be sinchronized exchanging signals. Signals also serve to exchange information 
+thus can be synchronized exchanging signals. Signals also serve to exchange information 
 between tasks. In any case, Lumen is a shared memory environment and all tasks live in 
 the same VM, so tasks can declare global variables, etc.
 
@@ -25,8 +25,12 @@ to attend a signal from a Device.
 
 Toribio runs on Lua 5.1 or LuaJIT. Compatibility with Lua 5.2 is planned.
 The only external dependency is the [nixio](https://github.com/Neopallium/nixio) library.
-Aditionally, for automatically managing devices on file creation and removal the 
-inotifywait program must be installed.
+Additionally, for automatically managing devices on file creation and removal the 
+`inotifywait` program must be installed.
+
+## Tutorial
+
+A tutorial is available [here](https://github.com/xopxe/Toribio/blob/master/docs/1-Tutorial.md)
 
 ## Contents
 
@@ -51,12 +55,12 @@ You may want to add tasks there to extend Toribio with support for new hardware
 
 * /tasks/*
 
-Here go user tasks, that implement the behavior of the robot. A task can implement some
+Here go user tasks, that implement the behaviour of the robot. A task can implement some
 intelligence, or be a remote control server, or just be a data logger, etc.
 
 * /docs/*
 
-Full API reference
+Full API reference and additional documentation.
 
 * Lumen/
 
@@ -69,4 +73,6 @@ Same as Lua, see COPYRIGHT.
 ## Who?
 
 Copyright (C) 2012 Jorge Visca, jvisca@fing.edu.uy
+
+MINA Group, University of the Republic, Uruguay
 

@@ -8,11 +8,10 @@ the configuration file, and copied in the tasks/ folder.
 The skeleton of a task file (called say taskname.lua) is as follows:
 
     local M = {}
+    local sched=require 'sched'
     
     function M.start (conf)
-    	local sched=require 'sched'
     	-- initialize stuff
-
     	sched.run(function()
 		-- do something
     	end)
@@ -20,7 +19,7 @@ The skeleton of a task file (called say taskname.lua) is as follows:
     
     return M
 
-If the file is called taskname.lua, then there might be an entry
+As the file is called taskname.lua, then there might be an entry
 in the toribio-go.conf file as follows
 
     tasks.taskname.load=true
@@ -28,16 +27,18 @@ in the toribio-go.conf file as follows
     tasks.taskname.anotherparameter=0
 
 The toribio-go.lua script will start the tasks if the load parameter is
-true. All the configuration parameters will be provided in the conf table.
+true. All the configuration parameters will be provided in the conf table 
+(when starting this task, toribio will invoke `M.start(tasks.taskname)`).
 Notice that the full configuration table is available at
 toribio.configuration.
 
-The start() call must start the Lumen tasks (there might be several), 
+The `start()` call must start the Lumen process (there might be several), 
 register callbacks, etc. Optionally, the module can provide further methods. 
-For example, a task that will print "tick" at a
-regulable intervals of time can be as follows:
+For example, a task that will print "tick" at a regulable intervals of time 
+can be as follows:
 
     local M = {}
+    local sched=require 'sched'
 
     local interval = 1
 
@@ -46,7 +47,6 @@ regulable intervals of time can be as follows:
     end
     
     function M.start (conf)
-    	local sched=require 'sched'
     	sched.run(function()
     		while true do
     			sched.sleep(interval)
@@ -57,11 +57,12 @@ regulable intervals of time can be as follows:
     
     return M
 
-Another example of an extra method is a stop() call. The previous program 
+Another example of an extra method is a `stop()` call. The previous program 
 could be modified as follows:
 
     local M = {}
-
+    local sched=require 'sched'
+    
     local interval = 1
 
     function M.set_interval (v)
@@ -69,7 +70,6 @@ could be modified as follows:
     end
     
     function M.start (conf)
-    	local sched=require 'sched'
     	M.task = M.task or sched.run(function()
     		while true do
     			sched.sleep(interval)

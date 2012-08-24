@@ -175,6 +175,7 @@ In this example, we will use a usb4butia IO board. Our task will be called booti
     deviceloaders.bobot.load = true
     deviceloaders.bobot.path = '../bobot' --path to bobot library
     deviceloaders.bobot.comms = {"usb"}
+    deviceloaders.bobot.timeout_refresh = 10
     tasks.bootia.load=true
 
 The code for the tasks/bootia.lua might be as follows:

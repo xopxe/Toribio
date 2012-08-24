@@ -86,7 +86,7 @@ in the toribio-go.conf configuration file.</p>
 <h3>accelxo</h3>
 
 <p>Supports the accelerometer installed in the OLPC XO-1.75 laptops. 
-The device is name "accelxo", and the module is also "accelxo".</p>
+The device is name <em>'accelxo'</em>, and the module is also <em>'accelxo'</em>.</p>
 
 <h3>bobot</h3>
 
@@ -97,8 +97,9 @@ and module is defined by bobot. Sample configuration:</p>
 
 <pre>
  deviceloaders.bobot.<span class="global">load</span> = <span class="keyword">true</span>
- deviceloaders.bobot.comms = {<span class="string">"usb"</span>, <span class="string">"serial"</span>} <span class="comment">--comms services to use
-</span>
+ deviceloaders.bobot.comms = {<span class="string">'usb'</span>, <span class="string">'serial'</span>} <span class="comment">--comms services to use
+</span> deviceloaders.bobot.path = <span class="string">'../bobot'</span> <span class="comment">--path to bobot library
+</span> deviceloaders.bobot.timeout_refresh = <span class="number">10</span>
 </pre>
 
 <h3>dynamixel</h3>
@@ -111,18 +112,19 @@ and module is defined by bobot. Sample configuration:</p>
  deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
 </pre>
 
-<p>It will create a device for the dynamixel bus (named 'dynamixel:/dev/ttyUSB0' 
-in the example and module "dynamixel"), plus a device for each motor (named, for example, 
-'ax12:5' and module 'ax')</p>
+<p>It will create a device for the dynamixel bus (named <em>'dynamixel:/dev/ttyUSB0'</em> 
+in the example and module <em>'dynamixel'</em>), plus a device for each motor (named like 
+<em>'ax12:5'</em> and module <em>'ax'</em>)</p>
 
 <h3>mice</h3>
 
-<p>This device allows you to read a mouse.</p>
+<p>This device allows you to read a mouse. As it reads from /dev/input/mice, you probably
+need to start toribio with sudo.</p>
 
 <h3>filedev</h3>
 
-<p>This is a special loader, that watches for a serie of files and starts an associated
-loader when a file appears. When a file dissapears, it will remove all depending devices.</p>
+<p>This is a special loader, that watches for a set of files and starts an associated
+loader when a file appears. When a file disappears, it will remove all depending devices.</p>
 
 
 <pre>
@@ -133,11 +135,11 @@ loader when a file appears. When a file dissapears, it will remove all depending
 </pre>
 
 <p>When a file described by the mask appears, filedev will set the "filename" configuration 
-parameters for the corresponing task, and start it. Aditional parameters for the 
-autostarted task can be provided in it's own section, tough the load atribute for it must
+parameters for the corresponding task, and start it. Additional parameters for the 
+auto-started task can be provided in it's own section, tough the load attribute for it must
 not be set.</p>
 
-<p>When fieldev detects a file removal, it will remove all devices that have it in the filename
+<p>When fieldev detects a file removal, it will remove all devices that have it in the "filename"
 attribute.</p>
 
 <p>Filedev uses the tasks/inotifier.lua task, and therefore depends on the inotifywait program.</p>
@@ -145,8 +147,8 @@ attribute.</p>
 <p><a name="Accessing_devices"></a></p>
 <h2>Accessing devices</h2>
 
-<p>Devices are available trough de toribio.devices table, or using the 
-toribio.wait_for_device(name) method.</p>
+<p>Devices are available trough the toribio.devices table, or using the 
+<code>toribio.wait_for_device(name|filter)</code> method.</p>
 
 <p>To iterate all devices, you can do:</p>
 
@@ -163,8 +165,8 @@ type (module) are they.</p>
 <p>If you know the name of the object, you can retrieve it directly.
 Some devices can be detected after your task started,
 so instead of going directly to the table you can use the 
-toribio.wait_for_device(name) method. If the given device exists, 
-it will be returned inmediatelly. Otherwise the call will block 
+<code>toribio.wait_for_device(name)</code> method. If the given device exists, 
+it will be returned immediately. Otherwise the call will block 
 until said device appears.</p>
 
 
@@ -172,9 +174,21 @@ until said device appears.</p>
  <span class="keyword">local</span> mice = toribio.wait_for_device(<span class="string">'mice:/dev/input/mice'</span>)
 </pre>
 
+<p>You can also retrieve devices providing a table containing a filter the 
+device must match. For example, if you are interested in a dynamixel 
+motor connected to a particular serial bus, you can do:</p>
+
+
+<pre>
+ <span class="keyword">local</span> motor =  toribio.wait_for_device({
+     <span class="global">module</span> = <span class="string">'ax'</span>,
+     filename = <span class="string">'/dev/ttyUSB1'</span>
+ })
+</pre>
+
 <p>Some devices can connect and disconnect at runtime. If you're 
-interested in these events, you can listen for the 'new_device' and
-'removed_device' events. For example:</p>
+interested in these events, you can listen for the <em>'new_device'</em> and
+<em>'removed_device'</em> events. For example:</p>
 
 
 <pre>
@@ -207,8 +221,8 @@ to the instance.</p>
     <li>device.module</li>
 </ul>
 
-<p>Device's type. For example it can be "mice" for a mouse or "dist" 
-for a distence sensor.</p>
+<p>Device's type. For example it can be "mice" for a mouse or "bb-dist" 
+for a distance sensor.</p>
 
 <ul>
     <li>device.task</li>
@@ -221,7 +235,8 @@ available here. This is also the task that emits device's events.</p>
     <li>device.signals</li>
 </ul>
 
-<p>A table containing the signals that the device can emit.</p>
+<p>A table containing the signals that the device can emit. The key is the
+name of the signal.</p>
 
 <ul>
     <li>device.filename</li>
@@ -230,22 +245,27 @@ available here. This is also the task that emits device's events.</p>
 <p>If the device depends on a device file, it will be here.</p>
 
 <ul>
-    <li>device:register_callback()</li>
+    <li>device:register_callback(...)</li>
 </ul>
 
-<p>OO-styled synonim for toribio.register_callback()</p>
+<p>OO-styled synonym for <code>toribio.register_callback(device, ...)</code></p>
 
 <h3>device-dependant fields</h3>
 
 <p>Each device will have a set of methods that allow to manipulate 
-the device. Usually all evices with equal module will have the 
-same methods. For example a device with moule "dist" could
-have a device.get_distance() method.</p>
+the device. Usually all devices with equal module will have the 
+same methods. For example a device with module "bb-dist" could
+have a <code>device.get_distance()</code> method.</p>
 
 <p><a name="Creating_your_own_devices_"></a></p>
 <h2>Creating your own devices.</h2>
 
-<p>TODO</p>
+<p>Besides representing pieces of hardware, a Device can represent an 
+abstract service. The use can define it own device modules. For that
+it must instantiate a table with the appropriate structure, and feed it to 
+Toribio using <code>toribio.add_device(device)</code>. This will allow other tasks
+to easily request it (using <a href="../modules/toribio.html#wait_for_device">toribio.wait<em>for</em>device</a> ), and register callbacks
+(using <a href="../modules/toribio.html#wait_for_device">toribio.wait<em>for</em>device</a> ).</p>
 
 
 
