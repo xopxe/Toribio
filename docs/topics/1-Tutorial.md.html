@@ -175,7 +175,7 @@
  <span class="keyword">return</span> M
 </pre>
 
-<p>In this program we use the register_callback method, instead of the explicit loop with a sched.wait inside as in the first program. This will start yet another process (the one listening for the signal), that will keep runing while the first process (the one started with sched.run) will finish immediatelly. The register_callback method has a timeout parameter set (the 0.5 at the end). When the timeout runs out wihtout signals, it will wake our function with nil, 'timeout' as parameters: that's why we check for x to see wether we have a new coordinate, or must use the last recorded set of coordinates.</p>
+<p>In this program we use the register_callback method, instead of the explicit loop with a sched.wait inside as in the first program. This will start yet another process (the one listening for the signal), that will keep runing while the first process (the one started with sched.run) will finish immediatelly. The register_callback method has a timeout parameter set (the 0.5 at the end). When the timeout runs out without signals, it will wake our function with <code>nil, 'timeout'</code> as parameters: that's why we check for x to see wether we have a new coordinate, or must use the last recorded set of coordinates.</p>
 
 <p>The only part missing is the generate_output function. We will use nixio to create a UDP socket and use it to send the messages.</p>
 
@@ -289,6 +289,7 @@ Notice how we feed the socket to the nixiorator service (the nixiorator.register
  <span class="keyword">local</span> M = {}
  <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
+
  M.start = <span class="keyword">function</span>()
      sched.run(<span class="keyword">function</span>()
          <span class="keyword">local</span> button =  toribio.wait_for_device({<span class="global">module</span>=<span class="string">'bb-button'</span>})
@@ -306,6 +307,7 @@ Notice how we feed the socket to the nixiorator service (the nixiorator.register
          <span class="keyword">end</span>
      <span class="keyword">end</span>)
  <span class="keyword">end</span>
+
  <span class="keyword">return</span> M
 </pre>
 

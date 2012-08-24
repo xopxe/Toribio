@@ -95,6 +95,10 @@
 	<td class="name" nowrap><a href="#get_motor">get_motor&nbsp;(id)</a></td>
 	<td class="summary">Get a Motor object.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_sync_motor">get_sync_motor&nbsp;(...)</a></td>
+	<td class="summary">Get a Sync-motor object.</td>
+	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
@@ -115,7 +119,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module name (in this case, 'dynamixel').</td>
+	<td class="summary">Module name (in this case, <em>'dynamixel'</em>).</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#filename">filename</a></td>
@@ -218,6 +222,29 @@
 
 
 </dd>
+    <dt>
+    <a name = "get_sync_motor"></a>
+    <strong>get_sync_motor&nbsp;(...)</strong>
+    </dt>
+    <dd>
+    Get a Sync-motor object. 
+ A sync-motor allows to control several actuators with a single command.
+ The commands will applied to all actuators it represents. 
+ The "get" methods are not available. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>...</em></code>:  A set of motor Device objects or numeric IDs</li>
+    </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        a sync_motor object
+    </ol>
+
+
+</dd>
 </dl>
     <h2><a name="Tables"></a>Tables</h2>
     
@@ -261,7 +288,7 @@
     </dt>
     <dd>
     Name of the device. 
- Of the form 'dynamixel:/dev/ttyUSB0'
+ Of the form <em>'dynamixel:/dev/ttyUSB0'</em>
 
 
 
@@ -273,7 +300,7 @@
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'dynamixel'). 
+    Module name (in this case, <em>'dynamixel'</em>). 
 
 
 

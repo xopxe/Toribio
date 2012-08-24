@@ -222,7 +222,7 @@ M.start = function (conf)
 			return err
 		end
 	end)
-	local reset =mutex.synchronize(function(id)
+	local reset = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
 		fd:writeall(packet_action)
@@ -232,7 +232,7 @@ M.start = function (conf)
 		end
 	end)
 	local sync_write = mutex.synchronize(function(ids, address,data) 
-		local dataout= address..string.char(#data)
+		local dataout = string.char(address)..string.char(#data)
 		for i=1, #ids do
 			local sid = ids[i]
 			dataout=dataout..sid..data
@@ -243,17 +243,23 @@ M.start = function (conf)
 	end)
 	-- -----------------------------------------
 	
-	local busdevice = {}
+	local busdevice = {
+		ping = ping,
+		reset = reset,
+		read_data =read_data,
+		write_data = write_data_now,
+		sync_write = sync_write,
+	}
 
 	--- Motors connected to the bus.
 	-- The keys are device numbers, the values are Motor objects.
 	busdevice.motors = {}
 	
 	--- Name of the device.
-	-- Of the form 'dynamixel:/dev/ttyUSB0'
+	-- Of the form _'dynamixel:/dev/ttyUSB0'_
 	busdevice.name = 'dynamixel:'..filename
 	
-	--- Module name (in this case, 'dynamixel').
+	--- Module name (in this case, _'dynamixel'_).
 	busdevice.module = 'dynamixel'
 	
 	--- Device file of the bus.
@@ -302,14 +308,6 @@ M.start = function (conf)
 	busdevice.get_broadcaster = function()
 		return busdevice.get_motor(0xFE)
 	end
-
-	busdevice.ping = ping
-	
-	busdevice.reset = reset
-	
-	busdevice.read_data =read_data
-	
-	busdevice.write_data = write_data_now
 	
 	--- Get a Motor object.
 	-- @param id The numeric ID of the motor
@@ -319,6 +317,26 @@ M.start = function (conf)
 		local motor=ax.get_motor(busdevice, id)
 		busdevice.motors[id] = motor
 		return motor
+	end
+	
+	--- Get a Sync-motor object.
+	-- A sync-motor allows to control several actuators with a single command.
+	-- The commands will applied to all actuators it represents. 
+	-- The "get" methods are not available. 
+	-- @param ... A set of motor Device objects or numeric IDs
+	-- @return a sync_motor object
+	busdevice.get_sync_motor = function(...)
+		local ids = {}
+		for i=1, select('#', ...)  do
+			local m = select(i, ...)
+			if type (m) == 'number' then 
+				local motor = busdevice.get_motor(m)
+				if motor then ids[#ids+1] = motor.id end
+			else 
+				ids[#ids+1] = m.id 
+			end
+		end
+		return ax.get_motor(busdevice, ids)
 	end
 	
 	debugprint('device object created', busdevice.name)
@@ -333,7 +351,6 @@ M.start = function (conf)
 			if motor then 
 				--print('XXXXXXXX',i) 
 				busdevice.signals[i] = string.char(i)
-				--motor.name = 'ax'..motor.get_model()..':'..i
 				toribio.add_device(motor)
 			end
 			--sched.yield()

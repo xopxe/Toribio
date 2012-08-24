@@ -74,7 +74,7 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example">local toribio = require 'toribio'
-local motor = toribio.wait_for_device('ax12:5')
+local motor = toribio.wait_for_device({module='ax', id=5})
 motor.set_led(true)</pre>
     </ul>
 
@@ -97,28 +97,12 @@ motor.set_led(true)</pre>
 	<td class="summary">Get actuator's ID.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#init_mode_wheel">init_mode_wheel&nbsp;()</a></td>
-	<td class="summary">Set wheel mode.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#init_mode_joint">init_mode_joint&nbsp;(min, max)</a></td>
-	<td class="summary">Set joint mode.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#get_rotation_mode">get_rotation_mode&nbsp;()</a></td>
 	<td class="summary">Get the motor mode.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#ping">ping&nbsp;()</a></td>
 	<td class="summary">Ping the motor.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#set_led">set_led&nbsp;(value)</a></td>
-	<td class="summary">Control motor's led.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#set_torque_enable">set_torque_enable&nbsp;(value)</a></td>
-	<td class="summary">Enables motor torque.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#get_torque_enable">get_torque_enable&nbsp;()</a></td>
@@ -129,32 +113,16 @@ motor.set_led(true)</pre>
 	<td class="summary">Get motor speed.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_speed">set_speed&nbsp;(value)</a></td>
-	<td class="summary">Set motor speed.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#get_operating_voltage">get_operating_voltage&nbsp;()</a></td>
 	<td class="summary">Get operating voltage.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#set_operating_voltage">set_operating_voltage&nbsp;(min, max)</a></td>
-	<td class="summary">Set operating voltage range.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#get_position">get_position&nbsp;()</a></td>
 	<td class="summary">Get motor position.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_position">set_position&nbsp;(value)</a></td>
-	<td class="summary">Set motor position.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#get_torque_limit">get_torque_limit&nbsp;()</a></td>
 	<td class="summary">Get the torque limit.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#set_torque_limit">set_torque_limit&nbsp;(value)</a></td>
-	<td class="summary">Set the torque limit.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#get_load">get_load&nbsp;()</a></td>
@@ -168,12 +136,44 @@ motor.set_led(true)</pre>
 	<td class="name" nowrap><a href="#is_moving">is_moving&nbsp;()</a></td>
 	<td class="summary">Get if motor is moving.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#init_mode_wheel">init_mode_wheel&nbsp;()</a></td>
+	<td class="summary">Set wheel mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#init_mode_joint">init_mode_joint&nbsp;(min, max)</a></td>
+	<td class="summary">Set joint mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_led">set_led&nbsp;(value)</a></td>
+	<td class="summary">Control motor's led.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_torque_enable">set_torque_enable&nbsp;(value)</a></td>
+	<td class="summary">Enables motor torque.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_speed">set_speed&nbsp;(value)</a></td>
+	<td class="summary">Set motor speed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_operating_voltage">set_operating_voltage&nbsp;(min, max)</a></td>
+	<td class="summary">Set operating voltage range.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_position">set_position&nbsp;(value)</a></td>
+	<td class="summary">Set motor position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_torque_limit">set_torque_limit&nbsp;(value)</a></td>
+	<td class="summary">Set the torque limit.</td>
+	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module name ('ax' in this case)</td>
+	<td class="name" nowrap><a href="#id">id</a></td>
+	<td class="summary">The id number of the motor.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#filename">filename</a></td>
@@ -245,6 +245,7 @@ motor.set_led(true)</pre>
     </dt>
     <dd>
     Get actuator's ID. 
+ This retrieves the ID number from the motor.
 
 
 
@@ -252,38 +253,6 @@ motor.set_led(true)</pre>
     <ol>
         ID number
     </ol>
-
-
-</dd>
-    <dt>
-    <a name = "init_mode_wheel"></a>
-    <strong>init_mode_wheel&nbsp;()</strong>
-    </dt>
-    <dd>
-    Set wheel mode. 
-Set the motor to continuous rotation mode.
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "init_mode_joint"></a>
-    <strong>init_mode_joint&nbsp;(min, max)</strong>
-    </dt>
-    <dd>
-    Set joint mode. 
- Set the motor to joint mode. Angles are provided in degrees,
- in the full servo coverage (0 - 300 degrees arc)
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>min</em></code>:  the minimum joint angle (defaults to 0)</li>
-       <li><code><em>max</em></code>:  the maximum joint angle (defaults to 300)</li>
-    </ul>
-
-
 
 
 </dd>
@@ -298,7 +267,7 @@ Set the motor to continuous rotation mode.
 
     <h3>Returns:</h3>
     <ol>
-        either 'wheel' or 'joint'
+        either <em>'wheel'</em> or <em>'joint'</em>
     </ol>
 
 
@@ -320,39 +289,6 @@ Set the motor to continuous rotation mode.
 
 </dd>
     <dt>
-    <a name = "set_led"></a>
-    <strong>set_led&nbsp;(value)</strong>
-    </dt>
-    <dd>
-    Control motor's led. 
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>value</em></code>:  true switches on, false switches off.</li>
-    </ul>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "set_torque_enable"></a>
-    <strong>set_torque_enable&nbsp;(value)</strong>
-    </dt>
-    <dd>
-    Enables motor torque. 
- This activates the motor. 
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>value</em></code>:  true switches on, false switches off.</li>
-    </ul>
-
-
-
-
-</dd>
-    <dt>
     <a name = "get_torque_enable"></a>
     <strong>get_torque_enable&nbsp;()</strong>
     </dt>
@@ -363,7 +299,7 @@ Set the motor to continuous rotation mode.
 
     <h3>Returns:</h3>
     <ol>
-        true if torque enabled
+        <em>true</em> if torque enabled
     </ol>
 
 
@@ -386,24 +322,6 @@ Set the motor to continuous rotation mode.
 
 </dd>
     <dt>
-    <a name = "set_speed"></a>
-    <strong>set_speed&nbsp;(value)</strong>
-    </dt>
-    <dd>
-    Set motor speed. 
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>value</em></code>:  If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
- (0 means max available speed). 
- If in wheel mode, as a % of max torque (in the -100% .. 100% range).</li>
-    </ul>
-
-
-
-
-</dd>
-    <dt>
     <a name = "get_operating_voltage"></a>
     <strong>get_operating_voltage&nbsp;()</strong>
     </dt>
@@ -416,25 +334,6 @@ Set the motor to continuous rotation mode.
     <ol>
         The voltage in volts.
     </ol>
-
-
-</dd>
-    <dt>
-    <a name = "set_operating_voltage"></a>
-    <strong>set_operating_voltage&nbsp;(min, max)</strong>
-    </dt>
-    <dd>
-    Set operating voltage range. 
- If the operating voltage get out of the specified range, an
- alarm is set.
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>min</em></code>:  Minimum voltage in volts</li>
-       <li><code><em>max</em></code>:  Maximum voltage in volts</li>
-    </ul>
-
-
 
 
 </dd>
@@ -457,24 +356,6 @@ Set the motor to continuous rotation mode.
 
 </dd>
     <dt>
-    <a name = "set_position"></a>
-    <strong>set_position&nbsp;(value)</strong>
-    </dt>
-    <dd>
-    Set motor position. 
- Set the target position for the motor's axle. Only works in
- joint mode.
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>value</em></code>:  Angle in degrees, in the 0 .. 300deg range.</li>
-    </ul>
-
-
-
-
-</dd>
-    <dt>
     <a name = "get_torque_limit"></a>
     <strong>get_torque_limit&nbsp;()</strong>
     </dt>
@@ -488,23 +369,6 @@ Set the motor to continuous rotation mode.
     <ol>
         Percentage of max torque (0% .. 100% range).
     </ol>
-
-
-</dd>
-    <dt>
-    <a name = "set_torque_limit"></a>
-    <strong>set_torque_limit&nbsp;(value)</strong>
-    </dt>
-    <dd>
-    Set the torque limit. 
- Sets the torque limit in the motor.
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>value</em></code>:  Percentage of max torque (0% ..100% range).</li>
-    </ul>
-
-
 
 
 </dd>
@@ -553,9 +417,146 @@ Set the motor to continuous rotation mode.
 
     <h3>Returns:</h3>
     <ol>
-        If the motor has reached target position, return false.
- Otherwhise return true.
+        If the motor has reached target position, return <em>false</em>.
+ Otherwhise return <em>true</em>.
     </ol>
+
+
+</dd>
+    <dt>
+    <a name = "init_mode_wheel"></a>
+    <strong>init_mode_wheel&nbsp;()</strong>
+    </dt>
+    <dd>
+    Set wheel mode. 
+Set the motor to continuous rotation mode.
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "init_mode_joint"></a>
+    <strong>init_mode_joint&nbsp;(min, max)</strong>
+    </dt>
+    <dd>
+    Set joint mode. 
+ Set the motor to joint mode. Angles are provided in degrees,
+ in the full servo coverage (0 - 300 degrees arc)
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>min</em></code>:  the minimum joint angle (defaults to 0)</li>
+       <li><code><em>max</em></code>:  the maximum joint angle (defaults to 300)</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_led"></a>
+    <strong>set_led&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Control motor's led. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  <em>true</em> switches on, <em>false</em> switches off.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_torque_enable"></a>
+    <strong>set_torque_enable&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Enables motor torque. 
+ This activates the motor. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  <em>true</em> switches on, <em>false</em> switches off.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_speed"></a>
+    <strong>set_speed&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set motor speed. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
+ (0 means max available speed). 
+ If in wheel mode, as a % of max torque (in the -100% .. 100% range).</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_operating_voltage"></a>
+    <strong>set_operating_voltage&nbsp;(min, max)</strong>
+    </dt>
+    <dd>
+    Set operating voltage range. 
+ If the operating voltage get out of the specified range, an
+ alarm is set.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>min</em></code>:  Minimum voltage in volts</li>
+       <li><code><em>max</em></code>:  Maximum voltage in volts</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_position"></a>
+    <strong>set_position&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set motor position. 
+ Set the target position for the motor's axle. Only works in
+ joint mode.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  Angle in degrees, in the 0 .. 300deg range.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_torque_limit"></a>
+    <strong>set_torque_limit&nbsp;(value)</strong>
+    </dt>
+    <dd>
+    Set the torque limit. 
+ Sets the torque limit in the motor.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>value</em></code>:  Percentage of max torque (0% ..100% range).</li>
+    </ul>
+
+
 
 
 </dd>
@@ -564,11 +565,11 @@ Set the motor to continuous rotation mode.
     
     <dl class="function">
     <dt>
-    <a name = "module"></a>
-    <strong>module</strong>
+    <a name = "id"></a>
+    <strong>id</strong>
     </dt>
     <dd>
-    Module name ('ax' in this case) 
+    The id number of the motor. 
 
 
 
@@ -582,7 +583,7 @@ Set the motor to continuous rotation mode.
     <dd>
     Device file of the bus. 
  Filename of the bus to which the motor is connected.
- For example, '/dev/ttyUSB0'
+ For example, <em>'/dev/ttyUSB0'</em>
 
 
 
