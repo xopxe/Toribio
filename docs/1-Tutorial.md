@@ -22,7 +22,7 @@ Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:
     local sched=require 'sched'
     local toribio = require 'toribio'
 
-    M.start = function(conf)
+    M.init = function(conf)
     	sched.run(function()
     		local file = io.open(conf.outfile or 'data.log', 'w')
     		local motor = toribio.wait_for_device(conf.motorname)
@@ -66,7 +66,7 @@ The remote control will behave as follows: it tracks mouse's movements, generate
     local toribio = require 'toribio'
     local sched = require 'sched'
     
-    M.start = function(conf)
+    M.init = function(conf)
     
     	local function generate_output(x, y)
     		--calculate velocities and send them over udp
@@ -128,7 +128,7 @@ And the tasks/rc\_bot.lua skeleton:
     local toribio = require 'toribio'
     local sched = require 'sched'
     
-    M.start = function(conf)
+    M.init = function(conf)
     
     	sched.run(function()
     		--initialize motors
@@ -184,7 +184,7 @@ The code for the tasks/bootia.lua might be as follows:
     local sched = require 'sched'
     local toribio = require 'toribio'
     
-    M.start = function()
+    M.init = function()
     	sched.run(function()
     		local button =  toribio.wait_for_device({module='bb-button'})
     		local pressed = false

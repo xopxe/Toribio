@@ -87,6 +87,10 @@
 	<td class="summary">Register a callback for a device's signal.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#add_device">add_device&nbsp;(device)</a></td>
+	<td class="summary">Provide a new Device object.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#start">start&nbsp;(section, taskname)</a></td>
 	<td class="summary">Start a task.</td>
 	</tr>
@@ -175,6 +179,24 @@ local some_button = toribio.wait_for_device({module='bb-button'})</pre>
     <ol>
         The callback task
     </ol>
+
+
+</dd>
+    <dt>
+    <a name = "add_device"></a>
+    <strong>add_device&nbsp;(device)</strong>
+    </dt>
+    <dd>
+    Provide a new Device object. 
+ Registers the Device object with Toribio. Warning: if the object's name is 
+ already taken, Toribio will rename the object.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>device</em></code>:  a Device object.</li>
+    </ul>
+
+
 
 
 </dd>

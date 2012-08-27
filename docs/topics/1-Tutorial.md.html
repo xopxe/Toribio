@@ -97,7 +97,7 @@
  <span class="keyword">local</span> sched=<span class="global">require</span> <span class="string">'sched'</span>
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
 
- M.start = <span class="keyword">function</span>(conf)
+ M.init = <span class="keyword">function</span>(conf)
      sched.run(<span class="keyword">function</span>()
          <span class="keyword">local</span> file = <span class="global">io</span>.open(conf.outfile <span class="keyword">or</span> <span class="string">'data.log'</span>, <span class="string">'w'</span>)
          <span class="keyword">local</span> motor = toribio.wait_for_device(conf.motorname)
@@ -151,7 +151,7 @@
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
  <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
 
- M.start = <span class="keyword">function</span>(conf)
+ M.init = <span class="keyword">function</span>(conf)
 
      <span class="keyword">local</span> <span class="keyword">function</span> generate_output(x, y)
          <span class="comment">--calculate velocities and send them over udp
@@ -225,7 +225,7 @@
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
  <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
 
- M.start = <span class="keyword">function</span>(conf)
+ M.init = <span class="keyword">function</span>(conf)
 
      sched.run(<span class="keyword">function</span>()
          <span class="comment">--initialize motors
@@ -291,7 +291,7 @@ Notice how we feed the socket to the nixiorator service (the nixiorator.register
  <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
 
- M.start = <span class="keyword">function</span>()
+ M.init = <span class="keyword">function</span>()
      sched.run(<span class="keyword">function</span>()
          <span class="keyword">local</span> button =  toribio.wait_for_device({<span class="global">module</span>=<span class="string">'bb-button'</span>})
          <span class="keyword">local</span> pressed = <span class="keyword">false</span>

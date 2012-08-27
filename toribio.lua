@@ -143,6 +143,10 @@ M.register_callback = function(device, event, f, timeout)
 end
 
 local signal_new_device = {}
+--- Provide a new Device object.
+-- Registers the Device object with Toribio. Warning: if the object's name is 
+-- already taken, Toribio will rename the object.
+-- @param device a Device object.
 M.add_device = function (device)
 	local devicename=get_device_name(device.name)
 	print('NEW DEVICE!', device.name, device.module)
@@ -159,6 +163,9 @@ end
 
 local signal_remove_device = {}
 M.remove_devices = function(devdesc)
+	if type(devdesc) == 'string' then
+		devdesc={name=devdesc}
+	end
 	for _, device in pairs(devices) do
 		local matches = true
 		for key, value in pairs(devdesc) do

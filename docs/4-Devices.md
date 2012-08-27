@@ -59,7 +59,7 @@ parameters for the corresponding task, and start it. Additional parameters for t
 auto-started task can be provided in it's own section, tough the load attribute for it must
 not be set.
 
-When fieldev detects a file removal, it will remove all devices that have it in the "filename"
+When filedev detects a file removal, it will remove all devices that have it in the "filename"
 attribute.
 
 Filedev uses the tasks/inotifier.lua task, and therefore depends on the inotifywait program.
@@ -154,12 +154,73 @@ have a `device.get_distance()` method.
 ## Creating your own devices.
 
 Besides representing pieces of hardware, a Device can represent an 
-abstract service. The use can define it own device modules. For that
+abstract service. The user can define his own device modules. For that
 it must instantiate a table with the appropriate structure, and feed it to 
 Toribio using `toribio.add_device(device)`. This will allow other tasks
 to easily request it (using `toribio.wait_for_device()`), and register callbacks
 (using `toribio.wait_for_device()`).
 
+The following code creates devices that are attached to distance-sensor devices, 
+and trigger signals when the sensed distance below a configurable threshold.
+The file bellow (deviceloaders/distrigger.lua) initializes device objects, one for
+each distance sensor specified in configuration. Each device will contain a task that 
+periodically checks the reading from the sensor, and if needed triggers a signal.
+
+    local M = {}
+    local toribio = require 'toribio'
+    local sched = require 'sched'
+    
+    M.init = function(conf)
+    	local too_close_event={}
+    	for sensorname, sconf in pairs(conf.sensors or {}) do
+    		local sensor=toribio.wait_for_device( sensorname )
+    		
+    		local device={}
+    		device.name='distrigger:'..sensorname
+    		device.module='distrigger'
+    		device.signals={
+    			too_close=too_close_event
+    		}
+    		device.task = sched.run(function()
+			local too_close = false
+    			while true do
+    				if sensor.getValue() < sconf.min_threshold then
+    					if not too_close then 
+    						sched.signal( device.signals.too_close() )
+    						too_close=true
+    					end
+    				else too_close=false end
+    				sched.sleep( sconf.rate )
+    			end
+    		end)
+    		device.set_pause = function ( pause )
+    			device.task:set_pause( pause )
+    		end
+    		
+    		toribio.add_device( device )
+    	end
+    	
+    end
+    
+    return M
+
+The device publishes the signal it emits in the `signals` table. It also provides a `set_pause` 
+function to stop the polling to save resources when not needed.
+
+To enable these devices, a configuration must be provided as follows:
+
+    deviceloaders.distrigger.load=true
+    deviceloaders.distrigger.sensors['bb-dist:0'].min_threshold = 150
+    deviceloaders.distrigger.sensors['bb-dist:0'].interval = 0.2 --time between readings
+    deviceloaders.distrigger.sensors['bb-dist:3'].min_threshold = 500
+    deviceloaders.distrigger.sensors['bb-dist:3'].interval = 1 --time between readings
+
+The client code could be something like this:
+
+    local sensor = toribio.wait_for_device('distrigger:bb-dist:3')
+    sensor:register_callback(sensor.signals.too_close, function()
+    	print ('PROXIMITY WARNING!')
+    end)
 
 
 

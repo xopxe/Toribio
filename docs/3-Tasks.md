@@ -10,7 +10,7 @@ The skeleton of a task file (called say taskname.lua) is as follows:
     local M = {}
     local sched=require 'sched'
     
-    function M.start (conf)
+    function M.init (conf)
     	-- initialize stuff
     	sched.run(function()
 		-- do something
