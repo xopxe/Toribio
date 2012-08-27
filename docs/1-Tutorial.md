@@ -49,7 +49,7 @@ Finally, we run the program:
 
 ## Remote controlled robot
 
-We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, an generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).
+We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, and generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).
 
 ### Remote Control
 
@@ -204,11 +204,11 @@ The code for the tasks/bootia.lua might be as follows:
     
     return M
 
-This process polls a button connected to the usb4butia board (any button will do), and prints "pressed!" or "released!" when the button changes state. You can change the polling rate in the sched.sleep() call. The asbolutely minimum you can expect to work is at least call sched.yield() from time to time, to give opportunity to other processes to do their stuff.
+This process polls a button connected to the usb4butia board (any button will do), and prints "pressed!" or "released!" when the button changes state. You can change the polling rate in the sched.sleep() call. The absolutely minimum you can expect to work is at least call sched.yield() from time to time, to give opportunity to other processes to do their stuff.
 
 Now suppose you have a usb4butia powered robot that only goes forward and backwards, changind the direction with a button press. You could put the direction changind code right in the previous process, but we will do it using a more flexible method: signalling. 
 
-The idea is that there will be a signal that requests a direction change, and a separate process that will wait for these signals an apply them. The previous process will be modified to emit a signal as follows:
+The idea is that there will be a signal that requests a direction change, and a separate process that will wait for these signals and apply them. The previous process will be modified to emit a signal as follows:
 
     			if pressed and not now then 
     				sched.signal('change direction!')

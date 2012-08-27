@@ -59,7 +59,9 @@ can be as follows:
 
 A program to set the interval on this task would do the following:
 
-    local taskmodule=require 'taskname'
+    local taskmodule=toribio.start('tasks', 'taskname')
     taskmodule.set_interval(10)
 
+This is safe even if the module is already started: toribio will
+initialize each module only once.
 

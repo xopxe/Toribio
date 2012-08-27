@@ -138,9 +138,12 @@ can be as follows:</p>
 
 
 <pre>
- <span class="keyword">local</span> taskmodule=<span class="global">require</span> <span class="string">'taskname'</span>
+ <span class="keyword">local</span> taskmodule=toribio.start(<span class="string">'tasks'</span>, <span class="string">'taskname'</span>)
  taskmodule.set_interval(<span class="number">10</span>)
 </pre>
+
+<p>This is safe even if the module is already started: toribio will
+initialize each module only once.</p>
 
 
 
