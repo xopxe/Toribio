@@ -7,7 +7,7 @@
 
 local M = {}
 
-M.start = function(conf)
+M.init = function(conf)
 	local toribio = require 'toribio'
 	local nixiorator = require 'tasks/nixiorator'
 	local nixio = nixiorator.nixio

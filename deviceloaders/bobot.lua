@@ -102,8 +102,7 @@ local function server_refresh ()
 end
 
 
-M.start = function (conf)
-
+M.init = function (conf)
 	local timeout_refresh = conf.timeout_refresh or -1
 
 	if conf.path then 

@@ -1,6 +1,6 @@
 local M = {}
 
-M.start = function(conf)
+M.init = function()
 	local sched = require 'sched'
 	
 	return sched.run(function()

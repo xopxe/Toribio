@@ -2,7 +2,7 @@ local M = {}
 local toribio = require 'toribio'
 local sched = require 'sched'
 
-M.start = function(conf)
+M.init = function(conf)
 
 	local nixio = require 'nixio'
 	local udp = assert(nixio.bind('*', 0, 'inet', 'dgram'))

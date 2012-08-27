@@ -11,6 +11,7 @@ local M ={}
 
 local sched = require 'sched'
 local catalog = require 'catalog'
+local log= require 'log'
 --require "log".setlevel('ALL')
 
 --- Available devices.
@@ -183,16 +184,25 @@ end
 -- @param taskname The name of the task
 -- @return true on success.
 M.start = function(section, taskname)
-	local ok
+	local packagename = section..'/'..taskname
+	if package.loaded[packagename] 
+	then return package.loaded[packagename] end
+	
 	local sect = M.configuration[section] or {}
 	local conf = sect[taskname] or {}
-	local taskmodule = require (section..'/'..taskname)
+	local taskmodule = require (packagename)
 	_G.debugprint('module loaded:', taskmodule)
-	if taskmodule and taskmodule.start then
-		ok = pcall(taskmodule.start, conf)
+	log('TORIBIO', 'INFO', 'module %s loaded', packagename)
+	if taskmodule and taskmodule.init then
+		local ok, err = pcall(taskmodule.init, conf)
+		if ok then 
+			log('TORIBIO', 'INFO', 'module %s initialized', packagename)
+		else
+			log('TORIBIO', 'WARNING', 'module %s initialization failed: %s', packagename,tostring(err))
+		end
 		_G.debugprint('module started:', ok)
 	end
-	return ok
+	return taskmodule 
 end
 
 --- Toribio's task.

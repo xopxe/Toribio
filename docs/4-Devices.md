@@ -157,8 +157,8 @@ Besides representing pieces of hardware, a Device can represent an
 abstract service. The use can define it own device modules. For that
 it must instantiate a table with the appropriate structure, and feed it to 
 Toribio using `toribio.add_device(device)`. This will allow other tasks
-to easily request it (using `toribio.wait_for_device`), and register callbacks
-(using `toribio.wait_for_device`).
+to easily request it (using `toribio.wait_for_device()`), and register callbacks
+(using `toribio.wait_for_device()`).
 
 
 

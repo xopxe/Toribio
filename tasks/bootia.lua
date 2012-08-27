@@ -3,7 +3,7 @@ local M = {}
 local sched = require 'sched'
 local toribio = require 'toribio'
 
-M.start = function()
+M.init = function()
 	sched.run(function()
 		local button =  toribio.wait_for_device({module='bb-button'})
 		print ('BUTTON FOUND', button.name)

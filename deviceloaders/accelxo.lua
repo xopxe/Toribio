@@ -1,6 +1,6 @@
 local M = {}
 
-M.start = function(conf)
+M.init = function(conf)
 	toribio = require 'toribio'
 
 	local path = conf.filename or '/sys/devices/platform/lis3lv02d'
@@ -8,7 +8,6 @@ M.start = function(conf)
 	local device={
 		name="accelxo",
 		module="accelxo",
-		api=api, 
 		filename=filename,
 		get_accel = function()
 			local f=io.open(filename, 'r')
@@ -16,7 +15,7 @@ M.start = function(conf)
 			local x, y, z = l:match('^%(([^,]+),([^,]+),([^,]+)%)$')
 			f:close()
 			return tonumber(x), tonumber(y), tonumber(z)
-		end},
+		end,
 	}
 
 	_G.debugprint('device object created', device.name)

@@ -180,7 +180,7 @@ process["QUIT"] = function ()
 end
 
 
-M.start = function(conf)
+M.init = function(conf)
 	local nixiorator = require 'tasks/nixiorator'
 	local nixio = nixiorator.nixio
 	print ('nixiorator found:', nixiorator.task)

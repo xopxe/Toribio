@@ -102,11 +102,11 @@ in the toribio-go.conf file as follows</p>
 
 <p>The toribio-go.lua script will start the tasks if the load parameter is
 true. All the configuration parameters will be provided in the conf table 
-(when starting this task, toribio will invoke <code>M.start(tasks.taskname)</code>).
+(when starting this task, toribio will invoke <code>M.init(tasks.taskname)</code>).
 Notice that the full configuration table is available at
 toribio.configuration.</p>
 
-<p>The <code>start()</code> call must start the Lumen process (there might be several), 
+<p>The <code>init()</code> call must start the Lumen process (there might be several), 
 register callbacks, etc. Optionally, the module can provide further methods. 
 For example, a task that will print "tick" at a regulable intervals of time 
 can be as follows:</p>
@@ -122,7 +122,7 @@ can be as follows:</p>
      interval=v
  <span class="keyword">end</span>
 
- <span class="keyword">function</span> M.start (conf)
+ <span class="keyword">function</span> M.init (conf)
      sched.run(<span class="keyword">function</span>()
          <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
              sched.sleep(interval)
@@ -134,34 +134,12 @@ can be as follows:</p>
  <span class="keyword">return</span> M
 </pre>
 
-<p>Another example of an extra method is a <code>stop()</code> call. The previous program 
-could be modified as follows:</p>
+<p>A program to set the interval on this task would do the following:</p>
 
 
 <pre>
- <span class="keyword">local</span> M = {}
- <span class="keyword">local</span> sched=<span class="global">require</span> <span class="string">'sched'</span>
-
- <span class="keyword">local</span> interval = <span class="number">1</span>
-
- <span class="keyword">function</span> M.set_interval (v)
-     interval=v
- <span class="keyword">end</span>
-
- <span class="keyword">function</span> M.start (conf)
-     M.task = M.task <span class="keyword">or</span> sched.run(<span class="keyword">function</span>()
-         <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
-             sched.sleep(interval)
-             <span class="global">print</span>(<span class="string">'tick'</span>)
-         <span class="keyword">end</span>
-     <span class="keyword">end</span>)
- <span class="keyword">end</span>
-
- <span class="keyword">function</span> M.stop()
-     <span class="keyword">if</span> M.task <span class="keyword">then</span> M.task:kill() <span class="keyword">end</span>
- <span class="keyword">end</span>
-
- <span class="keyword">return</span> M
+ <span class="keyword">local</span> taskmodule=<span class="global">require</span> <span class="string">'taskname'</span>
+ taskmodule.set_interval(<span class="number">10</span>)
 </pre>
 
 

@@ -2,7 +2,7 @@ local M = {}
 local toribio = require 'toribio'
 local sched = require 'sched'
 
-M.start = function(conf)
+M.init = function(conf)
 
 	sched.run(function()
 		--initialize motors

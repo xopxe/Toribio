@@ -1,6 +1,6 @@
 local M = {}
 
-M.start =  function(conf)
+M.init =  function(conf)
 	local sched = require 'sched'
 	local toribio = require 'toribio' 
 

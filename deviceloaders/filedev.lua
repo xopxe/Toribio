@@ -5,7 +5,7 @@ local catalog = require 'catalog'
 local toribio = require 'toribio'
 local log = require 'log'
 
-M.start = function( conf )
+M.init = function( conf )
 	local masks_to_watch = {}
 	local deviceloadersconf = toribio.configuration.deviceloaders
 
@@ -24,12 +24,9 @@ M.start = function( conf )
 				local modulename = masks_to_watch[onmask]
 				log('FILEDEV','INFO', 'starting module %s on %s', tostring(modulename), tostring(devfile))
 				print('filedev module starting', devfile, modulename)
-				local devmodule = require ('deviceloaders/'..modulename)
-				if devmodule.start then
-					deviceloadersconf[modulename] = deviceloadersconf[modulename] or {}
-					deviceloadersconf[modulename].filename = devfile
-					devmodule.start(deviceloadersconf[modulename])
-				end
+				deviceloadersconf[modulename] = deviceloadersconf[modulename] or {}
+				deviceloadersconf[modulename].filename = devfile
+				toribio.start('deviceloaders', modulename)
 			elseif action=='FILE-' then
 				toribio.remove_devices({filename=devfile})
 			end

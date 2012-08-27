@@ -51,7 +51,7 @@ local function generate_checksum(data)
 	return 255 - (checksum%256)
 end
 
-M.start = function (conf)
+M.init = function (conf)
 	local nixiorator = require 'tasks/nixiorator'
 	local nixio = nixiorator.nixio
 

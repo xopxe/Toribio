@@ -27,7 +27,7 @@ local function run_shell_nixio(command)
 	end
 end
 
-M.start = function(masks_to_watch)
+M.init = function(masks_to_watch)
 	sched.run(function()
 		local catalog = require 'catalog'
 		catalog.register(masks_to_watch)
