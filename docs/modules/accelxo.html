@@ -32,14 +32,14 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Fields">Fields</a></li>
+<li><a href="#Functions">Functions</a></li>
 </ul>
 
 
 <h2>Modules</h2>
 <ul>
-  <li><a href="../modules/accelxo.html">accelxo</a></li>
-  <li><strong>bobot</strong></li>
+  <li><strong>accelxo</strong></li>
+  <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -63,24 +63,24 @@
 
 <div id="content">
 
-<h1>Module <code>bobot</code></h1>
+<h1>Module <code>accelxo</code></h1>
 
-<p>Library for using usb4butia boards.</p>
-<p> This library interface with bobot library for
- accessing usb4butia-attached devices. It supports hotplug.
- There will be one object of this type for each bobot device.
- Bobot device's methods (it's api in the bobot terms) are 
- available.</p>
+<p>Library for accesing the accelerometer of a XO 1.75.</p>
+<p> The device will be named "accelxo", module "accelxo". </p>
 
-<h2><a href="#Fields">Fields</a></h2>
+<h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#name">name</a></td>
-	<td class="summary">Name of the device.</td>
+	<td class="name" nowrap><a href="#get_accel">get_accel&nbsp;()</a></td>
+	<td class="summary">Read the acceleration.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module of the device.</td>
+	<td class="name" nowrap><a href="#set_rate">set_rate&nbsp;(hz)</a></td>
+	<td class="summary">Set the sensor sample rate.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#check">check&nbsp;()</a></td>
+	<td class="summary">Run the sensor internal self test.</td>
 	</tr>
 </table>
 
@@ -88,34 +88,57 @@
 <br/>
 
 
-    <h2><a name="Fields"></a>Fields</h2>
+    <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
     <dt>
-    <a name = "name"></a>
-    <strong>name</strong>
+    <a name = "get_accel"></a>
+    <strong>get_accel&nbsp;()</strong>
     </dt>
     <dd>
-    Name of the device. 
- Starts with 'bb-' and then the name provided
- by bobot. For example, "bb-dist:1".
+    Read the acceleration. 
 
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The x, y and z magnitudes.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "set_rate"></a>
+    <strong>set_rate&nbsp;(hz)</strong>
+    </dt>
+    <dd>
+    Set the sensor sample rate. 
+ This is the intarnal sample rate, and the supported values are
+ 1, 10, 25, 50, 100, 200, 400, 1600, and 5000 Hz.
+ The driver has a limit on reading at about 25 Hz.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>hz</em></code>:  The rate in hz.</li>
+    </ul>
 
 
 
 
 </dd>
     <dt>
-    <a name = "module"></a>
-    <strong>module</strong>
+    <a name = "check"></a>
+    <strong>check&nbsp;()</strong>
     </dt>
     <dd>
-    Module of the device. 
- Starts with 'bb-' and then the module provided
- by bobot. For example, "bb-dist".
+    Run the sensor internal self test. 
 
 
 
+    <h3>Returns:</h3>
+    <ol>
+        <em>true</em> on success or <em>false,v1,v2,v3</em> on failure.
+    </ol>
 
 
 </dd>
