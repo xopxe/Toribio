@@ -103,7 +103,7 @@
 	<td class="summary">Available devices.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#signals">signals</a></td>
+	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Signals that toribio can emit.</td>
 	</tr>
 	<tr>
@@ -235,7 +235,7 @@ local some_button = toribio.wait_for_device({module='bb-button'})</pre>
     Available devices. 
  This is a table containing the name and associated object for all available devices
  in the system.
- When toribio adds or removes a device, <a href="../modules/toribio.html#signals">signals</a> are emitted. For easily 
+ When toribio adds or removes a device, <a href="../modules/toribio.html#events">events</a> are emitted. For easily 
  accesing this table, use <a href="../modules/toribio.html#wait_for_device">wait_for_device</a>
 
 
@@ -250,8 +250,8 @@ end</pre>
 
 </dd>
     <dt>
-    <a name = "signals"></a>
-    <strong>signals</strong>
+    <a name = "events"></a>
+    <strong>events</strong>
     </dt>
     <dd>
     Signals that toribio can emit. 
@@ -267,7 +267,7 @@ end</pre>
     <ul>
         <pre class="example">local sched = require 'sched'
 sched.sigrun_task(
-    {emitter=toribio.task, signals={toribio.signals.new_device}}, 
+    {emitter=toribio.task, events={toribio.events.new_device}}, 
     print
 )</pre>
     </ul>
@@ -298,7 +298,7 @@ sched.sigrun_task(
     </dt>
     <dd>
     Toribio's task. 
- This is the task that emits toribios <a href="../modules/toribio.html#signals">signals</a>
+ This is the task that emits toribios <a href="../modules/toribio.html#events">events</a>
 
 
 

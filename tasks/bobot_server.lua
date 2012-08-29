@@ -89,7 +89,7 @@ process["DESCRIBE"] = function (parameters)
 	--	return "missing driver"
 	--end
 
-	local  skip_fields = {remove=true, name=true, register_callback=true, signals=true,
+	local  skip_fields = {remove=true, name=true, register_callback=true, events=true,
 		task=true, filename=true, module=true}
 	
 	local ret = "{"

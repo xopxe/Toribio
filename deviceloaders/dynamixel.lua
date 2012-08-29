@@ -271,8 +271,8 @@ M.init = function (conf)
 	
 	--- Signals emitted by this device.
 	-- @field ax_error Error detected. The first parameter is the motor ID, the second is the error description.
-	-- @table signals
-	busdevice.signals = {
+	-- @table events
+	busdevice.events = {
 		ax_error=signal_ax_error,
 	}
 	-- --- Sync write method.
@@ -350,7 +350,7 @@ M.init = function (conf)
 			local motor = busdevice.get_motor(i)
 			if motor then 
 				--print('XXXXXXXX',i) 
-				busdevice.signals[i] = string.char(i)
+				busdevice.events[i] = string.char(i)
 				toribio.add_device(motor)
 			end
 			--sched.yield()

@@ -10,13 +10,13 @@ M.init = function(conf)
 		local device={}
 		device.name='distrigger'
 		device.module='distrigger'
-		device.signals={
+		device.events={
 			too_close=too_close_event
 		}
 		device.task = sched.run(function()
 			while true do
 				if sensor.getValue() < sconf.min_threshold then
-					sched.signal( device.signals.too_close() )
+					sched.signal( device.events.too_close() )
 				end
 				sched.sleep( sconf.interval )
 			end

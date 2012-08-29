@@ -17,7 +17,7 @@ local log= require 'log'
 --- Available devices.
 -- This is a table containing the name and associated object for all available devices
 -- in the system.
--- When toribio adds or removes a device, @{signals} are emitted. For easily 
+-- When toribio adds or removes a device, @{events} are emitted. For easily 
 -- accesing this table, use @{wait_for_device}
 -- @usage for name, _ in pairs(toribio.devices) do
 --  print(name)
@@ -46,17 +46,17 @@ end
 -- The emitter of these signals will be the task returned by @{task}
 -- @usage local sched = require 'sched'
 --sched.sigrun_task(
---    {emitter=toribio.task, signals={toribio.signals.new_device}}, 
+--    {emitter=toribio.task, events={toribio.events.new_device}}, 
 --    print
 --)
 -- @field new_device A new device is added. The first parameter is the device object.
 -- @field removed_device A device was removed. The first parameter is the device.
--- @table signals
-local signals = {
+-- @table events
+local events = {
 	new_device = {},
 	removed_device = {},
 }
-M.signals = signals
+M.events = events
 
 --- Return a device with a given name or matching a filter.
 -- If the parameter provided is a string, will look for a
@@ -101,7 +101,7 @@ M.wait_for_device = function(devdesc)
 		return in_devices
 	else
 		local tortask = catalog.waitfor('toribio')
-		local waitd = {emitter=tortask, events={M.signals.new_device}}
+		local waitd = {emitter=tortask, events={M.events.new_device}}
 		while true do
 			local _, _, device = sched.wait(waitd) 
 			if device_matches (device, devdesc) then
@@ -126,12 +126,12 @@ end
 M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
 	assert(device.task, "Device has no task associated")
-	assert(device.signals, "Device has no signals associated")
-	assert(device.signals[event], "Device has no such signal associated")
+	assert(device.events, "Device has no events associated")
+	assert(device.events[event], "Device has no such signal associated")
 
 	local waitd = {
 		emitter=device.task,
-		events={device.signals[event]},
+		events={device.events[event]},
 		timeout=timeout,
 	}
 	local mx = require 'mutex'()
@@ -213,7 +213,7 @@ M.start = function(section, taskname)
 end
 
 --- Toribio's task.
--- This is the task that emits toribios @{signals}
+-- This is the task that emits toribios @{events}
 -- @return toribio's task
 M.task = sched.run( function ()
 	catalog.register('toribio')
@@ -223,10 +223,10 @@ M.task = sched.run( function ()
 		local _, event, p = sched.wait(waitd_control)
 		if event==signal_new_device then
 			local device = p
-			sched.signal(signals.new_device, device )
+			sched.signal(events.new_device, device )
 		elseif event == signal_remove_device then 
 			local device = p
-			sched.signal(signals.removed_device, device )
+			sched.signal(events.removed_device, device )
 		end
 	end
 end)

@@ -41,24 +41,24 @@ M.init = function(conf)
 			local left = s1%2
 			if bl ~= left then 
 				bl=left
-				sched.signal(device.signals.leftbutton, left==1)
+				sched.signal(device.events.leftbutton, left==1)
 			end
 			local right = floor(s1/2)%2
 			if br ~= right then 
 				br=right
-				sched.signal(device.signals.rightbutton, right==1)
+				sched.signal(device.events.rightbutton, right==1)
 			end
 			local middle = floor(s1/4)%2
 			if bm ~= middle then 
 				bm=middle
-				sched.signal(device.signals.middlebutton, middle==1)
+				sched.signal(device.events.middlebutton, middle==1)
 			end
 			
 			--print('DATA!!!', s1, '', dx,dy, left, middle, right)
 			x, y = x+dx, y+dy
 			
 			if dx~=0 or dy~=0 then
-				sched.signal(device.signals.move, x, y, dx, dy)
+				sched.signal(device.events.move, x, y, dx, dy)
 			end
 		end 
 	end)
@@ -83,8 +83,8 @@ M.init = function(conf)
 	-- @field rightbutton Right button click.
 	-- @field middlebutton Middle button click.
 	-- @field move Mouse moved, first parameter x, second parameter y coordinates.
-	-- @table signals
-	device.signals={
+	-- @table events
+	device.events={
 		leftbutton={},
 		rightbutton={},
 		middlebutton={},
