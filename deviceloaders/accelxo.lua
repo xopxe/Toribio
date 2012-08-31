@@ -19,6 +19,9 @@ M.init = function(conf)
 		filename=sysfs,
 		
 		--- Read the acceleration.
+		-- The acceleration is measured in mg (1/1000th of earth gravity)
+		-- the axis are,when looking from the front: x (horizontal to the right),
+		-- y (horizontal to the front) and z (down)
 		-- @return The x, y and z magnitudes.
 		get_accel = function()
 			local f=io.open(sysfs_position, 'r')
@@ -43,7 +46,7 @@ M.init = function(conf)
 		end,
 		
 		--- Run the sensor internal self test.
-		-- @return _true_ on success or _false,v1,v2,v3_ on failure.
+		-- @return _true_ on success or _false,dx,dy,dz_ on failure.
 		check = function()
 			local f=io.open(sysfs_selftest, 'r')
 			if not f then return end
