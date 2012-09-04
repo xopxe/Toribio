@@ -34,7 +34,7 @@ M.init = function( conf )
 	end)
 	
 	local inotifier = require 'tasks/inotifier'
-	inotifier.start(masks_to_watch)
+	inotifier.init(masks_to_watch)
 end
 
 return M
