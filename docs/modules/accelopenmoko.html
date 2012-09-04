@@ -40,12 +40,12 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><a href="../modules/accelopenmoko.html">accelopenmoko</a></li>
+  <li><strong>accelopenmoko</strong></li>
   <li><a href="../modules/accelxo.html">accelxo</a></li>
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
-  <li><strong>mice</strong></li>
+  <li><a href="../modules/mice.html">mice</a></li>
   <li><a href="../modules/toribio.html">toribio</a></li>
 </ul>
 <h2>Scripts</h2>
@@ -66,52 +66,65 @@
 
 <div id="content">
 
-<h1>Module <code>mice</code></h1>
+<h1>Module <code>accelopenmoko</code></h1>
 
-<p>Library for accesing a mouse.</p>
-<p> This library allows to read data from a mouse,
- such as it's coordinates and button presses.
- The device will be named "mice", module "mice". </p>
+<p>Library for accesing the accelerometer of a OpenMoko.</p>
+<p> This module starts two devices, one for each one of the acceleration
+ sensors of a OpenMoko FreeRunner smartphone. Runs under SHR-testing OS.
+ The module of both devices is "accelopenmoko".
+ The acceleration is measured in mg (1/1000th of earth gravity).
+ The first Device is named "accelerometer.1" and the axes are, when 
+ looking from the front and the phone laying on a desk:
+ x (horizontal to the right and away), y (horizontal to the left and away) 
+ and z (down).
+ The second Device is named "accelerometer.2" and the axes are, when 
+ looking from the front and the phone laying on a desk:
+ x (horizontal to the right), y (horizontal and away) 
+ and z (down).</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local accel = toribio.wait_for_device('accelerometer.1')
+sched.sigrun(
+    {emitter=accel.task, events={accel.events.data}},
+    function(_,_,x,y,z) print (x,y,z) end
+)</pre>
+    </ul>
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#get_pos">get_pos&nbsp;()</a></td>
-	<td class="summary">Get mouse position.</td>
+	<td class="name" nowrap><a href="#set_rate">set_rate&nbsp;(hz)</a></td>
+	<td class="summary">Set the sample rate for sensor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#reset_pos">reset_pos&nbsp;(newx, newy)</a></td>
-	<td class="summary">Reset position.</td>
+	<td class="name" nowrap><a href="#set_threshold">set_threshold&nbsp;(threshold)</a></td>
+	<td class="summary">Set the threshold for sensor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_pause">set_pause&nbsp;(pause)</a></td>
-	<td class="summary">Pause the event generation.</td>
+	<td class="name" nowrap><a href="#run">run&nbsp;(enable, delay)</a></td>
+	<td class="summary">Enable sensing.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#events">events</a></td>
-	<td class="summary">Signals emitted by this device.</td>
+	<td class="summary">Sensor data events.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#name">name</a></td>
-	<td class="summary">Name of the device (in this case, 'mice').</td>
+	<td class="summary">Name of the device.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module name (in this case, 'mice').</td>
+	<td class="summary">Module name.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#task">task</a></td>
-	<td class="summary">Task that will emit signals associated to this device.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#filename">filename</a></td>
-	<td class="summary">Device file of the mouse.</td>
+	<td class="summary">Sensor task.</td>
 	</tr>
 </table>
 
@@ -123,36 +136,17 @@
     
     <dl class="function">
     <dt>
-    <a name = "get_pos"></a>
-    <strong>get_pos&nbsp;()</strong>
+    <a name = "set_rate"></a>
+    <strong>set_rate&nbsp;(hz)</strong>
     </dt>
     <dd>
-    Get mouse position. 
-
-
-
-    <h3>Returns:</h3>
-    <ol>
-        a pair of x, y coordinates.
-    </ol>
-
-
-</dd>
-    <dt>
-    <a name = "reset_pos"></a>
-    <strong>reset_pos&nbsp;(newx, newy)</strong>
-    </dt>
-    <dd>
-    Reset position. 
- Fixes the coordinates associated to the current
- position.
+    Set the sample rate for sensor. 
+ This is the intarnal sample rate, and the known supported values are
+ 100 and 400 Hz.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>newx</em></code>:  number to set as x coordinate of
- the cursos (defaults to 0)</li>
-       <li><code><em>newy</em></code>:  number to set as y coordinate of
- the cursos (defaults to 0)</li>
+       <li><code><em>hz</em></code>:  The rate in hz.</li>
     </ul>
 
 
@@ -160,16 +154,35 @@
 
 </dd>
     <dt>
-    <a name = "set_pause"></a>
-    <strong>set_pause&nbsp;(pause)</strong>
+    <a name = "set_threshold"></a>
+    <strong>set_threshold&nbsp;(threshold)</strong>
     </dt>
     <dd>
-    Pause the event generation. 
- While the device is paused, no events are generated, nor movements tracked.
+    Set the threshold for sensor. 
+ Values around 10 or 18 are usual.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>pause</em></code>:  mode, true to pause, false to unpause</li>
+       <li><code><em>threshold</em></code>:  The threshold value</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "run"></a>
+    <strong>run&nbsp;(enable, delay)</strong>
+    </dt>
+    <dd>
+    Enable sensing. 
+ This allows to enable and disable the sensing.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>enable</em></code>:  boolean indicating if the sensor data events must be generated.</li>
+       <li><code><em>delay</em></code>:  time delay between events. If omitted, a configuration value 
+ is used (field <em>deviceloaders.accelopenmoko.delay</em>), 1 otherwise.</li>
     </ul>
 
 
@@ -185,16 +198,12 @@
     <strong>events</strong>
     </dt>
     <dd>
-    Signals emitted by this device. 
- Button presses have single parameter: true on press,
- false on release.
+    Sensor data events. 
+ The events that the sensor can emit.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>leftbutton</em></code>:  Left button click.</li>
-       <li><code><em>rightbutton</em></code>:  Right button click.</li>
-       <li><code><em>middlebutton</em></code>:  Middle button click.</li>
-       <li><code><em>move</em></code>:  Mouse moved, first parameter x, second parameter y coordinates.</li>
+       <li><code><em>data</em></code>:  A data signal, with x,y,z acceleration values as parameters.</li>
     </ul>
 
 
@@ -210,7 +219,8 @@
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device (in this case, 'mice'). 
+    Name of the device. 
+ Either 'accelerometer.1' or 'accelerometer.2'
 
 
 
@@ -222,7 +232,8 @@
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'mice'). 
+    Module name. 
+ In this case, "accelopenmoko".
 
 
 
@@ -234,20 +245,8 @@
     <strong>task</strong>
     </dt>
     <dd>
-    Task that will emit signals associated to this device. 
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "filename"></a>
-    <strong>filename</strong>
-    </dt>
-    <dd>
-    Device file of the mouse. 
- For example, '/dev/input/mice'
+    Sensor task. 
+ This is the task that will emit data signals.
 
 
 
