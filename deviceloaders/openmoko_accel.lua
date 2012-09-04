@@ -1,7 +1,7 @@
 --- Library for accesing the accelerometer of a OpenMoko.
 -- This module starts two devices, one for each one of the acceleration
 -- sensors of a OpenMoko FreeRunner smartphone. Runs under SHR-testing OS.
--- The module of both devices is "accelopenmoko".
+-- The module of both devices is "openmoko\_accel".
 -- The acceleration is measured in mg (1/1000th of earth gravity).
 -- The first Device is named "accelerometer.1" and the axes are, when 
 -- looking from the front and the phone laying on a desk:
@@ -16,7 +16,7 @@
 --    {emitter=accel.task, events={accel.events.data}},
 --    function(_,_,x,y,z) print (x,y,z) end
 --)
--- @module accelopenmoko
+-- @module openmoko_accel
 -- @alias device
 
 local M = {}
@@ -99,8 +99,8 @@ M.init = function(conf)
 			name=name,
 			
 			--- Module name.
-			-- In this case, "accelopenmoko".
-			module="accelopenmoko",
+			-- In this case, "openmoko_accel".
+			module="openmoko_accel",
 			
 			--- Sensor data events.
 			-- The events that the sensor can emit.
@@ -138,7 +138,7 @@ M.init = function(conf)
 			-- This allows to enable and disable the sensing.
 			-- @param enable boolean indicating if the sensor data events must be generated.
 			-- @param delay time delay between events. If omitted, a configuration value 
-			-- is used (field _deviceloaders.accelopenmoko.delay_), 1 otherwise.
+			-- is used (field _deviceloaders.openmoko_accel.delay_), 1 otherwise.
 			run = function(enable, delay)
 				delay_read = delay or delay_read
 				task_read:set_pause(not enable)

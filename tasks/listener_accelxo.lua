@@ -6,9 +6,9 @@ M.init = function()
 	local sched = require 'sched'
 	
 	return sched.run(function(conf)
-		local accelxo = toribio.wait_for_device('accelxo')
+		local xo_accel = toribio.wait_for_device('xo_accel')
 		while true do
-			print (accelxo.get_accel())
+			print (xo_accel.get_accel())
 			sched.sleep(conf.interval or 0.5)
 		end
 	end)

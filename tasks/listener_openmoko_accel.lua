@@ -7,10 +7,10 @@ M.init = function(conf)
 	
 	--[[
 	return sched.run(function()
-		local accelopenmoko = toribio.wait_for_device('accelopenmoko')
-		print('listener started', accelopenmoko.name)
+		local accel = toribio.wait_for_device('openmoko_accel')
+		print('listener started', accel.name)
 		while true do
-			print ('ACC',accelopenmoko.get_accel2())
+			print ('ACC',accel.get_accel2())
 			sched.sleep(conf.interval or 1)
 		end
 	end)

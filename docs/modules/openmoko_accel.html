@@ -40,13 +40,13 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><strong>accelopenmoko</strong></li>
-  <li><a href="../modules/accelxo.html">accelxo</a></li>
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
+  <li><strong>openmoko_accel</strong></li>
   <li><a href="../modules/toribio.html">toribio</a></li>
+  <li><a href="../modules/xo_accel.html">xo_accel</a></li>
 </ul>
 <h2>Scripts</h2>
 <ul>
@@ -66,12 +66,12 @@
 
 <div id="content">
 
-<h1>Module <code>accelopenmoko</code></h1>
+<h1>Module <code>openmoko_accel</code></h1>
 
 <p>Library for accesing the accelerometer of a OpenMoko.</p>
 <p> This module starts two devices, one for each one of the acceleration
  sensors of a OpenMoko FreeRunner smartphone. Runs under SHR-testing OS.
- The module of both devices is "accelopenmoko".
+ The module of both devices is "openmoko_accel".
  The acceleration is measured in mg (1/1000th of earth gravity).
  The first Device is named "accelerometer.1" and the axes are, when 
  looking from the front and the phone laying on a desk:
@@ -182,7 +182,7 @@ sched.sigrun(
     <ul>
        <li><code><em>enable</em></code>:  boolean indicating if the sensor data events must be generated.</li>
        <li><code><em>delay</em></code>:  time delay between events. If omitted, a configuration value 
- is used (field <em>deviceloaders.accelopenmoko.delay</em>), 1 otherwise.</li>
+ is used (field <em>deviceloaders.openmoko</em>accel.delay_), 1 otherwise.</li>
     </ul>
 
 
@@ -233,7 +233,7 @@ sched.sigrun(
     </dt>
     <dd>
     Module name. 
- In this case, "accelopenmoko".
+ In this case, "openmoko_accel".
 
 
 

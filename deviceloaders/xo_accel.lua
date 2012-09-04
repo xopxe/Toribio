@@ -1,6 +1,6 @@
 --- Library for accesing the accelerometer of a XO 1.75.
--- The device will be named "accelxo", module "accelxo". 
--- @module accelxo
+-- The device will be named "xo\_accel", module "xo\_accel". 
+-- @module xo_accel
 -- @alias device
 
 local M = {}
@@ -14,8 +14,8 @@ M.init = function(conf)
 	local sysfs_rate = sysfs .. '/rate'
 		
 	local device={
-		name="accelxo",
-		module="accelxo",
+		name="xo_accel",
+		module="xo_accel",
 		filename=sysfs,
 		
 		--- Read the acceleration.
