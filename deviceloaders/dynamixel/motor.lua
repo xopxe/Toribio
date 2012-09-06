@@ -221,6 +221,14 @@ M.get_motor= function (busdevice, id)
 		local ret = busdevice[write_method](idb,0x19,parameter)
 		if ret then return ret:byte() end
 	end
+	--- Set the serial speed of the motor.
+	-- @param baud baud rate to set, in the 9600 to 1000000 range.
+	Motor.set_serial_speed = function(baud)
+		local n = math.floor(2000000/baud)-1
+		if n<1 or n>207 then error ("Attempt to set serial speed: "..n) end
+		local ret = busdevice[write_method](idb,0x04,n)
+		if ret then return ret:byte() end
+	end
 	--- Enables motor torque.
 	-- This activates the motor. 
 	-- @param value _true_ switches on, _false_ switches off.
