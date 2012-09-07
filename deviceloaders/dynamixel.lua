@@ -54,7 +54,7 @@ end
 M.init = function (conf)
 	local nixiorator = require 'tasks/nixiorator'
 	local nixio = nixiorator.nixio
-
+	
 	local filename = assert(conf.filename)
 	local fd, err = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
 	fd:sync() --flush()
@@ -170,7 +170,7 @@ M.init = function (conf)
 		return packet
 	end
 	
-	local waitd_protocol = {emitter=task_protocol, events='*', timeout = 0.01}
+	local waitd_protocol = {emitter=task_protocol, events='*', timeout = conf.serial_timeout or 0.1}
 	
 	local ping = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
