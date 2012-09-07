@@ -170,7 +170,7 @@ M.init = function (conf)
 		return packet
 	end
 	
-	local waitd_protocol = {emitter=task_protocol, events='*', timeout = conf.serial_timeout or 0.1}
+	local waitd_protocol = {emitter=task_protocol, events='*', timeout = conf.serialtimeout or 0.01}
 	
 	local ping = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
