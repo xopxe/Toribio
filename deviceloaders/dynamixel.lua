@@ -348,8 +348,8 @@ M.init = function (conf)
 		sched.signal('discoverystart')
 		for i = 0, 253 do
 			local motor = busdevice.get_motor(i)
+			--print('XXXXXXXX',i, (motor or {}).name) 
 			if motor then 
-				--print('XXXXXXXX',i) 
 				busdevice.events[i] = string.char(i)
 				toribio.add_device(motor)
 			end
