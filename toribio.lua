@@ -201,13 +201,10 @@ M.start = function(section, taskname)
 	_G.debugprint('module loaded:', taskmodule)
 	log('TORIBIO', 'INFO', 'module %s loaded', packagename)
 	if taskmodule and taskmodule.init then
-		local ok, err = pcall(taskmodule.init, conf)
-		if ok then 
-			log('TORIBIO', 'INFO', 'module %s initialized', packagename)
-		else
-			log('TORIBIO', 'WARNING', 'module %s initialization failed: %s', packagename,tostring(err))
-		end
-		_G.debugprint('module started:', ok)
+		sched.run(function()
+			taskmodule.init(conf)
+			_G.debugprint('module started:', taskmodule)
+		end)
 	end
 	return taskmodule 
 end
