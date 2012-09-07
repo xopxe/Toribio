@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Toribio</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/bobot.html">bobot</a></li>
+  <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
+  <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/mice.html">mice</a></li>
+  <li><strong>openmoko</strong></li>
+  <li><a href="../modules/openmoko_accel.html">openmoko_accel</a></li>
+  <li><a href="../modules/toribio.html">toribio</a></li>
+  <li><a href="../modules/xo_accel.html">xo_accel</a></li>
+</ul>
+<h2>Scripts</h2>
+<ul>
+  <li><a href="../scripts/toribio-go.html">toribio-go</a></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/0-Installation.md.html">0-Installation.md</a></li>
+  <li><a href="../topics/1-Tutorial.md.html">1-Tutorial.md</a></li>
+  <li><a href="../topics/2-Configuration.md.html">2-Configuration.md</a></li>
+  <li><a href="../topics/3-Tasks.md.html">3-Tasks.md</a></li>
+  <li><a href="../topics/4-Devices.md.html">4-Devices.md</a></li>
+  <li><a href="../topics/README.md.html">README.md</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>openmoko</code></h1>
+
+<p>Library for managing a OpenMoko smartphone.</p>
+<p> At the moment, supports FreeRunner under SHR-testing.</p>
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#usb_mode">usb_mode&nbsp;(mode)</a></td>
+	<td class="summary">Set USB mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usb_power_direction">usb_power_direction&nbsp;(direction)</a></td>
+	<td class="summary">Set USB power.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usb_currlim">usb_currlim&nbsp;(currlim)</a></td>
+	<td class="summary">Set the current limit on the USB port.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#battery_status">battery_status&nbsp;()</a></td>
+	<td class="summary">Get the battery satus.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#name">name</a></td>
+	<td class="summary">Name of the device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#module">module</a></td>
+	<td class="summary">Module name.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "usb_mode"></a>
+    <strong>usb_mode&nbsp;(mode)</strong>
+    </dt>
+    <dd>
+    Set USB mode. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>mode</em></code>:  Optional, either 'host' or 'device' changes the mode.</li>
+    </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The mode as set.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "usb_power_direction"></a>
+    <strong>usb_power_direction&nbsp;(direction)</strong>
+    </dt>
+    <dd>
+    Set USB power. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>direction</em></code>:  optional. If 'out', the phone is powering the connected devices. If 'in'
+ the phone charges from the port.</li>
+    </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The direction as set.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "usb_currlim"></a>
+    <strong>usb_currlim&nbsp;(currlim)</strong>
+    </dt>
+    <dd>
+    Set the current limit on the USB port. 
+ BWhen powered from an "dumb" device, the phone sets a 100mA limit by default.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>currlim</em></code>:  Optional the current limit in mA. Supported values are 0, 100, 500 and 1000.</li>
+    </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The current limit as set.
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "battery_status"></a>
+    <strong>battery_status&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the battery satus. 
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        The battery charging status, suhch as 'Charging' or 'Not charging'.
+    </ol>
+
+
+</dd>
+</dl>
+    <h2><a name="Fields"></a>Fields</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "name"></a>
+    <strong>name</strong>
+    </dt>
+    <dd>
+    Name of the device. 
+ In this case, "openmoko".
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "module"></a>
+    <strong>module</strong>
+    </dt>
+    <dd>
+    Module name. 
+ In this case, "openmoko".
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
