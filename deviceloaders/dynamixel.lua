@@ -85,8 +85,7 @@ M.init = function (conf)
 	--local message_pipe=sched.pipes.new({}, 10)
 	
 	local taskf_protocol = function() 
-		local nxtask = catalog.waitfor('nixiorator')
-		catalog.register('dynamixel:'..filename)
+		local nxtask = require 'catalog'.get_catalog('tasks'):waitfor('nixiorator')
 		local waitd_traffic = {emitter=nxtask,events={fd}, buff_len=-1}
 		local packet=''
 		local insync=false

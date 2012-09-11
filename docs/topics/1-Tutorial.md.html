@@ -217,7 +217,9 @@
  deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
  tasks.rc_bot.<span class="global">load</span> = <span class="keyword">true</span>
  tasks.rc_bot.ip = <span class="string">'127.0.0.1'</span> <span class="comment">--change with the ip adress of the robot
-</span> tasks.rc_bot.port = <span class="number">9999</span>
+</span> tasks.rc_bot.motor_left=<span class="string">'ax12:3'</span>
+ tasks.rc_bot.motor_right=<span class="string">'ax12:12'</span>
+ tasks.rc_bot.port = <span class="number">9999</span>
 </pre>
 
 <p>And the tasks/rc_bot.lua skeleton:</p>
@@ -232,8 +234,8 @@
 
      sched.run(<span class="keyword">function</span>()
          <span class="comment">--initialize motors
-</span>         <span class="keyword">local</span> motor_left = toribio.wait_for_device({<span class="global">module</span>=<span class="string">'ax'</span>})
-         <span class="keyword">local</span> motor_right = toribio.wait_for_device({<span class="global">module</span>=<span class="string">'ax'</span>})
+</span>         <span class="keyword">local</span> motor_left = toribio.wait_for_device(conf.motor_left)
+         <span class="keyword">local</span> motor_right = toribio.wait_for_device(conf.motor_right)
          motor_left.init_mode_wheel()
          motor_right.init_mode_wheel()
 
@@ -260,8 +262,7 @@
  <span class="keyword">return</span> M
 </pre>
 
-<p>Unlike the first program, we do not configure a device name for the motors: we request them using a table filter. The left motor will be the first device that matches "module='ax'", and the next one will be our right motor.
-Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
+<p>Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
 
 <p>Now we run toribio with rc_control task enabled on one machine, connected to a second machine with rc_bot enabled.</p>
 

@@ -10,7 +10,7 @@
 local M ={}
 
 local sched = require 'sched'
-local catalog = require 'catalog'
+local catalog_tasks = require 'catalog'.get_catalog('tasks')
 local log= require 'log'
 --require "log".setlevel('ALL')
 
@@ -100,7 +100,7 @@ M.wait_for_device = function(devdesc)
 	if in_devices then 
 		return in_devices
 	else
-		local tortask = catalog.waitfor('toribio')
+		local tortask = catalog_tasks:waitfor('toribio')
 		local waitd = {emitter=tortask, events={M.events.new_device}}
 		while true do
 			local _, _, device = sched.wait(waitd) 
@@ -213,7 +213,7 @@ end
 -- This is the task that emits toribios @{events}
 -- @return toribio's task
 M.task = sched.run( function ()
-	catalog.register('toribio')
+	catalog_tasks:register('toribio', sched.running_task)
 	local waitd_control={emitter='*', buff_size=10, 
 		events={signal_new_device, signal_remove_device}}
 	while true do

@@ -120,6 +120,8 @@ The bot listens for UDP packets, parses them and set motor velocities. As allway
     deviceloaders.dynamixel.filename = '/dev/ttyUSB0'
     tasks.rc_bot.load = true
     tasks.rc_bot.ip = '127.0.0.1' --change with the ip adress of the robot
+    tasks.rc_bot.motor_left='ax12:3'
+    tasks.rc_bot.motor_right='ax12:12'
     tasks.rc_bot.port = 9999
 
 And the tasks/rc\_bot.lua skeleton:
@@ -132,8 +134,8 @@ And the tasks/rc\_bot.lua skeleton:
     
     	sched.run(function()
     		--initialize motors
-    		local motor_left = toribio.wait_for_device({module='ax'})
-    		local motor_right = toribio.wait_for_device({module='ax'})
+    		local motor_left = toribio.wait_for_device(conf.motor_left)
+    		local motor_right = toribio.wait_for_device(conf.motor_right)
     		motor_left.init_mode_wheel()
     		motor_right.init_mode_wheel()
 
@@ -159,7 +161,6 @@ And the tasks/rc\_bot.lua skeleton:
     
     return M
 
-Unlike the first program, we do not configure a device name for the motors: we request them using a table filter. The left motor will be the first device that matches "module='ax'", and the next one will be our right motor.
 Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.
 
 Now we run toribio with rc\_control task enabled on one machine, connected to a second machine with rc\_bot enabled.

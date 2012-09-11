@@ -1,7 +1,6 @@
 local M = {}
 
 local sched=require 'sched'
-local catalog = require 'catalog'
 local toribio = require 'toribio'
 local log = require 'log'
 
@@ -16,7 +15,7 @@ M.init = function( conf )
 	end
 
 	sched.run(function()
-		local inotifier_task = catalog.waitfor(masks_to_watch)
+		local inotifier_task = require 'catalog'.get_catalog('tasks'):waitfor(masks_to_watch)
 		local waitd_fileevent = {emitter=inotifier_task, events={'FILE+', 'FILE-'}, buff_len=100}
 		while true do
 			local _, action, devfile, onmask = sched.wait(waitd_fileevent)

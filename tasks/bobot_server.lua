@@ -4,7 +4,6 @@ local debugprint = _G.debugprint
 local toribio = require 'toribio'
 local devices = toribio.devices
 local sched = require "sched"
-local catalog = require 'catalog'
 local bobot = nil --require('comms/bobot').bobot
 
 table.pack=table.pack or function (...)
@@ -217,7 +216,7 @@ M.init = function(conf)
 	--accept connections
 	return sched.sigrun( {emitter=nixiorator.task, events={tcprecv}},
 		function(_, _, msg, inskt)
-			catalog.register("bobot-server-accepter")
+			require 'catalog'.get_catalog('tasks'):register("bobot-server-accepter", sched.runing_task)
 
 			print ("new bobot server client", tcprecv, msg, inskt )
 			if msg=='accepted' then

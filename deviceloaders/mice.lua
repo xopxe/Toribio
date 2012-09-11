@@ -12,7 +12,6 @@ M.init = function(conf)
 	local nixiorator = require 'tasks/nixiorator'
 	local nixio = nixiorator.nixio
 	local sched = require 'sched'
-	local catalog = require 'catalog'
 	local floor = math.floor
 
 	local filename = conf.filename or '/dev/input/mice'
@@ -25,8 +24,7 @@ M.init = function(conf)
 	local device={}
 	
 	local devtask = sched.run(function() 
-		local nxtask = catalog.waitfor('nixiorator')
-		catalog.register(devicename)
+		local nxtask = require 'catalog'.get_catalog('tasks'):waitfor('nixiorator')
 		local waitd ={emitter=nxtask,events={fd}, buff_len=0}
 		while true do
 			local _, _, data = sched.wait(waitd)

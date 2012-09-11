@@ -29,8 +29,7 @@ end
 
 M.init = function(masks_to_watch)
 	sched.run(function()
-		local catalog = require 'catalog'
-		catalog.register(masks_to_watch)
+		require 'catalog'.get_catalog('tasks'):register(masks_to_watch, sched.running_task)
 
 		if #run_shell('which inotifywait')==0 then
 			error('inotifywait not available')
