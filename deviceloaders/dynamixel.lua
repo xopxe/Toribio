@@ -56,18 +56,18 @@ M.init = function (conf)
 	local nixio = nixiorator.nixio
 	
 	local filename = assert(conf.filename)
-	local fd, err = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
+	local fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
 	fd:sync() --flush()
 	
 	local opencount=5
 	while not fd and opencount>0 do
 		print('retrying open...', opencount)
 		sched.sleep(0.5)
-		fd, err = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
+		fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
 		opencount=opencount-1
 	end
 	if not fd then 
-		debugprint('usb failed to open',filename, err)
+		debugprint('usb failed to open',filename, erropen)
 		return 
 	end
 	debugprint(filename,'opened as', fd)
@@ -97,13 +97,13 @@ M.init = function (conf)
 			--local data_length = s:byte(4)
 			local data = s:sub(5, -1)
 			if generate_checksum(s:sub(3,-1))~=0 then return nil,'checksum error' end
-			local err = data:sub(1,1)
-			if err ~= NULL_CHAR then
-				sched.signal(signal_ax_error, id, ax_errors[err:byte()])
+			local errinpacket = data:sub(1,1)
+			if errinpacket ~= NULL_CHAR then
+				sched.signal(signal_ax_error, id, ax_errors[errinpacket:byte()])
 			end
 			local payload = data:sub(2,-2)
 			--print('parsed', id:byte(1, #id),'$', err:byte(1, #err),':', payload:byte(1, #payload))
-			return id, err, payload
+			return id, errinpacket, payload
 		end
 
 		while true do
@@ -191,7 +191,9 @@ M.init = function (conf)
 		fd:writeall(packet_write)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
-			return err
+			if type (err)=='string' and #err==1 then
+				return err
+			end
 		end
 	end)
 	local read_data = mutex.synchronize(function(id,startAddress,length)
@@ -209,7 +211,9 @@ M.init = function (conf)
 		fd:writeall(packet_reg_write)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
-			return err
+			if type (err)=='string' and #err==1 then
+				return err
+			end
 		end
 	end)
 	local action = mutex.synchronize(function(id)
@@ -218,7 +222,9 @@ M.init = function (conf)
 		fd:writeall(packet_action)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
-			return err
+			if type (err)=='string' and #err==1 then
+				return err
+			end
 		end
 	end)
 	local reset = mutex.synchronize(function(id)
@@ -227,7 +233,9 @@ M.init = function (conf)
 		fd:writeall(packet_action)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
-			return err
+			if type (err)=='string' and #err==1 then
+				return err
+			end
 		end
 	end)
 	local sync_write = mutex.synchronize(function(ids, address,data) 
@@ -320,7 +328,7 @@ M.init = function (conf)
 	
 	--- Get a Sync-motor object.
 	-- A sync-motor allows to control several actuators with a single command.
-	-- The commands will applied to all actuators it represents. 
+	-- The commands will be applied to all actuators it represents. 
 	-- The "get" methods are not available. 
 	-- @param ... A set of motor Device objects or numeric IDs
 	-- @return a sync_motor object

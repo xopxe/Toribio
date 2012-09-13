@@ -245,7 +245,7 @@ M.get_motor= function (busdevice, id)
 	end
 	--- Set motor speed.
 	-- @param value If motor in joint mode, speed in deg/sec in the 1 .. 684 range 
-	-- (0 means max available speed). 
+	-- (0 means max unregulated speed). 
 	-- If in wheel mode, as a % of max torque (in the -100% .. 100% range).
 	Motor.set_speed = function(value)
 		if Motor.mode=='joint' then
