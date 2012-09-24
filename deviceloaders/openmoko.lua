@@ -28,7 +28,7 @@ end
 
 
 
-M.init = function()
+M.init = function(conf)
 	local toribio = require 'toribio'
 
 	local device={
@@ -46,8 +46,14 @@ M.init = function()
 		usb_mode = function(mode)
 			if mode then
 				assert(mode=='host' or mode=='device', "Supported host mode are 'host' and 'device'")
+				if mode=='host' then
+					os.execute('ifconfig usb0 down')
+				end
 				write_file(usb_mode_file, mode)
 				os.execute('lsusb') --https://docs.openmoko.org/trac/ticket/2166
+				if mode=='device' then
+					os.execute('ifconfig usb0 up')
+				end
 			end
 			return read_file(usb_mode_file)
 		end,
@@ -89,6 +95,12 @@ M.init = function()
 			return read_file(battery_status_file)
 		end
 	}
+
+	for _, param in ipairs({'usb_mode', 'usb_power_direction', 'usb_currlim'}) do
+		if conf[param] and device[param] then
+			device[param](conf[param])
+		end
+	end
 	
 	_G.debugprint('device object created', device.name)
 	toribio.add_device(device)
@@ -96,3 +108,4 @@ M.init = function()
 end
 
 return M
+
