@@ -12,14 +12,62 @@ local sched = require 'sched'
 --require "log".setlevel('ALL')
 local toribio = require 'toribio'
 
-local arg = _G.arg or {}
-for i, v in ipairs(arg) do
-	if v=="DEBUG" then
-		debugprint=print --bugprint or print
-		debugprint('Debug print enabled')
-		table.remove(arg, i)
-		break
-	end
+-- From http://lua-users.org/wiki/AlternativeGetOpt
+-- getopt_alt.lua
+-- getopt, POSIX style command line argument parser
+-- param arg contains the command line arguments in a standard table.
+-- param options is a string with the letters that expect string values.
+-- returns a table where associated keys are true, nil, or a string value.
+-- The following example styles are supported
+--   -a one  ==> opts["a"]=="one"
+--   -bone   ==> opts["b"]=="one"
+--   -c      ==> opts["c"]==true
+--   --c=one ==> opts["c"]=="one"
+--   -cdaone ==> opts["c"]==true opts["d"]==true opts["a"]=="one"
+-- note POSIX demands the parser ends at the first non option
+--      this behavior isn't implemented.
+local function getopt( arg, options )
+  local tab = {}
+  for k, v in ipairs(arg) do
+    if string.sub( v, 1, 2) == "--" then
+      local x = string.find( v, "=", 1, true )
+      if x then tab[ string.sub( v, 3, x-1 ) ] = string.sub( v, x+1 )
+      else      tab[ string.sub( v, 3 ) ] = true
+      end
+    elseif string.sub( v, 1, 1 ) == "-" then
+      local y = 2
+      local l = string.len(v)
+      local jopt
+      while ( y <= l ) do
+        jopt = string.sub( v, y, y )
+        if string.find( options, jopt, 1, true ) then
+          if y < l then
+            tab[ jopt ] = string.sub( v, y+1 )
+            y = l
+          else
+            tab[ jopt ] = arg[ k + 1 ]
+          end
+        else
+          tab[ jopt ] = true
+        end
+        y = y + 1
+      end
+    end
+  end
+  return tab
+end
+-- Test code
+--opts = getopt( arg, "ab" )
+--for k, v in pairs(opts) do
+--  print( k, v )
+--end
+-- End of: From http://lua-users.org/wiki/AlternativeGetOpt
+
+local opts = getopt( _G.arg, "cd" )
+
+if opts["d"] then
+	debugprint=print --bugprint or print
+	debugprint('Debug print enabled')
 end
 
 --watches for task die events and prints out
@@ -43,11 +91,15 @@ local function load_configuration(file)
 	meta_create_on_query['__index']=nil
 end
 
-load_configuration('toribio-go.conf')
+if not opts["c"] then
+	load_configuration('toribio-go.conf')
+elseif opts["c"] ~= "none" then
+	load_configuration(opts["c"])
+end
 
 sched.run(function()
 	for _, section in ipairs({'deviceloaders', 'tasks'}) do
-		for task, conf in pairs(toribio.configuration[section]) do
+		for task, conf in pairs(toribio.configuration[section] or {}) do
 			print ('processing conf', section, task, (conf and conf.load) or false)
 
 			if conf and conf.load==true then
