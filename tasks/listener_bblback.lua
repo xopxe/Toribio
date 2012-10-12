@@ -5,7 +5,7 @@ M.init = function()
 	
 	return sched.run(function()
 		local toribio = require 'toribio'
-		local lback = toribio.wait_for_device('bb-lback')
+		local lback = assert(toribio.wait_for_device('bb-lback', 5))
 		
 		while true do
 			lback.send(sched.get_time())

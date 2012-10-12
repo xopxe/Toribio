@@ -49,7 +49,7 @@ end
 --    {emitter=toribio.task, events={toribio.events.new_device}}, 
 --    print
 --)
--- @field new_device A new device is added. The first parameter is the device object.
+-- @field new_device A new device was added. The first parameter is the device object.
 -- @field removed_device A device was removed. The first parameter is the device.
 -- @table events
 local events = {
@@ -64,11 +64,16 @@ M.events = events
 -- specifying a criterion a device must match.
 -- If no such device exists, will block until it appears.
 -- @param devdesc The name of the device or a filter.
--- @return device the device with the given name.
+-- @param timeout How much time wait for the device.
+-- @return The requested device. On timeout, returns _nil,'timeout'_.
 -- @usage local mice = toribio.wait_for_device('mice')
 --local some_button = toribio.wait_for_device({module='bb-button'})
-M.wait_for_device = function(devdesc)
+M.wait_for_device = function(devdesc, timeout)
 	assert(sched.running_task, 'Must run in a task')
+	
+	local wait_until
+	if timeout then wait_until=sched.get_time() + timeout end
+	
 	local device_in_devices, device_matches --matching function
 	
 	if type (devdesc) == 'string' then 
@@ -102,11 +107,16 @@ M.wait_for_device = function(devdesc)
 	else
 		local tortask = catalog_tasks:waitfor('toribio')
 		local waitd = {emitter=tortask, events={M.events.new_device}}
+		if wait_until then waitd.timeout=wait_until-sched.get_time() end
 		while true do
 			local _, _, device = sched.wait(waitd) 
+			if not device then --timeout
+				return nil, 'timeout'
+			end
 			if device_matches (device, devdesc) then
 				return device 
 			end
+			if wait_until then waitd.timeout=wait_until-sched.get_time() end
 		end
 	end
 	

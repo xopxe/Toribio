@@ -82,7 +82,7 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#wait_for_device">wait_for_device&nbsp;(devdesc)</a></td>
+	<td class="name" nowrap><a href="#wait_for_device">wait_for_device&nbsp;(devdesc, timeout)</a></td>
 	<td class="summary">Return a device with a given name or matching a filter.</td>
 	</tr>
 	<tr>
@@ -130,7 +130,7 @@
     <dl class="function">
     <dt>
     <a name = "wait_for_device"></a>
-    <strong>wait_for_device&nbsp;(devdesc)</strong>
+    <strong>wait_for_device&nbsp;(devdesc, timeout)</strong>
     </dt>
     <dd>
     Return a device with a given name or matching a filter. 
@@ -142,6 +142,7 @@
     <h3>Parameters:</h3>
     <ul>
        <li><code><em>devdesc</em></code>:  The name of the device or a filter.</li>
+       <li><code><em>timeout</em></code>:  How much time wait for the device.</li>
     </ul>
 
     <h3>Usage:</h3>
@@ -152,7 +153,7 @@ local some_button = toribio.wait_for_device({module='bb-button'})</pre>
 
     <h3>Returns:</h3>
     <ol>
-        device the device with the given name.
+        The requested device. On timeout, returns <em>nil,'timeout'</em>.
     </ol>
 
 
@@ -261,7 +262,7 @@ end</pre>
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>new_device</em></code>:  A new device is added. The first parameter is the device object.</li>
+       <li><code><em>new_device</em></code>:  A new device was added. The first parameter is the device object.</li>
        <li><code><em>removed_device</em></code>:  A device was removed. The first parameter is the device.</li>
     </ul>
 
