@@ -77,7 +77,7 @@ M.init = function(conf)
 		end,
 		
 		--- Set the current limit on the USB port.
-		-- BWhen powered from an "dumb" device, the phone sets a 100mA limit by default.
+		-- When powered from an "dumb" device, the phone sets a 100mA limit by default.
 		-- @param currlim Optional the current limit in mA. Supported values are 0, 100, 500 and 1000.
 		-- @return The current limit as set.
 		usb_currlim = function(currlim)

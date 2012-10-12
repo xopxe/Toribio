@@ -57,12 +57,11 @@ M.init = function (conf)
 	
 	local filename = assert(conf.filename)
 	local fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
-	fd:sync() --flush()
 	
-	local opencount=5
+	local opencount=60
 	while not fd and opencount>0 do
 		print('retrying open...', opencount)
-		sched.sleep(0.5)
+		sched.sleep(1)
 		fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
 		opencount=opencount-1
 	end
@@ -70,6 +69,7 @@ M.init = function (conf)
 		debugprint('usb failed to open',filename, erropen)
 		return 
 	end
+	fd:sync() --flush()
 	debugprint(filename,'opened as', fd)
 	nixiorator.register_client(fd, 65000) --TODO message usual size?
 

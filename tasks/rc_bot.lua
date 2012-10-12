@@ -28,7 +28,7 @@ M.init = function(conf)
 			end
 			motor_left.set_speed(left)
 			motor_right.set_speed(right)
-		end, 1)
+		end)
 	end)
 end
 
