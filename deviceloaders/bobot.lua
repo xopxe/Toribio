@@ -93,6 +93,7 @@ local function read_devices_list()
 end
 
 local function server_refresh ()
+	print ('bobot refreshing!')
 	for i, bb in ipairs(bobot.baseboards) do
 		if not bb:refresh() then
 			bobot.baseboards[i]=nil
@@ -122,6 +123,13 @@ M.init = function (conf)
 	debugprint=debugprint or function() end
 	
 	bobot.init(conf.comms)
+	local count = 60
+	while #bobot.baseboards == 0 and count > 0 do
+		debugprint('bobot retrying connect', count)
+		sched.sleep(1)
+		bobot.init(conf.comms)
+		count = count-1
+	end
 	read_devices_list()
 	sched.sigrun({
 		emitter='*', 
