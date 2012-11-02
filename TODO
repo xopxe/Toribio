@@ -1,0 +1,16 @@
+* Implement some sort of high level pattern for behavior 
+  programming (subsumption?). Must support asynchronism.
+
+* Keep annoying usb4butia people to migrate to a serial/async
+  protocol.
+
+* Integrate new Lumen "selector" machinery.
+
+* Create a task that will support http querying (find a 
+  http parsing library).
+
+* Test on a beagleboard and RPi.
+
+* Write a external opencv tool that pushes events to toribio
+  throug a socket.
+
