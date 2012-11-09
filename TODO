@@ -4,8 +4,6 @@
 * Keep annoying usb4butia people to migrate to a serial/async
   protocol.
 
-* Integrate new Lumen "selector" machinery.
-
 * Create a task that will support http querying (find a 
   http parsing library).
 
