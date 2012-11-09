@@ -11,7 +11,6 @@ local M = {}
 
 local toribio = require 'toribio'
 local sched = require 'sched'
-local catalog = require 'catalog'
 local mutex = require 'mutex'()
 local ax = require 'deviceloaders/dynamixel/motor'
 
@@ -52,26 +51,23 @@ local function generate_checksum(data)
 end
 
 M.init = function (conf)
-	local nixiorator = require 'tasks/nixiorator'
-	local nixio = nixiorator.nixio
+	local selector = require 'tasks/selector'
 	
 	local filename = assert(conf.filename)
-	local fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
+	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, 65000)--TODO message usual size?
 	
 	local opencount=60
-	while not fd and opencount>0 do
+	while not filehandler and opencount>0 do
 		print('retrying open...', opencount)
 		sched.sleep(1)
-		fd, erropen = nixio.open(filename, nixio.open_flags('rdwr', 'nonblock'))
+		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, 65000)--TODO message usual size?
 		opencount=opencount-1
 	end
-	if not fd then 
+	if not filehandler then 
 		debugprint('usb failed to open',filename, erropen)
 		return 
 	end
-	fd:sync() --flush()
-	debugprint(filename,'opened as', fd)
-	nixiorator.register_client(fd, 65000) --TODO message usual size?
+	debugprint(filename,'opened as', filehandler)
 
 	local tty_params = '-parenb -parodd cs8 hupcl -cstopb cread -clocal -crtscts -ignbrk -brkint '
 	..'-ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -iuclc -ixany -imaxbel '
@@ -81,12 +77,12 @@ M.init = function (conf)
 	local init_tty_string ='stty -F ' .. filename .. ' ' .. speed .. ' ' .. tty_params
 
 	os.execute(init_tty_string)
+	filehandler.fd:sync() --flush()
 	
 	--local message_pipe=sched.pipes.new({}, 10)
 	
 	local taskf_protocol = function() 
-		local nxtask = require 'catalog'.get_catalog('tasks'):waitfor('nixiorator')
-		local waitd_traffic = {emitter=nxtask,events={fd}, buff_len=-1}
+		local waitd_traffic = {emitter=selector.task,events={filehandler.events.data}, buff_len=-1}
 		local packet=''
 		local insync=false
 		local packlen=nil -- -1
@@ -174,7 +170,7 @@ M.init = function (conf)
 	local ping = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_ping = buildAX12packet(id, INSTRUCTION_PING)
-		fd:writeall(packet_ping)
+		filehandler:send_sync(packet_ping)
 		if id ~= BROADCAST_ID then
 			local emitter, _, err = sched.wait(waitd_protocol)
 			if emitter then 
@@ -188,7 +184,7 @@ M.init = function (conf)
 		id = id or BROADCAST_ID
 		local packet_write = buildAX12packet(id, 
 			INSTRUCTION_WRITE_DATA..string.char(address)..data)
-		fd:writeall(packet_write)
+		filehandler:send_sync(packet_write)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
 			if type (err)=='string' and #err==1 then
@@ -199,7 +195,7 @@ M.init = function (conf)
 	local read_data = mutex.synchronize(function(id,startAddress,length)
 		local packet_read = buildAX12packet(id, 
 			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
-		fd:writeall(packet_read)
+		filehandler:send_sync(packet_read)
 		local _, _, err, data = sched.wait(waitd_protocol)
 		--if #data ~= length then return nil, 'read error' end
 		return data, err
@@ -208,7 +204,7 @@ M.init = function (conf)
 		id = id or BROADCAST_ID
 		local packet_reg_write = buildAX12packet(id, 
 			INSTRUCTION_REG_WRITE..string.char(address)..data)
-		fd:writeall(packet_reg_write)
+		filehandler:send_sync(packet_reg_write)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
 			if type (err)=='string' and #err==1 then
@@ -219,7 +215,7 @@ M.init = function (conf)
 	local action = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_ACTION)
-		fd:writeall(packet_action)
+		filehandler:writeall(packet_action)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
 			if type (err)=='string' and #err==1 then
@@ -230,7 +226,7 @@ M.init = function (conf)
 	local reset = mutex.synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
-		fd:writeall(packet_action)
+		filehandler:send_sync(packet_action)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
 			if type (err)=='string' and #err==1 then
@@ -246,7 +242,7 @@ M.init = function (conf)
 		end
 		local sync_packet = buildAX12packet(BROADCAST_ID, 
 			INSTRUCTION_SYNC_WRITE..dataout)
-		fd:writeall(sync_packet)
+		filehandler:send_sync(sync_packet)
 	end)
 	-- -----------------------------------------
 	

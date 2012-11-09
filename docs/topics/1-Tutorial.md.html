@@ -242,11 +242,11 @@
          <span class="comment">--initialize socket
 </span>         <span class="keyword">local</span> nixio = <span class="global">require</span> <span class="string">'nixio'</span>
          <span class="keyword">local</span> udp = <span class="global">assert</span>(nixio.bind(conf.ip, conf.port, <span class="string">'inet'</span>, <span class="string">'dgram'</span>))
-         <span class="keyword">local</span> nixiorator = <span class="global">require</span> <span class="string">'tasks/nixiorator'</span>
-         nixiorator.register_client(udp, <span class="number">1500</span>)
+         <span class="keyword">local</span> selector = <span class="global">require</span> <span class="string">'tasks/selector'</span>
+         <span class="keyword">local</span> udp = selector.new_udp(conf.ip, conf.port, <span class="number">1480</span>)
 
          <span class="comment">--listen for messages
-</span>         sched.sigrun({emitter=nixiorator.task, events={udp}, timeout=<span class="number">1</span>}, 
+</span>         sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=<span class="number">1</span>}, 
              <span class="keyword">function</span>(_, _, msg) 
                  <span class="keyword">local</span> left, right = <span class="number">0</span>, <span class="number">0</span>
                  <span class="keyword">if</span> msg <span class="keyword">then</span>
@@ -262,7 +262,7 @@
  <span class="keyword">return</span> M
 </pre>
 
-<p>Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
+<p>Notice how we use the selector service to create a udp socket object, that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.</p>
 
 <p>Now we run toribio with rc_control task enabled on one machine, connected to a second machine with rc_bot enabled.</p>
 

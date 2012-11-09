@@ -1,6 +1,11 @@
 --- Toribio application.
 -- This application starts the different tasks and device loaders.
--- It is controlled trough a configuration file.
+-- It is controlled trough a configuration file (default toribio-go.conf).
+-- @usage	lua toribio-go.lua [-h] [-d] [-c conffile|'none'] 
+--		-d Debug mode
+--		-h Print help
+--		-c Use given configuration file (or none). 
+--		   Defaults to 'toribio-go.conf'
 -- @script toribio-go
 
 package.path = package.path .. ";;;Lumen/?.lua"
@@ -9,6 +14,8 @@ require 'strict'
 _G.debugprint=function() end
 
 local sched = require 'sched'
+local selector = require "tasks/selector".init({service='nixio'})
+
 --require "log".setlevel('ALL')
 local toribio = require 'toribio'
 
@@ -91,6 +98,16 @@ local function load_configuration(file)
 	meta_create_on_query['__index']=nil
 end
 
+if opts["h"] then
+	print [[Usage:
+	lua toribio-go.lua [-h] [-d] [-c conffile|'none'] 
+		-d Debug mode
+		-h This help
+		-c Use given configuration file (or none). 
+		   Defaults to 'toribio-go.conf'
+	]]
+	os.exit()
+end
 if not opts["c"] then
 	load_configuration('toribio-go.conf')
 elseif opts["c"] ~= "none" then

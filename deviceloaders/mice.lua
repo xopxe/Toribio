@@ -9,57 +9,51 @@ local M = {}
 
 M.init = function(conf)
 	local toribio = require 'toribio'
-	local nixiorator = require 'tasks/nixiorator'
-	local nixio = nixiorator.nixio
+	local selector = require 'tasks/selector'
 	local sched = require 'sched'
 	local floor = math.floor
 
 	local filename = conf.filename or '/dev/input/mice'
 	local devicename='mice:'..filename
-	local fd = assert(nixio.open(filename, nixio.open_flags('rdonly', 'sync')))
-	nixiorator.register_client(fd, 3)
+
 	local x, y = 0, 0
 	local bl, bm, br = 0, 0, 0
 
+	local leftbutton, rightbutton, middlebutton, move={}, {}, {}, {} --events
+	
 	local device={}
 	
-	local devtask = sched.run(function() 
-		local nxtask = require 'catalog'.get_catalog('tasks'):waitfor('nixiorator')
-		local waitd ={emitter=nxtask,events={fd}, buff_len=0}
-		while true do
-			local _, _, data = sched.wait(waitd)
-			
-			local s1,dx,dy = string.byte(data,1,3)
-			if floor(s1/16)%2 == 1 then 
-				dx = dx - 0x100
-			end
-			if floor(s1/32)%2==1 then 
-				dy = dy - 0x100
-			end
-			local left = s1%2
-			if bl ~= left then 
-				bl=left
-				sched.signal(device.events.leftbutton, left==1)
-			end
-			local right = floor(s1/2)%2
-			if br ~= right then 
-				br=right
-				sched.signal(device.events.rightbutton, right==1)
-			end
-			local middle = floor(s1/4)%2
-			if bm ~= middle then 
-				bm=middle
-				sched.signal(device.events.middlebutton, middle==1)
-			end
-			
-			--print('DATA!!!', s1, '', dx,dy, left, middle, right)
-			x, y = x+dx, y+dy
-			
-			if dx~=0 or dy~=0 then
-				sched.signal(device.events.move, x, y, dx, dy)
-			end
-		end 
-	end)
+	local filehandler = assert(selector.new_fd(filename, {'rdonly', 'sync'}, 3, function(_, data)
+		local s1,dx,dy = string.byte(data,1,3)
+		if floor(s1/16)%2 == 1 then 
+			dx = dx - 0x100
+		end
+		if floor(s1/32)%2==1 then 
+			dy = dy - 0x100
+		end
+		local left = s1%2
+		if bl ~= left then 
+			bl=left
+			sched.signal(leftbutton, left==1)
+		end
+		local right = floor(s1/2)%2
+		if br ~= right then 
+			br=right
+			sched.signal(rightbutton, right==1)
+		end
+		local middle = floor(s1/4)%2
+		if bm ~= middle then 
+			bm=middle
+			sched.signal(middlebutton, middle==1)
+		end
+		
+		--print('DATA!!!', s1, '', dx,dy, left, middle, right)
+		x, y = x+dx, y+dy
+		
+		if dx~=0 or dy~=0 then
+			sched.signal(move, x, y, dx, dy)
+		end
+	end))
 	
 	--- Name of the device (in this case, 'mice').
 	device.name=devicename
@@ -68,7 +62,7 @@ M.init = function(conf)
 	device.module='mice'
 
 	--- Task that will emit signals associated to this device.
-	device.task=devtask
+	device.task=selector.task
 
 	--- Device file of the mouse.
 	-- For example, '/dev/input/mice'
@@ -83,10 +77,10 @@ M.init = function(conf)
 	-- @field move Mouse moved, first parameter x, second parameter y coordinates.
 	-- @table events
 	device.events={
-		leftbutton={},
-		rightbutton={},
-		middlebutton={},
-		move={},
+		leftbutton=leftbutton,
+		rightbutton=rightbutton,
+		middlebutton=middlebutton,
+		move=move,
 	}
 
 	--- Get mouse position.

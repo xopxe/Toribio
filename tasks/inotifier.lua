@@ -1,8 +1,8 @@
 local M = {}
 
 local sched=require 'sched'
-local nixiorator = require 'tasks/nixiorator'
-local nixio = nixiorator.nixio
+local selector = require "tasks/selector"
+local nixio = require 'nixio'
 
 --executes s on the console and returns the output
 local run_shell = function (s)
@@ -11,24 +11,9 @@ local run_shell = function (s)
 	f:close()
 	return l
 end
-local function run_shell_nixio(command)
-    local fdi, fdo = nixio.pipe()
-    local pid = nixio.fork()
-	if pid > 0 then 
-		--parent
-		fdo:close()
-		return fdi
-	else
-		--child
-		nixio.dup(fdo, nixio.stdout)
-		fdi:close()
-		fdo:close()
-		nixio.exec("/bin/sh", "-c", command)
-	end
-end
 
 M.init = function(masks_to_watch)
-	sched.run(function()
+	M.task = sched.run(function()
 		require 'catalog'.get_catalog('tasks'):register(masks_to_watch, sched.running_task)
 
 		if #run_shell('which inotifywait')==0 then
@@ -48,10 +33,9 @@ M.init = function(masks_to_watch)
 			command = command..' '..path
 		end
 		--print('+++++++++INOTIFY:', command)
-		local watcherfd = run_shell_nixio(command)
-		nixiorator.register_client(watcherfd, 'line')
+		local watcherfd=selector.grab_stdout (command, 'line', nil)
 
-		local waitd_inotify={emitter=nixiorator.task, events={watcherfd}, buff_len=100}
+		local waitd_inotify={emitter=selector.task, events={watcherfd.events.data}, buff_len=100}
 		
 		--generate events for already existing files
 		for _, devmask in ipairs(masks_to_watch) do

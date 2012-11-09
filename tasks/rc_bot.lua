@@ -12,13 +12,11 @@ M.init = function(conf)
 		motor_right.init_mode_wheel()
 
 		--initialize socket
-		local nixio = require 'nixio'
-		local udp = assert(nixio.bind(conf.ip, conf.port, 'inet', 'dgram'))
-		local nixiorator = require 'tasks/nixiorator'
-		nixiorator.register_client(udp, 1500)
+		local selector = require "tasks/selector"
+		local udp = selector.new_udp(nil, nil, conf.ip, conf.port, -1)
 
 		--listen for messages
-		sched.sigrun({emitter=nixiorator.task, events={udp}}, function(_, _, msg) 
+		sched.sigrun({emitter=selector.task, events={udp.events.data}}, function(_, _, msg) 
 			local left, right
 			if msg then
 				left, right = msg:match('^([^,]+),([^,]+)$')

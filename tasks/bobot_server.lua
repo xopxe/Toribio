@@ -180,19 +180,15 @@ end
 
 
 M.init = function(conf)
-	local nixiorator = require 'tasks/nixiorator'
-	local nixio = nixiorator.nixio
-	print ('nixiorator found:', nixiorator.task)
+	local selector = require 'tasks/selector'
 	
 	local ip = conf.ip or '127.0.0.1'
 	local port = conf.port or 2009
-	local tcprecv = assert(nixio.bind(ip, port, 'inet', 'stream'))
-	nixiorator.register_server(tcprecv, 'line')
-
-	local handler_task = function(_, inskt, line, err)
+	
+	
+	local tcprecv = selector.new_tcp_server(ip, port, 'line',  function( inskt, line, err)
 		--print("bobot server:", inskt, line, err or '')
 		if not line then return end
-
 		local words=split_words(line)
 		local command=words[1]
 		if not command then
@@ -211,19 +207,8 @@ M.init = function(conf)
 			end
 		end
 		
-	end
+	end)
 	
-	--accept connections
-	return sched.sigrun( {emitter=nixiorator.task, events={tcprecv}},
-		function(_, _, msg, inskt)
-			require 'catalog'.get_catalog('tasks'):register("bobot-server-accepter", sched.runing_task)
-
-			print ("new bobot server client", tcprecv, msg, inskt )
-			if msg=='accepted' then
-				sched.sigrun({emitter=nixiorator.task, events={inskt}}, handler_task)
-			end
-		end
-	)
 end
 
 return M

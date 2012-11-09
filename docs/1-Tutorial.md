@@ -142,11 +142,11 @@ And the tasks/rc\_bot.lua skeleton:
     		--initialize socket
     		local nixio = require 'nixio'
     		local udp = assert(nixio.bind(conf.ip, conf.port, 'inet', 'dgram'))
-    		local nixiorator = require 'tasks/nixiorator'
-    		nixiorator.register_client(udp, 1500)
+    		local selector = require 'tasks/selector'
+    		local udp = selector.new_udp(conf.ip, conf.port, 1480)
     
     		--listen for messages
-    		sched.sigrun({emitter=nixiorator.task, events={udp}, timeout=1}, 
+    		sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=1}, 
     			function(_, _, msg) 
     				local left, right = 0, 0
     				if msg then
@@ -161,7 +161,7 @@ And the tasks/rc\_bot.lua skeleton:
     
     return M
 
-Notice how we feed the socket to the nixiorator service (the nixiorator.register_client call), that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.
+Notice how we use the selector service to create a udp socket object, that will emit signals when data arrives. Then we listen for these signals with a function (registered in the sched.sigrun call). The timeout is set so if we do not receive a command within a second, the robot will stop.
 
 Now we run toribio with rc\_control task enabled on one machine, connected to a second machine with rc\_bot enabled.
 
