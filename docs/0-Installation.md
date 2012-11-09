@@ -7,14 +7,6 @@ First, install [nixio](https://github.com/Neopallium/nixio):
     # make
     # sudo make install
 
-If there are errors when compiling, edit the Makefile and change the line 86:
-
-    $(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
-
-so it is:
-
-    $(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
-
 If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example `make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-` to crosscompile for ARM.
 
 Then, download the latest version of [Toribio](https://github.com/xopxe/Toribio). You can either get the [tarball](https://github.com/xopxe/Toribio/tarball/master) , or use git:
