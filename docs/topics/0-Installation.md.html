@@ -76,20 +76,6 @@
  # sudo make install
 </pre>
 
-<p>If there are errors when compiling, edit the Makefile and change the line 86:</p>
-
-
-<pre>
- $(LINK) $(SHLIB_FLAGS) $(NIXIO_LDFLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS_POST)
-</pre>
-
-<p>so it is:</p>
-
-
-<pre>
- $(LINK) $(SHLIB_FLAGS) -o src/$(NIXIO_SO) $(NIXIO_OBJ) $(NIXIO_LDFLAGS) $(NIXIO_LDFLAGS_POST)
-</pre>
-
 <p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example <code>make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-</code> to crosscompile for ARM.</p>
 
 <p>Then, download the latest version of <a href="https://github.com/xopxe/Toribio">Toribio</a>. You can either get the <a href="https://github.com/xopxe/Toribio/tarball/master">tarball</a> , or use git:</p>
