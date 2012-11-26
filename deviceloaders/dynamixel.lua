@@ -11,8 +11,10 @@ local M = {}
 
 local toribio = require 'toribio'
 local sched = require 'sched'
-local mutex = require 'mutex'()
+local mutex = require 'mutex'
 local ax = require 'deviceloaders/dynamixel/motor'
+
+local mx = mutex.new()
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -167,7 +169,7 @@ M.init = function (conf)
 	
 	local waitd_protocol = {emitter=task_protocol, events='*', timeout = conf.serialtimeout or 0.01}
 	
-	local ping = mutex.synchronize(function(id)
+	local ping = mx:synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_ping = buildAX12packet(id, INSTRUCTION_PING)
 		filehandler:send_sync(packet_ping)
@@ -180,7 +182,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local write_data_now = mutex.synchronize(function(id,address,data)
+	local write_data_now = mx:synchronize(function(id,address,data)
 		id = id or BROADCAST_ID
 		local packet_write = buildAX12packet(id, 
 			INSTRUCTION_WRITE_DATA..string.char(address)..data)
@@ -192,7 +194,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local read_data = mutex.synchronize(function(id,startAddress,length)
+	local read_data = mx:synchronize(function(id,startAddress,length)
 		local packet_read = buildAX12packet(id, 
 			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
 		filehandler:send_sync(packet_read)
@@ -200,7 +202,7 @@ M.init = function (conf)
 		--if #data ~= length then return nil, 'read error' end
 		return data, err
 	end)
-	local reg_write_data = mutex.synchronize(function(id,address,data)
+	local reg_write_data = mx:synchronize(function(id,address,data)
 		id = id or BROADCAST_ID
 		local packet_reg_write = buildAX12packet(id, 
 			INSTRUCTION_REG_WRITE..string.char(address)..data)
@@ -212,7 +214,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local action = mutex.synchronize(function(id)
+	local action = mx:synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_ACTION)
 		filehandler:writeall(packet_action)
@@ -223,7 +225,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local reset = mutex.synchronize(function(id)
+	local reset = mx:synchronize(function(id)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
 		filehandler:send_sync(packet_action)
@@ -234,7 +236,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local sync_write = mutex.synchronize(function(ids, address,data) 
+	local sync_write = mx:synchronize(function(ids, address,data) 
 		local dataout = string.char(address)..string.char(#data)
 		for i=1, #ids do
 			local sid = ids[i]

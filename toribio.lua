@@ -12,6 +12,7 @@ local M ={}
 local sched = require 'sched'
 local catalog_tasks = require 'catalog'.get_catalog('tasks')
 local log= require 'log'
+local mutex = require 'mutex'
 --require "log".setlevel('ALL')
 
 --- Available devices.
@@ -144,8 +145,8 @@ M.register_callback = function(device, event, f, timeout)
 		events={device.events[event]},
 		timeout=timeout,
 	}
-	local mx = require 'mutex'()
-	local fsynched = mx.synchronize(f)
+	local mx = mutex.new()
+	local fsynched = mx:synchronize(f)
 	local wrapper = function(_, _, ...)
 		return fsynched(...)
 	end
@@ -237,6 +238,10 @@ M.task = sched.run( function ()
 		end
 	end
 end)
+
+--- A catalog for tasks.
+-- This is a catalog used to give well known names to tasks.
+M.catalog_tasks = catalog_tasks
 
 --- The configuration table.
 -- This table contains the configurations specified in toribio-go.conf file.
