@@ -37,7 +37,7 @@ Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:
 
     return M
 
-The log file will contain motor load readings. The process (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. The wait\_for\_device call will block until the device is detected, so it is important to place that call _inside_ the process (we do not want the main process blocking).
+The log file will contain motor load readings. The process (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. 
 
 The process will loop reading data from the motor and logging it, and then sleeping for the specified interval.
 
@@ -49,7 +49,47 @@ Finally, we run the program:
 
 ## Remote controlled robot
 
-We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, and generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).
+We will do a remote controlled robot. The idea is that we want to control a two-wheled differential robot using the mouse on another machine. We will see two methods: one using the Lumen's proxy service, and explicitly opening a socket.
+
+### Remote control using a proxy
+
+This is is the simplest method. The proxy task provided with Lumen allows a Toribio to receiv events from another Toribio instance, trough a network. Thus the ""remote control"" Toribio only have to start the proxy task and load the mouse device, and the "robot" Toribio can receive mouse events as if they were local.
+
+There is no need to write code for the remote control, everything is achieved trough configuration:
+
+    deviceloaders.mice.load = true
+    tasks.proxy.load = true
+
+The robot will have a task (named rcp_bot.lua) that will use the proxy service to receive the mouse events. For thge moment, we will only show how to receive the mouse events without actually moving the motors. The configuration file will have the following:
+
+    tasks.rcp_bot.load = true
+    tasks.rcp_bot.rc_ip = "192.168.1.100"
+    tasks.rcp_bot.rc_port = 1985 --default port for proxy
+
+The rcp_bot.lua file to place in the tasks/ folder is the following:
+
+    local M = {}
+    local toribio = require 'toribio'
+    local sched = require 'sched'
+    local proxy = require 'tasks/proxy'
+    
+    M.init = function(conf)
+    	local waitd = proxy.new_remote_waitd(conf.rc_ip, conf.rc_port, {
+    		emitter = {'mice:/dev/input/mice'},
+    		events = {'move', 'leftbutton'},
+    	})
+    	
+    	local left, right = 0, 0
+    	sched.sigrun(waitd, function(_, _, _, event, v1, v2) 
+    		print (event, v1, v2)
+    	end)
+    end
+    
+    return M
+
+The "robot" will print `'move', x, y` as the mouse is moved and `'leftbutton', 'true'` when the left button is clicked and `'leftbutton', 'false'` when released.
+
+This method is very convenient, but does not adapt very well for a remote control: the robot is the one connecting to the control, which is somehow backwards. We will implement a more traditional remote control application next. In this implementation one instance of toribio will read inputs from the mouse (the task rc_control), and generate commands over a UDP link to a Toribio instance in a robot (task rc\_robot) which will receive and parse the commands.
 
 ### Remote Control
 
@@ -187,7 +227,7 @@ The code for the tasks/bootia.lua might be as follows:
     
     M.init = function()
     	sched.run(function()
-    		local button =  toribio.wait_for_device({module='bb-button'})
+    		local button = toribio.wait_for_device({module='bb-button'})
     		local pressed = false
     		while true do
     			local now = ( button.getValue()==1 )

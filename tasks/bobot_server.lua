@@ -35,12 +35,12 @@ end
 
 
 process["LIST"] = function ()
-print("listing devices", devices)
 	local ret,comma = "", ""
 	for name, _ in pairs(devices) do
 		ret = ret .. comma .. name
 		comma=","
 	end
+	debugprint("listing devices", ret)
 	return ret
 end
 

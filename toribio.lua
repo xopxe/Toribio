@@ -11,6 +11,8 @@ local M ={}
 
 local sched = require 'sched'
 local catalog_tasks = require 'catalog'.get_catalog('tasks')
+local events_catalog = require 'catalog'.get_catalog('events')
+
 local log= require 'log'
 local mutex = require 'mutex'
 --require "log".setlevel('ALL')
@@ -165,6 +167,14 @@ M.add_device = function (device)
 	device.name=devicename
 	devices[devicename] = device
 	
+	print ('cataloging task',  device.task, 'by device', device.name)
+	assert(catalog_tasks:register(device.name, device.task))
+	
+	for evname, ev in pairs(device.events) do
+		print ('cataloging event', evname, 'by device', device.name)
+		assert(events_catalog:register(evname, ev))
+	end
+	
 	 -- for device:register_callback() notation
 	device.register_callback = M.register_callback 
 	device.remove = M.remove_device
@@ -242,6 +252,10 @@ end)
 --- A catalog for tasks.
 -- This is a catalog used to give well known names to tasks.
 M.catalog_tasks = catalog_tasks
+
+--- A catalog for events.
+-- This is a catalog used to give well known names to events.
+M.events_catalog = events_catalog
 
 --- The configuration table.
 -- This table contains the configurations specified in toribio-go.conf file.

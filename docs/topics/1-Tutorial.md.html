@@ -116,7 +116,7 @@
  <span class="keyword">return</span> M
 </pre>
 
-<p>The log file will contain motor load readings. The process (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. The wait_for_device call will block until the device is detected, so it is important to place that call <em>inside</em> the process (we do not want the main process blocking).</p>
+<p>The log file will contain motor load readings. The process (the function provided to sched.run) starts opening a file for writing and getting the Device for the specified motor. </p>
 
 <p>The process will loop reading data from the motor and logging it, and then sleeping for the specified interval.</p>
 
@@ -132,7 +132,57 @@
 <p><a name="Remote_controlled_robot"></a></p>
 <h2>Remote controlled robot</h2>
 
-<p>We will do a remote controlled robot. One instance of toribio will read inputs from the mouse, and generate commands over a UDP link to a Toribio instance in a robot with two motors (left and rigth).</p>
+<p>We will do a remote controlled robot. The idea is that we want to control a two-wheled differential robot using the mouse on another machine. We will see two methods: one using the Lumen's proxy service, and explicitly opening a socket.</p>
+
+<h3>Remote control using a proxy</h3>
+
+<p>This is is the simplest method. The proxy task provided with Lumen allows a Toribio to receiv events from another Toribio instance, trough a network. Thus the ""remote control"" Toribio only have to start the proxy task and load the mouse device, and the "robot" Toribio can receive mouse events as if they were local.</p>
+
+<p>There is no need to write code for the remote control, everything is achieved trough configuration:</p>
+
+
+<pre>
+ deviceloaders.mice.<span class="global">load</span> = <span class="keyword">true</span>
+ tasks.proxy.<span class="global">load</span> = <span class="keyword">true</span>
+</pre>
+
+<p>The robot will have a task (named rcp_bot.lua) that will use the proxy service to receive the mouse events. For thge moment, we will only show how to receive the mouse events without actually moving the motors. The configuration file will have the following:</p>
+
+
+<pre>
+ tasks.rcp_bot.<span class="global">load</span> = <span class="keyword">true</span>
+ tasks.rcp_bot.rc_ip = <span class="string">"192.168.1.100"</span>
+ tasks.rcp_bot.rc_port = <span class="number">1985</span> <span class="comment">--default port for proxy
+</span>
+</pre>
+
+<p>The rcp_bot.lua file to place in the tasks/ folder is the following:</p>
+
+
+<pre>
+ <span class="keyword">local</span> M = {}
+ <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
+ <span class="keyword">local</span> sched = <span class="global">require</span> <span class="string">'sched'</span>
+ <span class="keyword">local</span> proxy = <span class="global">require</span> <span class="string">'tasks/proxy'</span>
+
+ M.init = <span class="keyword">function</span>(conf)
+     <span class="keyword">local</span> waitd = proxy.new_remote_waitd(conf.rc_ip, conf.rc_port, {
+         emitter = {<span class="string">'mice:/dev/input/mice'</span>},
+         events = {<span class="string">'move'</span>, <span class="string">'leftbutton'</span>},
+     })
+
+     <span class="keyword">local</span> left, right = <span class="number">0</span>, <span class="number">0</span>
+     sched.sigrun(waitd, <span class="keyword">function</span>(_, _, _, event, v1, v2) 
+         <span class="global">print</span> (event, v1, v2)
+     <span class="keyword">end</span>)
+ <span class="keyword">end</span>
+
+ <span class="keyword">return</span> M
+</pre>
+
+<p>The "robot" will print <code>'move', x, y</code> as the mouse is moved and <code>'leftbutton', 'true'</code> when the left button is clicked and <code>'leftbutton', 'false'</code> when released.</p>
+
+<p>This method is very convenient, but does not adapt very well for a remote control: the robot is the one connecting to the control, which is somehow backwards. We will implement a more traditional remote control application next. In this implementation one instance of toribio will read inputs from the mouse (the task rc_control), and generate commands over a UDP link to a Toribio instance in a robot (task rc_robot) which will receive and parse the commands.</p>
 
 <h3>Remote Control</h3>
 
@@ -297,7 +347,7 @@
 
  M.init = <span class="keyword">function</span>()
      sched.run(<span class="keyword">function</span>()
-         <span class="keyword">local</span> button =  toribio.wait_for_device({<span class="global">module</span>=<span class="string">'bb-button'</span>})
+         <span class="keyword">local</span> button = toribio.wait_for_device({<span class="global">module</span>=<span class="string">'bb-button'</span>})
          <span class="keyword">local</span> pressed = <span class="keyword">false</span>
          <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
              <span class="keyword">local</span> now = ( button.getValue()==<span class="number">1</span> )

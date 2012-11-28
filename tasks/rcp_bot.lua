@@ -15,19 +15,24 @@ M.init = function(conf)
 		--]]
 		
 		local waitd = proxy.new_remote_waitd('127.0.0.1', 1985, {
-			emitter = {'mice'},
+			emitter = {'mice:/dev/input/mice'},
 			events = {'move', 'leftbutton'},
-			timeout = 1,
+			--timeout = 1,
 		})
-		print ('waitd:', waitd)
 		
 		--listen for messages
 		local left, right = 0, 0
 		sched.sigrun(waitd, function(emitter, arrived, _, event, v1, v2) 
-			print (emitter, arrived, event, v1, v2)
-			if not emitter or (event=='leftbutton' and v1) then 
+			--print (emitter, arrived, event, v1, v2)
+			if not emitter or (event=='leftbutton' and v1=='true') then 
 				left, right = 0, 0
+			else
+				local x, y = tonumber(v1), tonumber(v2) 
+				if x and y then 
+					left, right  = (y + x)/2, (y - x)/2
+				end
 			end
+			print (left, right)
 			--[[
 			motor_left.set_speed(left)
 			motor_right.set_speed(right)
