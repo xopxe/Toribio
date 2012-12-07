@@ -18,7 +18,7 @@ local M = {}
 
 local run_shell = function(s)
 	local f = io.popen(s) -- runs command
-	local l = f:read("*a") -- read output of command
+	local l = f:read("*l") -- read output of command
 	f:close()
 	return l
 end
@@ -139,10 +139,10 @@ om uevent dump
 		-- @return The current lock mode as set.
 		 touchscreen_lock = function (on)
 			if on and not touchscreen_lock then 
-				local out = run_shell('om touchscreen lock &')
-				_, _, touchscreen_lock = out:find('%s(%d+)$')
-			elseif on~=nil and touchscreen_lock then
-				run_shell('kill '..touchscreen_lock)
+				os.execute("om touchscreen lock &")
+				touchscreen_lock = true 
+			elseif on==false and touchscreen_lock then
+				os.execute("kill `ps ax | grep 'om touchscreen lock' | grep -v grep | awk '{print $1}'`")
 				touchscreen_lock = nil
 			end
 			return touchscreen_lock ~= nil
