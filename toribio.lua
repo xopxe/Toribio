@@ -170,7 +170,7 @@ M.add_device = function (device)
 	print ('cataloging task',  device.task, 'by device', device.name)
 	assert(catalog_tasks:register(device.name, device.task))
 	
-	for evname, ev in pairs(device.events) do
+	for evname, ev in pairs(device.events or {}) do
 		print ('cataloging event', evname, 'by device', device.name)
 		assert(events_catalog:register(evname, ev))
 	end
