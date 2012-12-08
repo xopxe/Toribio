@@ -307,7 +307,7 @@ om uevent dump
 				end
 			end
 			local ret = run_shell('om led vibrator')
-			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)%c*$')
 			return tonumber(reton), tonumber(retontime), tonumber(retofftime)
 		end,
 		
@@ -329,7 +329,7 @@ om uevent dump
 				end
 			end
 			local ret = run_shell('om led power_orange')
-			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)%c*$')
 			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
 			
@@ -373,7 +373,7 @@ om uevent dump
 				end
 			end
 			local ret = run_shell('om led aux_red')
-			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)%c*%c*%c*%c*%c*$')
 			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
 	}
