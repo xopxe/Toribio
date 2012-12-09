@@ -9,7 +9,7 @@ M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'tasks/selector'
 	local sched = require 'sched'
-	local json = require 'dkjson'
+	local json = require 'lib/dkjson'
 	local log = require 'log'
 	
 	local ip = conf.ip or '127.0.0.1'
@@ -49,9 +49,9 @@ M.init = function(conf)
 	
 	device.set_watch = function(enable)
 		if enable then 
-			sktd_gpsd:write_sync('?WATCH={"enable":true,"json":true}')
+			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}')
 		else
-			sktd_gpsd:write_sync('?WATCH={"enable":false}')
+			sktd_gpsd:send_sync('?WATCH={"enable":false}')
 		end
 	end
 	
