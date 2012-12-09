@@ -8,7 +8,7 @@ M.init = function( conf )
 	local masks_to_watch = {}
 	local deviceloadersconf = toribio.configuration.deviceloaders
 
-	for modulename, devmask in pairs(conf.module) do
+	for modulename, devmask in pairs(conf.module or {}) do
 		log('FILEDEV','INFO', 'watching path %s for module %s', tostring(devmask), tostring(modulename))
 		masks_to_watch[devmask] = modulename
 		masks_to_watch[#masks_to_watch+1] = devmask
