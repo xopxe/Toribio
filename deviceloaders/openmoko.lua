@@ -195,7 +195,7 @@ om uevent dump
 			elseif keep_on_in_suspend==false then
 				run_shell('om gps keep-on-in-suspend 0')
 			end
-			return run_shell('om gps power')=="1", run_shell('om keep-on-in-suspend power')=="1"
+			return run_shell('om gps power')=="1", run_shell('om gps keep-on-in-suspend')=="1"
 		end,
 
 		--- Power the gsm module.
