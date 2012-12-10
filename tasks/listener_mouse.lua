@@ -5,7 +5,7 @@ M.init = function()
 	
 	return sched.run(function()
 		local toribio = require 'toribio'
-		local mice = toribio.wait_for_device('mice:/dev/input/mice')
+		local mice = toribio.wait_for_device({module='mice'})
 		
 		--[[
 		local waitd = {
