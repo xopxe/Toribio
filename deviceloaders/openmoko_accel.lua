@@ -138,7 +138,7 @@ M.init = function(conf)
 			-- This allows to enable and disable the sensing.
 			-- @param enable boolean indicating if the sensor data events must be generated.
 			-- @param delay time delay between events. If omitted, a configuration value 
-			-- is used (field _deviceloaders.openmoko_accel.delay_), 1 otherwise.
+			-- is used (field _deviceloaders.openmoko\_accel.delay_), 1 otherwise.
 			run = function(enable, delay)
 				delay_read = delay or delay_read
 				task_read:set_pause(not enable)

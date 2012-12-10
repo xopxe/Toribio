@@ -70,84 +70,96 @@
 
 <p>Library for managing a OpenMoko smartphone.</p>
 <p> Uses the omhacks tool.
- See http://manpages.ubuntu.com/manpages/precise/man1/om.1.html</p>
+ See http://manpages.ubuntu.com/manpages/precise/man1/om.1.html <br/>
+ It is possible to provide default values applied automatically at startup. For this a configuration field
+ matching a method name  must exist. Examples:</p>
+
+<p> deviceloaders.openmoko.usb_charger_mode = 'charge-battery' <br/>
+ deviceloaders.openmoko.usb_mode = 'host' <br/>
+ deviceloaders.openmoko.gps_power = {true, true}  </p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local toribio = require 'toribio'
+local om = toribio.wait_for_device('openmoko')
+print (om.battery_energy())</pre>
+    </ul>
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#usb.mode">usb.mode&nbsp;(mode)</a></td>
+	<td class="name" nowrap><a href="#usb_mode">usb_mode&nbsp;(mode)</a></td>
 	<td class="summary">Set USB mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#usb.charger.mode">usb.charger.mode&nbsp;(direction)</a></td>
+	<td class="name" nowrap><a href="#usb_charger_mode">usb_charger_mode&nbsp;(direction)</a></td>
 	<td class="summary">Set USB powering mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#usb.charger.limit">usb.charger.limit&nbsp;(currlim)</a></td>
+	<td class="name" nowrap><a href="#usb_charger_limit">usb_charger_limit&nbsp;(currlim)</a></td>
 	<td class="summary">Set the current limit on the USB port.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#touchscreen.lock">touchscreen.lock&nbsp;(on)</a></td>
+	<td class="name" nowrap><a href="#touchscreen_lock">touchscreen_lock&nbsp;(on)</a></td>
 	<td class="summary">Locks the touchsreen.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#battery.charger.limit">battery.charger.limit&nbsp;(currlim)</a></td>
+	<td class="name" nowrap><a href="#battery_charger_limit">battery_charger_limit&nbsp;(currlim)</a></td>
 	<td class="summary">Set the current limit on the battery charger.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#battery.energy">battery.energy&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#battery_energy">battery_energy&nbsp;()</a></td>
 	<td class="summary">Return the battery charge level.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#bt.power">bt.power&nbsp;(power)</a></td>
+	<td class="name" nowrap><a href="#bt_power">bt_power&nbsp;(power)</a></td>
 	<td class="summary">Power the bluetooth module.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#gps.power">gps.power&nbsp;(power, keep_on_in_suspend)</a></td>
+	<td class="name" nowrap><a href="#gps_power">gps_power&nbsp;(power, keep_on_in_suspend)</a></td>
 	<td class="summary">Power the gps module.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#gsm.power">gsm.power&nbsp;(power)</a></td>
+	<td class="name" nowrap><a href="#gsm_power">gsm_power&nbsp;(power)</a></td>
 	<td class="summary">Power the gsm module.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#wifi.power">wifi.power&nbsp;(power)</a></td>
+	<td class="name" nowrap><a href="#wifi_power">wifi_power&nbsp;(power)</a></td>
 	<td class="summary">Power the wifi module.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#wifi.maxperf">wifi.maxperf&nbsp;(iface, on)</a></td>
+	<td class="name" nowrap><a href="#wifi_maxperf">wifi_maxperf&nbsp;(iface, on)</a></td>
 	<td class="summary">Enable the maxperf mode for wifi.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#wifi.keep_bus_on_in_suspend">wifi.keep_bus_on_in_suspend&nbsp;(iface, on)</a></td>
+	<td class="name" nowrap><a href="#wifi_keep_bus_on_in_suspend">wifi_keep_bus_on_in_suspend&nbsp;(iface, on)</a></td>
 	<td class="summary">Keep de wifi bus powered on suspend.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#screen.power">screen.power&nbsp;(power)</a></td>
+	<td class="name" nowrap><a href="#screen_power">screen_power&nbsp;(power)</a></td>
 	<td class="summary">Power the screen.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#screen.glamo_bus_timings">screen.glamo_bus_timings&nbsp;(timing)</a></td>
+	<td class="name" nowrap><a href="#screen_glamo_bus_timings">screen_glamo_bus_timings&nbsp;(timing)</a></td>
 	<td class="summary">Control the glamo timings.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#backlight.brightness">backlight.brightness&nbsp;(level)</a></td>
+	<td class="name" nowrap><a href="#backlight_brightness">backlight_brightness&nbsp;(level)</a></td>
 	<td class="summary">Control the backlight brigthness.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led.vibrator.power">led.vibrator.power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_vibrator_power">led_vibrator_power&nbsp;(level, ontime, offtime)</a></td>
 	<td class="summary">Control the vibrator power.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led.power_orange.power">led.power_orange.power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_power_orange_power">led_power_orange_power&nbsp;(level, ontime, offtime)</a></td>
 	<td class="summary">Control the orange light of the power button.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led.power_blue.power">led.power_blue.power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_power_blue_power">led_power_blue_power&nbsp;(level, ontime, offtime)</a></td>
 	<td class="summary">Control the blue light of the power button.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led.aux_red.power">led.aux_red.power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_aux_red_power">led_aux_red_power&nbsp;(level, ontime, offtime)</a></td>
 	<td class="summary">Control the red light of the aux button.</td>
 	</tr>
 </table>
@@ -171,8 +183,8 @@
     
     <dl class="function">
     <dt>
-    <a name = "usb.mode"></a>
-    <strong>usb.mode&nbsp;(mode)</strong>
+    <a name = "usb_mode"></a>
+    <strong>usb_mode&nbsp;(mode)</strong>
     </dt>
     <dd>
     Set USB mode. 
@@ -194,8 +206,8 @@
 
 </dd>
     <dt>
-    <a name = "usb.charger.mode"></a>
-    <strong>usb.charger.mode&nbsp;(direction)</strong>
+    <a name = "usb_charger_mode"></a>
+    <strong>usb_charger_mode&nbsp;(direction)</strong>
     </dt>
     <dd>
     Set USB powering mode. 
@@ -219,8 +231,8 @@
 
 </dd>
     <dt>
-    <a name = "usb.charger.limit"></a>
-    <strong>usb.charger.limit&nbsp;(currlim)</strong>
+    <a name = "usb_charger_limit"></a>
+    <strong>usb_charger_limit&nbsp;(currlim)</strong>
     </dt>
     <dd>
     Set the current limit on the USB port. 
@@ -247,8 +259,8 @@
 
 </dd>
     <dt>
-    <a name = "touchscreen.lock"></a>
-    <strong>touchscreen.lock&nbsp;(on)</strong>
+    <a name = "touchscreen_lock"></a>
+    <strong>touchscreen_lock&nbsp;(on)</strong>
     </dt>
     <dd>
     Locks the touchsreen. 
@@ -272,8 +284,8 @@
 
 </dd>
     <dt>
-    <a name = "battery.charger.limit"></a>
-    <strong>battery.charger.limit&nbsp;(currlim)</strong>
+    <a name = "battery_charger_limit"></a>
+    <strong>battery_charger_limit&nbsp;(currlim)</strong>
     </dt>
     <dd>
     Set the current limit on the battery charger. 
@@ -294,8 +306,8 @@
 
 </dd>
     <dt>
-    <a name = "battery.energy"></a>
-    <strong>battery.energy&nbsp;()</strong>
+    <a name = "battery_energy"></a>
+    <strong>battery_energy&nbsp;()</strong>
     </dt>
     <dd>
     Return the battery charge level. 
@@ -310,8 +322,8 @@
 
 </dd>
     <dt>
-    <a name = "bt.power"></a>
-    <strong>bt.power&nbsp;(power)</strong>
+    <a name = "bt_power"></a>
+    <strong>bt_power&nbsp;(power)</strong>
     </dt>
     <dd>
     Power the bluetooth module. 
@@ -330,8 +342,8 @@
 
 </dd>
     <dt>
-    <a name = "gps.power"></a>
-    <strong>gps.power&nbsp;(power, keep_on_in_suspend)</strong>
+    <a name = "gps_power"></a>
+    <strong>gps_power&nbsp;(power, keep_on_in_suspend)</strong>
     </dt>
     <dd>
     Power the gps module. 
@@ -351,8 +363,8 @@
 
 </dd>
     <dt>
-    <a name = "gsm.power"></a>
-    <strong>gsm.power&nbsp;(power)</strong>
+    <a name = "gsm_power"></a>
+    <strong>gsm_power&nbsp;(power)</strong>
     </dt>
     <dd>
     Power the gsm module. 
@@ -371,8 +383,8 @@
 
 </dd>
     <dt>
-    <a name = "wifi.power"></a>
-    <strong>wifi.power&nbsp;(power)</strong>
+    <a name = "wifi_power"></a>
+    <strong>wifi_power&nbsp;(power)</strong>
     </dt>
     <dd>
     Power the wifi module. 
@@ -391,8 +403,8 @@
 
 </dd>
     <dt>
-    <a name = "wifi.maxperf"></a>
-    <strong>wifi.maxperf&nbsp;(iface, on)</strong>
+    <a name = "wifi_maxperf"></a>
+    <strong>wifi_maxperf&nbsp;(iface, on)</strong>
     </dt>
     <dd>
     Enable the maxperf mode for wifi. 
@@ -414,8 +426,8 @@
 
 </dd>
     <dt>
-    <a name = "wifi.keep_bus_on_in_suspend"></a>
-    <strong>wifi.keep_bus_on_in_suspend&nbsp;(iface, on)</strong>
+    <a name = "wifi_keep_bus_on_in_suspend"></a>
+    <strong>wifi_keep_bus_on_in_suspend&nbsp;(iface, on)</strong>
     </dt>
     <dd>
     Keep de wifi bus powered on suspend. 
@@ -436,8 +448,8 @@
 
 </dd>
     <dt>
-    <a name = "screen.power"></a>
-    <strong>screen.power&nbsp;(power)</strong>
+    <a name = "screen_power"></a>
+    <strong>screen_power&nbsp;(power)</strong>
     </dt>
     <dd>
     Power the screen. 
@@ -456,8 +468,8 @@
 
 </dd>
     <dt>
-    <a name = "screen.glamo_bus_timings"></a>
-    <strong>screen.glamo_bus_timings&nbsp;(timing)</strong>
+    <a name = "screen_glamo_bus_timings"></a>
+    <strong>screen_glamo_bus_timings&nbsp;(timing)</strong>
     </dt>
     <dd>
     Control the glamo timings. 
@@ -481,8 +493,8 @@
 
 </dd>
     <dt>
-    <a name = "backlight.brightness"></a>
-    <strong>backlight.brightness&nbsp;(level)</strong>
+    <a name = "backlight_brightness"></a>
+    <strong>backlight_brightness&nbsp;(level)</strong>
     </dt>
     <dd>
     Control the backlight brigthness. 
@@ -503,8 +515,8 @@
 
 </dd>
     <dt>
-    <a name = "led.vibrator.power"></a>
-    <strong>led.vibrator.power&nbsp;(level, ontime, offtime)</strong>
+    <a name = "led_vibrator_power"></a>
+    <strong>led_vibrator_power&nbsp;(level, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the vibrator power. 
@@ -525,8 +537,8 @@
 
 </dd>
     <dt>
-    <a name = "led.power_orange.power"></a>
-    <strong>led.power_orange.power&nbsp;(level, ontime, offtime)</strong>
+    <a name = "led_power_orange_power"></a>
+    <strong>led_power_orange_power&nbsp;(level, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the orange light of the power button. 
@@ -547,8 +559,8 @@
 
 </dd>
     <dt>
-    <a name = "led.power_blue.power"></a>
-    <strong>led.power_blue.power&nbsp;(level, ontime, offtime)</strong>
+    <a name = "led_power_blue_power"></a>
+    <strong>led_power_blue_power&nbsp;(level, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the blue light of the power button. 
@@ -569,8 +581,8 @@
 
 </dd>
     <dt>
-    <a name = "led.aux_red.power"></a>
-    <strong>led.aux_red.power&nbsp;(level, ontime, offtime)</strong>
+    <a name = "led_aux_red_power"></a>
+    <strong>led_aux_red_power&nbsp;(level, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the red light of the aux button. 
