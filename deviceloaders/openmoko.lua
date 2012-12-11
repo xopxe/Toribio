@@ -18,7 +18,7 @@ local M = {}
 
 local run_shell = function(s)
 	local f = io.popen(s) -- runs command
-	local l = f:read("*l") -- read output of command
+	local l = f:read("*a") -- read output of command
 	f:close()
 	return l
 end
@@ -139,10 +139,10 @@ om uevent dump
 		-- @return The current lock mode as set.
 		 touchscreen_lock = function (on)
 			if on and not touchscreen_lock then 
-				os.execute("om touchscreen lock &")
-				touchscreen_lock = true 
-			elseif on==false and touchscreen_lock then
-				os.execute("kill `ps ax | grep 'om touchscreen lock' | grep -v grep | awk '{print $1}'`")
+				local out = run_shell('om touchscreen lock &')
+				_, _, touchscreen_lock = out:find('%s(%d+)$')
+			elseif on~=nil and touchscreen_lock then
+				run_shell('kill '..touchscreen_lock)
 				touchscreen_lock = nil
 			end
 			return touchscreen_lock ~= nil
@@ -306,58 +306,75 @@ om uevent dump
 					run_shell('om led vibrator ' .. level)
 				end
 			end
-			return run_shell('om led vibrator')
+			local ret = run_shell('om led vibrator')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			return tonumber(reton), tonumber(retontime), tonumber(retofftime)
 		end,
 		
 		--- Control the orange light of the power button.
-		-- @param level the light power, in the 0..255 range
+		-- @param on true switches on, false off, nil keeps as is.
 		-- @param ontime if provided with offtime, will blink at the indicated rate (milliseconds)
 		-- @param offtime if provided with ontime, will blink at the indicated rate (milliseconds)
-		-- @return the level as set.
-		led_power_orange_power = function (level,ontime,offtime)
-			if level then
+		-- @return the parameters as set.
+		led_power_orange_power = function (on,ontime,offtime)
+			local n
+			if on then n=255 
+			elseif n==false then n=0 end
+			if n then
 				if ontime and offtime then
-					run_shell('om led power_orange ' .. level .. 
+					run_shell('om led power_orange ' .. n .. 
 						' timer ' .. ontime .. ' ' .. offtime)
 				else
-					run_shell('om led power_orange ' .. level)
+					run_shell('om led power_orange ' .. n)
 				end
 			end
-			return run_shell('om led power_orange')
+			local ret = run_shell('om led power_orange')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
 			
 		--- Control the blue light of the power button.
-		-- @param level the light power, in the 0..255 range
+		-- @param on true switches on, false off, nil keeps as is.
 		-- @param ontime if provided with offtime, will blink at the indicated rate (milliseconds)
 		-- @param offtime if provided with ontime, will blink at the indicated rate (milliseconds)
-		-- @return the level as set.
-		led_power_blue_power = function (level,ontime,offtime)
-			if level then
+		-- @return the parameters as set.
+		led_power_blue_power = function (on,ontime,offtime)
+			local n
+			if on then n=255 
+			elseif n==false then n=0 end
+			if n then
 				if ontime and offtime then
-					run_shell('om led power_blue ' .. level .. 
+					run_shell('om led power_blue ' .. n .. 
 						' timer ' .. ontime .. ' ' .. offtime)
 				else
-					run_shell('om led power_blue ' .. level)
+					run_shell('om led power_blue ' .. n)
 				end
 			end
-			return run_shell('om led power_blue')
+			local ret = run_shell('om led power_blue')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
 			
 		--- Control the red light of the aux button.
-		-- @param level the light power, in the 0..255 range
+		-- @param on true switches on, false off, nil keeps as is.
 		-- @param ontime if provided with offtime, will blink at the indicated rate (milliseconds)
 		-- @param offtime if provided with ontime, will blink at the indicated rate (milliseconds)
-		-- @return the level as set.
-		led_aux_red_power = function (level,ontime,offtime)
-			if level then
+		-- @return the parameters as set.
+		led_aux_red_power = function (on,ontime,offtime)
+			local n
+			if on then n=255 
+			elseif n==false then n=0 end
+			if n then
 				if ontime and offtime then
-					run_shell('om led aux_red ' .. level .. 
+					run_shell('om led aux_red ' .. n .. 
 						' timer ' .. ontime .. ' ' .. offtime)
 				else
-					run_shell('om led aux_red ' .. level)
+					run_shell('om led aux_red ' .. n)
 				end
 			end
-			return run_shell('om led aux_red')
+			local ret = run_shell('om led aux_red')
+			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
+			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
 	}
 	
