@@ -33,11 +33,13 @@ M.init = function(conf)
 	local function get_incomming_handler()
 		local buff = ''
 		return function(sktd, data, err) 
+			--print ('', data)
 			if not data then sched.running_task:kill() end
 			buff = buff .. data
 			--print ('incomming', buff)
 			local decoded, index, e = json.decode(buff)
 			if decoded then 
+				--print ('','',decoded.class)
 				buff = buff:sub(index)
 				sched.signal(events[decoded.class], decoded) 
 			else
@@ -45,13 +47,14 @@ M.init = function(conf)
 			end
 		end
 	end
-	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, 10000, get_incomming_handler())
+	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, -1, get_incomming_handler())
 	
 	device.set_watch = function(enable)
 		if enable then 
-			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}')
+			print ('Enabling!')
+			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}\r\n')
 		else
-			sktd_gpsd:send_sync('?WATCH={"enable":false}')
+			sktd_gpsd:send_sync('?WATCH={"enable":false}\r\n')
 		end
 	end
 	

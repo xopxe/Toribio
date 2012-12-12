@@ -6,6 +6,7 @@ M.init = function()
 	return sched.run(function()
 		local toribio = require 'toribio'
 		local gpsd = toribio.wait_for_device('gpsd')
+		print ('listener gpsd found:', gpsd)
 		
 		--[[
 		local waitd = {
@@ -26,6 +27,7 @@ M.init = function()
 		---[[
 		toribio.register_callback(gpsd, 'VERSION', function(v)
 			print('gpsd version:',v.release, v.rev)
+			gpsd.set_watch(true)
 		end)
 		toribio.register_callback(gpsd, 'DEVICE', function(v)
 			print('gpsd device:',v.path, v.bps)
@@ -37,8 +39,8 @@ M.init = function()
 			print('gpsd:', v.mode, v.time, v.lat, v.lon, v.alt )
 		end)
 		--]]
-		
-		gpsd.set_watch(true)
+		--sched.sleep(1)
+		--gpsd.set_watch(true)
 	end)
 end
 
