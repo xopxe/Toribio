@@ -47,7 +47,7 @@ M.init = function(conf)
 			end
 		end
 	end
-	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, -1, get_incomming_handler())
+	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, 'line', get_incomming_handler())
 	
 	device.set_watch = function(enable)
 		if enable then 
