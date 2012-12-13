@@ -1,5 +1,7 @@
 --- Library for accesing gpsd.
--- The device will be named "gpsd", module "gpsd". 
+-- The device will be named "gpsd", module "gpsd", and will generate signals
+-- from gpsd. The gpsd service must be started. For an example using this module, 
+-- see listener_gpsd.lua
 -- @module gpsd
 -- @alias device
 
@@ -16,14 +18,31 @@ M.init = function(conf)
 	local port = conf.port or 2947
 	
 	local device={
-		name = 'gpsd',
-		module = 'gpsd',
-		task = selector.task, 
-		events = { --singletons
-			VERSION = {}, 
+		--- Name of the device (in this case, 'gpsd').
+		name = 'gpsd', 
+		
+		--- Module name (in this case, 'gpsd').
+		module = 'gpsd', 
+		
+		--- Task that will emit signals associated to this device.
+		task = selector.task,  
+		
+		--- Events emitted by this device.
+		-- Each event represent a gpsd event. The signal has a single
+		-- parameter, a table containing the gpsd provided data.
+		-- @field VERSION
+		-- @field WATCH
+		-- @field DEVICES
+		-- @field DEVICE
+		-- @field SKY
+		-- @field TPV
+		-- @field AIS
+		events = { 
+			VERSION = {},
 			WATCH = {}, 
 			DEVICES = {},
 			DEVICE = {},
+			SKY = {}, 
 			TPV = {}, 
 			AIS = {},
 		},
@@ -49,9 +68,11 @@ M.init = function(conf)
 	end
 	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, 'line', get_incomming_handler())
 	
+	--- Start and Stop gpsd watching.
+	-- @param enable true to start, false to stop
 	device.set_watch = function(enable)
 		if enable then 
-			print ('Enabling!')
+			_G.debugprint ('Enabling!')
 			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}\r\n')
 		else
 			sktd_gpsd:send_sync('?WATCH={"enable":false}\r\n')

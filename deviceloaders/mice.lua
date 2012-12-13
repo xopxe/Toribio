@@ -68,7 +68,7 @@ M.init = function(conf)
 	-- For example, '/dev/input/mice'
 	device.filename=filename
 
-	--- Signals emitted by this device.
+	--- Events emitted by this device.
 	-- Button presses have single parameter: true on press,
 	-- false on release.
 	-- @field leftbutton Left button click.

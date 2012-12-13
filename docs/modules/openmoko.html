@@ -42,6 +42,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
   <li><strong>openmoko</strong></li>
   <li><a href="../modules/openmoko_accel.html">openmoko_accel</a></li>
@@ -151,15 +152,15 @@ print (om.battery_energy())</pre>
 	<td class="summary">Control the vibrator power.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led_power_orange_power">led_power_orange_power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_power_orange_power">led_power_orange_power&nbsp;(on, ontime, offtime)</a></td>
 	<td class="summary">Control the orange light of the power button.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led_power_blue_power">led_power_blue_power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_power_blue_power">led_power_blue_power&nbsp;(on, ontime, offtime)</a></td>
 	<td class="summary">Control the blue light of the power button.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#led_aux_red_power">led_aux_red_power&nbsp;(level, ontime, offtime)</a></td>
+	<td class="name" nowrap><a href="#led_aux_red_power">led_aux_red_power&nbsp;(on, ontime, offtime)</a></td>
 	<td class="summary">Control the red light of the aux button.</td>
 	</tr>
 </table>
@@ -538,14 +539,14 @@ print (om.battery_energy())</pre>
 </dd>
     <dt>
     <a name = "led_power_orange_power"></a>
-    <strong>led_power_orange_power&nbsp;(level, ontime, offtime)</strong>
+    <strong>led_power_orange_power&nbsp;(on, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the orange light of the power button. 
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>level</em></code>:  the light power, in the 0..255 range</li>
+       <li><code><em>on</em></code>:  true switches on, false off, nil keeps as is.</li>
        <li><code><em>ontime</em></code>:  if provided with offtime, will blink at the indicated rate (milliseconds)</li>
        <li><code><em>offtime</em></code>:  if provided with ontime, will blink at the indicated rate (milliseconds)</li>
     </ul>
@@ -553,21 +554,21 @@ print (om.battery_energy())</pre>
 
     <h3>Returns:</h3>
     <ol>
-        the level as set.
+        the parameters as set.
     </ol>
 
 
 </dd>
     <dt>
     <a name = "led_power_blue_power"></a>
-    <strong>led_power_blue_power&nbsp;(level, ontime, offtime)</strong>
+    <strong>led_power_blue_power&nbsp;(on, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the blue light of the power button. 
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>level</em></code>:  the light power, in the 0..255 range</li>
+       <li><code><em>on</em></code>:  true switches on, false off, nil keeps as is.</li>
        <li><code><em>ontime</em></code>:  if provided with offtime, will blink at the indicated rate (milliseconds)</li>
        <li><code><em>offtime</em></code>:  if provided with ontime, will blink at the indicated rate (milliseconds)</li>
     </ul>
@@ -575,21 +576,21 @@ print (om.battery_energy())</pre>
 
     <h3>Returns:</h3>
     <ol>
-        the level as set.
+        the parameters as set.
     </ol>
 
 
 </dd>
     <dt>
     <a name = "led_aux_red_power"></a>
-    <strong>led_aux_red_power&nbsp;(level, ontime, offtime)</strong>
+    <strong>led_aux_red_power&nbsp;(on, ontime, offtime)</strong>
     </dt>
     <dd>
     Control the red light of the aux button. 
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>level</em></code>:  the light power, in the 0..255 range</li>
+       <li><code><em>on</em></code>:  true switches on, false off, nil keeps as is.</li>
        <li><code><em>ontime</em></code>:  if provided with offtime, will blink at the indicated rate (milliseconds)</li>
        <li><code><em>offtime</em></code>:  if provided with ontime, will blink at the indicated rate (milliseconds)</li>
     </ul>
@@ -597,7 +598,7 @@ print (om.battery_energy())</pre>
 
     <h3>Returns:</h3>
     <ol>
-        the level as set.
+        the parameters as set.
     </ol>
 
 
