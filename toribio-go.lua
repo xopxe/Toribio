@@ -14,9 +14,9 @@ require 'strict'
 _G.debugprint=function() end
 
 local sched = require 'sched'
+local log = require 'log'
 local selector = require "tasks/selector".init({service='nixio'})
 
---require "log".setlevel('ALL')
 local toribio = require 'toribio'
 
 -- From http://lua-users.org/wiki/AlternativeGetOpt
@@ -112,6 +112,13 @@ if not opts["c"] then
 	load_configuration('toribio-go.conf')
 elseif opts["c"] ~= "none" then
 	load_configuration(opts["c"])
+end
+
+--set log level
+if toribio.configuration and toribio.configuration.log 
+and toribio.configuration.log and toribio.configuration.log.defaultlevel then
+	print ('Setting log level', toribio.configuration.log.defaultlevel)
+	log.defaultlevel(toribio.configuration.log.defaultlevel)
 end
 
 sched.run(function()

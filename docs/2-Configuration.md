@@ -48,6 +48,13 @@ enable it, add the following:
     tasks.shell.ip = 127.0.0.1 --defaults to '*'
     tasks.shell.port = 2012 --defaults to 2012
 
+## Log Level
+
+Toribio uses Lumens logging infrastructure. The default log level can be set
+using the log.defaultlevel parameter. Available levels are  'NONE', 'ERROR', 
+'WARNING', 'INFO', 'DETAIL', 'DEBUG' and 'ALL'.
+
+    log.defaultlevel = 'INFO'
 
 ## Parameters on the commandline
 

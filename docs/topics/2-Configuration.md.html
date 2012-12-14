@@ -34,6 +34,7 @@
 <ul>
 <li><a href="#File_Format">File Format</a></li>
 <li><a href="#Interactive_shell">Interactive shell</a></li>
+<li><a href="#Log_Level">Log Level</a></li>
 <li><a href="#Parameters_on_the_commandline">Parameters on the commandline</a></li>
 </ul>
 
@@ -131,6 +132,18 @@ enable it, add the following:</p>
  tasks.shell.ip = <span class="number">127.0</span>.<span class="number">0.1</span> <span class="comment">--defaults to '*'
 </span> tasks.shell.port = <span class="number">2012</span> <span class="comment">--defaults to 2012
 </span>
+</pre>
+
+<p><a name="Log_Level"></a></p>
+<h2>Log Level</h2>
+
+<p>Toribio uses Lumens logging infrastructure. The default log level can be set
+using the log.defaultlevel parameter. Available levels are  'NONE', 'ERROR', 
+'WARNING', 'INFO', 'DETAIL', 'DEBUG' and 'ALL'.</p>
+
+
+<pre>
+ log.defaultlevel = <span class="string">'INFO'</span>
 </pre>
 
 <p><a name="Parameters_on_the_commandline"></a></p>
