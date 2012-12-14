@@ -20,7 +20,7 @@ M.init = function(conf)
 		motor_x.init_mode_joint()
 		motor_y.init_mode_joint()
 		
-		--debugprint ('torqueenable:', dynamixelbus.get_broadcaster().set_torque_enable(false))
+		--print ('torqueenable:', dynamixelbus.get_broadcaster().set_torque_enable(false))
 		dynamixelbus.get_broadcaster().set_speed(0)
 
 		local pressed=false

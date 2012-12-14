@@ -20,6 +20,7 @@
 -- @alias device
 
 local M = {}
+local log = require 'log'
 
 M.init = function(conf)
 	local toribio = require 'toribio'
@@ -148,11 +149,11 @@ M.init = function(conf)
 	end
 	
 	local device1=build_device('accelerometer.1', sysfs1, stream1, {})
-	_G.debugprint('device object created', device1.name)
+	log('OMACCEL', 'INFO', 'Device %s created: %s', device1.module, device1.name)
 	toribio.add_device(device1)
 	
 	local device2=build_device('accelerometer.2', sysfs2, stream2, {})
-	_G.debugprint('device object created', device2.name)
+	log('OMACCEL', 'INFO', 'Device %s created: %s', device2.module, device2.name)
 	toribio.add_device(device2)
 
 end

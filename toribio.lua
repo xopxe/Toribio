@@ -162,16 +162,16 @@ local signal_new_device = {}
 -- @param device a Device object.
 M.add_device = function (device)
 	local devicename=get_device_name(device.name)
-	print('NEW DEVICE!', device.name, device.module)
+	log ('TORIBIO', 'INFO', 'Adding device %s a (%s)', device.name, device.module)
 	if device.name~=devicename then print ('WARN!, device renamed!') end
 	device.name=devicename
 	devices[devicename] = device
 	
-	print ('cataloging task',  device.task, 'by device', device.name)
+	log ('TORIBIO', 'INFO', 'Cataloging task %s by for device %s', tostring(device.task), device.name)
 	assert(catalog_tasks:register(device.name, device.task))
 	
 	for evname, ev in pairs(device.events or {}) do
-		print ('cataloging event', evname, 'by device', device.name)
+		log ('TORIBIO', 'INFO', 'Cataloging event %s by for device %s', evname, device.name)
 		assert(events_catalog:register(evname, ev))
 	end
 	
@@ -200,7 +200,8 @@ M.remove_devices = function(devdesc)
 end
 
 M.remove_device = function(device)
-	print('CLOSING DEVICE!', device.name)
+	log ('TORIBIO', 'INFO', 'Removing device %s', device.name)
+
 	if device.task then sched.kill(device.task) end
 	devices[device.name]=nil
 	sched.signal(signal_remove_device, device )
@@ -219,12 +220,11 @@ M.start = function(section, taskname)
 	local sect = M.configuration[section] or {}
 	local conf = sect[taskname] or {}
 	local taskmodule = require (packagename)
-	_G.debugprint('module loaded:', taskmodule)
 	log('TORIBIO', 'INFO', 'module %s loaded', packagename)
 	if taskmodule and taskmodule.init then
 		sched.run(function()
 			taskmodule.init(conf)
-			_G.debugprint('module started:', taskmodule)
+			log('TORIBIO', 'INFO', 'module %s started', packagename)
 		end)
 	end
 	return taskmodule 

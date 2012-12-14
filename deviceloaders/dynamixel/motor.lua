@@ -12,7 +12,7 @@
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
-local debugprint=_G.debugprint
+local log = require 'log'
 
 local M = {}
 
@@ -311,7 +311,7 @@ M.get_motor= function (busdevice, id)
 		Motor.name = 'ax-sync:'..tostring(math.random(2^30))
 	end
 	
-	debugprint('device object created', Motor.name)
+	log('AXMOTOR', 'INFO', 'device object created: %s', Motor.name)
 
 	--toribio.add_device(busdevice)
 	return Motor

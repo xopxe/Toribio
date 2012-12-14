@@ -15,9 +15,7 @@ local M = {}
 local sched=require 'sched'
 local toribio = require 'toribio'
 local bobot  -- = require 'bobot'
-
---propagate debug print to bobot
-local debugprint = _G.debugprint
+local log = require 'log'
 
 local devices_attached = {}
 
@@ -26,7 +24,8 @@ local function check_open_device(d, ep1, ep2)
 	if d.handler or not d.open or d.name=='pnp' then return true end --FIXME bug in usb4butia pnp module
 
         -- if the device is not open, then open the device
-	debugprint ("Opening", d.name, d.handler)
+	log('BOBOT', 'INFO', 'Opening %s on %s', d.name, d.handler)
+ 
 	return d:open(ep1 or 1, ep2 or 1) --TODO asignacion de ep?
 end
 
@@ -47,15 +46,12 @@ local function get_device_name(d)
 end
 
 local function read_devices_list()
-	--debugprint("=Listing Devices")
 	local bfound
 	local devices_attached_now = {}
 	for _, bb in ipairs(bobot.baseboards) do
-		--debugprint("===board ", bb.idBoard)
 		for _,d in ipairs(bb.devices) do
 			local regname = get_device_name(d)
 			d.name=regname
-			--debugprint("=====module ",d.module," name",regname)
 			devices_attached_now[regname]=d
 		end
 		bfound = true
@@ -89,7 +85,7 @@ local function read_devices_list()
 		end
 	end
 	
-	if not bfound then debugprint("bb:WARN: No Baseboard found.") end
+	if not bfound then log('BOBOT', 'WARNING', ' No Baseboard found') end
 end
 
 local function server_refresh ()
@@ -117,15 +113,11 @@ M.init = function (conf)
 	
 	bobot  = require 'bobot'
 
-	if debugprint then 
-		bobot.debugprint = debugprint
-	end
-	debugprint=debugprint or function() end
-	
 	bobot.init(conf.comms)
 	local count = 60
 	while #bobot.baseboards == 0 and count > 0 do
-		debugprint('bobot retrying connect', count)
+		log('BOBOT', 'DETAIL', 'Retrying conect: %s', count)
+
 		sched.sleep(1)
 		bobot.init(conf.comms)
 		count = count-1

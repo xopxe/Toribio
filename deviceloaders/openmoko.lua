@@ -15,6 +15,7 @@
 -- @alias device
 
 local M = {}
+local log = require 'log'
 
 local run_shell = function(s)
 	local f = io.popen(s) -- runs command
@@ -382,17 +383,17 @@ om uevent dump
 	for k, v in pairs (conf) do
 		if device[k] then 
 			if type(v)=='table' then
-				_G.debugprint('om from configuration', k, unpack(v))
+				--print('om from configuration', k, unpack(v))
 				device[k](unpack(v))
 			else
-				_G.debugprint('om from configuration', k, v)
+				--print('om from configuration', k, v)
 				device[k](v)
 			end
 
 		end
 	end
 	
-	_G.debugprint('device object created', device.name)
+	log('OMACCEL', 'INFO', 'Device %s created: %s', device.module, device.name)
 	toribio.add_device(device)
 
 end

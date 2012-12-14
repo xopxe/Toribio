@@ -13,12 +13,11 @@ local toribio = require 'toribio'
 local sched = require 'sched'
 local mutex = require 'mutex'
 local ax = require 'deviceloaders/dynamixel/motor'
+local log = require 'log'
 
 local mx = mutex.new()
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
-
-local debugprint=_G.debugprint
 
 local NULL_CHAR = string.char(0x00) 
 local BROADCAST_ID = string.char(0xFE)
@@ -66,10 +65,10 @@ M.init = function (conf)
 		opencount=opencount-1
 	end
 	if not filehandler then 
-		debugprint('usb failed to open',filename, erropen)
+		log('AX', 'ERROR', 'usb %s failed to open with %s', filename, erropen)
 		return 
 	end
-	debugprint(filename,'opened as', filehandler)
+	log('AX', 'INFO', 'usb %s opened with %s', filename, erropen)
 
 	local tty_params = '-parenb -parodd cs8 hupcl -cstopb cread -clocal -crtscts -ignbrk -brkint '
 	..'-ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -iuclc -ixany -imaxbel '
@@ -119,9 +118,9 @@ M.init = function (conf)
 
 			---[[
 			while (not insync) and (#packet>2) and (packet:sub(1,2) ~= PACKET_START) do 
-				debugprint('resyncA', packet:byte(1,10) )
-				--debugprint('resyncB', insync, #packet, packet:byte(1,2), PACKET_START:byte(1,2))
-				packet=packet:sub(2, -1)
+				log('AX', 'DEBUG', 'resync on "%s"', packet:byte(1,10))
+				packet=packet:sub(2, -1) --=packet:sub(packet:find(PACKET_START) or -1, -1)
+
 			end
 			--]]
 			
@@ -135,7 +134,7 @@ M.init = function (conf)
 				if #packet == packlen+4 then  --fast lane
 					local id, errcode, payload=parseAx12Packet(packet)
 					if id then 
-						--debugprint('dynamixel message parsed (fast):',id:byte(), errcode:byte(),':', payload:byte(1,#payload))
+						--print('dynamixel message parsed (fast):',id:byte(), errcode:byte(),':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
 					packet = ''
@@ -145,7 +144,7 @@ M.init = function (conf)
 					local id, errcode, payload=parseAx12Packet(packet_pre)
 					--assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
 					if id then 
-						--debugprint('dynamixel message parsed (slow):',id, errcode:byte(),':', payload:byte(1,#payload))
+						--print('dynamixel message parsed (slow):',id, errcode:byte(),':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
 
@@ -344,8 +343,7 @@ M.init = function (conf)
 		return ax.get_motor(busdevice, ids)
 	end
 	
-	debugprint('device object created', busdevice.name)
-
+	log('AX', 'INFO', 'Device %s created: %s', busdevice.module, busdevice.name)
 	toribio.add_device(busdevice)
 	
 	sched.run(function()
@@ -356,6 +354,7 @@ M.init = function (conf)
 			--print('XXXXXXXX',i, (motor or {}).name) 
 			if motor then 
 				busdevice.events[i] = string.char(i)
+				log('AX', 'INFO', 'Device %s created: %s', motor.module, motor.name)
 				toribio.add_device(motor)
 			end
 			--sched.yield()

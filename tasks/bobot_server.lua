@@ -1,10 +1,10 @@
 local M = {}
 
-local debugprint = _G.debugprint
 local toribio = require 'toribio'
 local devices = toribio.devices
 local sched = require "sched"
 local bobot = nil --require('comms/bobot').bobot
+local log = require 'log'
 
 table.pack=table.pack or function (...)
 	return {n=select('#',...),...}
@@ -40,19 +40,16 @@ process["LIST"] = function ()
 		ret = ret .. comma .. name
 		comma=","
 	end
-	debugprint("listing devices", ret)
 	return ret
 end
 
 --[[
 process["LISTI"] = function ()
     if baseboards then
-        debugprint("listing instanced modules...")
         for _, bb in ipairs(bobot.baseboards) do
     	    local handler_size=bb:get_handler_size()
             for i=1, handler_size do
                 t_handler = bb:get_handler_type(i)
-                debugprint("handler=", i-1 ," type=" ,t_handler)
             end
         end
     end
@@ -65,7 +62,7 @@ process["OPEN"] = function (parameters)
 	local ep2= tonumber(parameters[4])
 
 	if not d then
-		debugprint("ls:Missing 'device' parameter")
+		log('BOBOTSRV', 'ERROR', "ls:Missing 'device' parameter")
 		return
 	end
 
@@ -78,7 +75,7 @@ process["DESCRIBE"] = function (parameters)
 	local ep2= tonumber(parameters[4])
 
 	if not d then
-		debugprint("ls:Missing \"device\" parameter")
+		log ('BOBOTSRV', 'ERROR', "ls:Missing \"device\" parameter")
 		return
 	end
 	
@@ -123,7 +120,7 @@ process["CALL"] = function (parameters)
 	local call  = parameters[3]
 
 	if not (d and call) then
-		debugprint("ls:Missing parameters", d, call)
+		log ('BOBOTSRV', 'ERROR', "ls:Missing parameters %s %s", d, call)
 		return
 	end
 
@@ -134,7 +131,7 @@ process["CALL"] = function (parameters)
 	
 	--local tini=socket.gettime()
 	--local ok, ret = pcall (api_call.call, unpack(parameters,4))
-	--if not ok then debugprint ("Error calling", ret) end
+	--if not ok then print ("Error calling", ret) end
 	
 	local ret = table.pack(pcall (api_call, unpack(parameters,4)))
 	local ok = ret[1]
@@ -162,18 +159,9 @@ process["BOOTLOADER"] = function ()
 	end
 	return "ok"
 end
-process["DEBUG"] = function (parameters) --disable debug mode Andrew code!
-	local debug = parameters[2]
-	if not debug then return "missing parameter" end
-	if debug=="ON" then
-		debugprint = print --function(...) print (...) end  --enable printing
-	elseif debug=="OFF" then
-		debugprint = function() end  --do not print anything
-	end
-	return "ok"
-end
+
 process["QUIT"] = function () 
-	debugprint("Requested EXIT...")
+	log ('BOBOTSRV', 'INFO', "Requested EXIT...")
 	os.exit()
 	return "ok"
 end
@@ -192,16 +180,16 @@ M.init = function(conf)
 		local words=split_words(line)
 		local command=words[1]
 		if not command then
-			debugprint("bs:Error parsing line:", line, command)
+			log ('BOBOTSRV', 'ERROR', "bs:Error parsing line %s", line)
 		else
 			if not process[command] then
-				debugprint("bs:Command not supported:", command)
+				log ('BOBOTSRV', 'ERROR', "bs:Command '%s' not supported:", command)
 			else
 				local ret = process[command](words) or ""
 				if ret then 
 					inskt:send(ret.."\n")
 				else
-					debugprint ("Error calling", command)
+					log ('BOBOTSRV', 'ERROR', "Error calling '%s'", command)
 					inskt:send("\n")
 				end
 			end

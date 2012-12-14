@@ -72,13 +72,15 @@ M.init = function(conf)
 	-- @param enable true to start, false to stop
 	device.set_watch = function(enable)
 		if enable then 
-			_G.debugprint ('Enabling!')
+			log('GPSD', 'INFO', 'Watch enabled')
 			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}\r\n')
 		else
+			log('GPSD', 'INFO', 'Watch disaabled')
 			sktd_gpsd:send_sync('?WATCH={"enable":false}\r\n')
 		end
 	end
 	
+	log('GPSD', 'INFO', 'Device %s created: %s', device.module, device.name)
 	toribio.add_device(device)
 end
 

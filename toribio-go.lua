@@ -2,16 +2,15 @@
 -- This application starts the different tasks and device loaders.
 -- It is controlled trough a configuration file (default toribio-go.conf).
 -- @usage	lua toribio-go.lua [-h] [-d] [-c conffile|'none'] 
---		-d Debug mode
 --		-h Print help
 --		-c Use given configuration file (or none). 
 --		   Defaults to 'toribio-go.conf'
+--		-d NONE|ERROR|WARNING|INFO|DETAIL|DEBUG|ALL
 -- @script toribio-go
 
 package.path = package.path .. ";;;Lumen/?.lua"
 
 require 'strict'
-_G.debugprint=function() end
 
 local sched = require 'sched'
 local log = require 'log'
@@ -72,9 +71,11 @@ end
 
 local opts = getopt( _G.arg, "cd" )
 
-if opts["d"] then
-	debugprint=print --bugprint or print
-	debugprint('Debug print enabled')
+local param_log_level = opts["d"]
+if param_log_level  == true then param_log_level ='DETAIL' end
+if param_log_level then
+	toribio.configuration.log = toribio.configuration.log or {}
+	toribio.configuration.log.defaultlevel = param_log_level
 end
 
 --watches for task die events and prints out
@@ -118,28 +119,30 @@ end
 if toribio.configuration and toribio.configuration.log 
 and toribio.configuration.log and toribio.configuration.log.defaultlevel then
 	print ('Setting log level', toribio.configuration.log.defaultlevel)
-	log.defaultlevel(toribio.configuration.log.defaultlevel)
+	log.setlevel(toribio.configuration.log.defaultlevel)
 end
 
 sched.run(function()
 	for _, section in ipairs({'deviceloaders', 'tasks'}) do
 		for task, conf in pairs(toribio.configuration[section] or {}) do
-			print ('processing conf', section, task, (conf and conf.load) or false)
+			log ('TORIBIOGO', 'DETAIL', 'Processing conf %s %s: %s', section, task, tostring((conf and conf.load) or false))
 
 			if conf and conf.load==true then
 				--[[
 				local taskmodule = require (section..'/'..task)
 				if taskmodule.start then
 					local ok = pcall(taskmodule.start,conf)
-					debugprint('module started:', ok)
 				end
 				--]]
+				log ('TORIBIOGO', 'INFO', 'Starting %s %s', section, task)
 				toribio.start(section, task)
 			end
 		end
 	end
 end)
 
-debugprint('toribio go!')
+print('Toribio go!')
+log ('TORIBIOGO', 'INFO', 'Ready')
 sched.go()
+
 

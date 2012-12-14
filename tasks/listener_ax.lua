@@ -9,7 +9,7 @@ M.init =  function(conf)
 		local bcaster = dynamixelbus.get_broadcaster()
 		local m3 = toribio.wait_for_device('ax12:3')
 		local m12 = toribio.wait_for_device('ax12:12')
-		--debugprint ('torqueenable:', bcaster.set_torque_enable(false))
+		--print ('torqueenable:', bcaster.set_torque_enable(false))
 		--sched.sleep(3)
 
 		---[[

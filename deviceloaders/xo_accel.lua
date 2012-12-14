@@ -4,6 +4,7 @@
 -- @alias device
 
 local M = {}
+local log = require 'log'
 
 M.init = function(conf)
 	toribio = require 'toribio'
@@ -58,7 +59,7 @@ M.init = function(conf)
 
 	}
 
-	_G.debugprint('device object created', device.name)
+	log('XOACCEL', 'INFO', 'Device %s created: %s', device.module, device.name)
 	toribio.add_device(device)
 end
 
