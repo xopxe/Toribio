@@ -137,13 +137,19 @@ enable it, add the following:</p>
 <p><a name="Log_Level"></a></p>
 <h2>Log Level</h2>
 
-<p>Toribio uses Lumens logging infrastructure. The default log level can be set
-using the log.defaultlevel parameter. Available levels are  'NONE', 'ERROR', 
-'WARNING', 'INFO', 'DETAIL', 'DEBUG' and 'ALL'.</p>
+<p>Toribio uses Lumens logging infrastructure. It is possible to change the 
+default log level, and set level per logging module. Available levels are
+'NONE', 'ERROR', 'WARNING', 'INFO', 'DETAIL', 'DEBUG' and 'ALL'.</p>
+
+<p>For example, to set a default level of INFO, while muting logging from 
+the scheduler and showing all available messages from the dynamixel module, 
+use:</p>
 
 
 <pre>
- log.defaultlevel = <span class="string">'INFO'</span>
+ log.level.default = <span class="string">'INFO'</span>
+ log.level.SCHED = <span class="string">'NONE'</span>
+ log.level.AX = <span class="string">'ALL'</span>
 </pre>
 
 <p><a name="Parameters_on_the_commandline"></a></p>
