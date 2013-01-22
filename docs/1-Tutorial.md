@@ -53,14 +53,14 @@ We will do a remote controlled robot. The idea is that we want to control a two-
 
 ### Remote control using a proxy
 
-This is is the simplest method. The proxy task provided with Lumen allows a Toribio to receiv events from another Toribio instance, trough a network. Thus the ""remote control"" Toribio only have to start the proxy task and load the mouse device, and the "robot" Toribio can receive mouse events as if they were local.
+This is is the simplest method. The proxy task provided with Lumen allows a Toribio to receive events from another Toribio instance, trough a network. Thus the ""remote control"" Toribio only have to start the proxy task and load the mouse device, and the 'robot' Toribio can receive mouse events as if they were local.
 
 There is no need to write code for the remote control, everything is achieved trough configuration:
 
     deviceloaders.mice.load = true
     tasks.proxy.load = true
 
-The robot will have a task (named rcp_bot.lua) that will use the proxy service to receive the mouse events. For thge moment, we will only show how to receive the mouse events without actually moving the motors. The configuration file will have the following:
+The robot will have a task (named rcp_bot.lua) that will use the proxy service to receive the mouse events. For the moment, we will only show how to receive the mouse events without actually moving the motors. The configuration file will have the following:
 
     tasks.rcp_bot.load = true
     tasks.rcp_bot.rc_ip = "192.168.1.100"

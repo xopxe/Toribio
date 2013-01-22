@@ -194,7 +194,7 @@ M.init = function(conf)
 				end
 			end
 		end
-		
+		return true
 	end)
 	
 end

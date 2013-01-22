@@ -64,6 +64,7 @@ M.init = function(conf)
 			else
 				log('GPSD', 'ERROR', 'failed to jsondecode buff  with length %s with error "%s"', tostring(#buff), tostring(index).." "..tostring(e))
 			end
+			return true
 		end
 	end
 	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, 'line', get_incomming_handler())

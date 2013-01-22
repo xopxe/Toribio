@@ -53,6 +53,7 @@ M.init = function(conf)
 		if dx~=0 or dy~=0 then
 			sched.signal(move, x, y, dx, dy)
 		end
+		return true
 	end))
 	
 	--- Name of the device (in this case, 'mice').

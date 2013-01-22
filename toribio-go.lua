@@ -14,7 +14,7 @@ require 'strict'
 
 local sched = require 'sched'
 local log = require 'log'
-local selector = require "tasks/selector".init({service='nixio'})
+require "tasks/selector".init({service='nixio'})
 
 local toribio = require 'toribio'
 
