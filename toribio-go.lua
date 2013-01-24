@@ -71,13 +71,6 @@ end
 
 local opts = getopt( _G.arg, "cd" )
 
-local param_log_level = opts["d"]
-if param_log_level  == true then param_log_level ='DETAIL' end
-if param_log_level then
-	toribio.configuration.log = toribio.configuration.log or {}
-	toribio.configuration.log.defaultlevel = param_log_level
-end
-
 --watches for task die events and prints out
 sched.sigrun({emitter='*', events={sched.EVENT_DIE}}, print)
 
@@ -102,10 +95,11 @@ end
 if opts["h"] then
 	print [[Usage:
 	lua toribio-go.lua [-h] [-d] [-c conffile|'none'] 
-		-d Debug mode
-		-h This help
+		-h Print help
 		-c Use given configuration file (or none). 
 		   Defaults to 'toribio-go.conf'
+		-d default log level. Available levels:
+		   NONE|ERROR|WARNING|INFO|DETAIL|DEBUG|ALL
 	]]
 	os.exit()
 end
@@ -114,13 +108,36 @@ if not opts["c"] then
 elseif opts["c"] ~= "none" then
 	load_configuration(opts["c"])
 end
+local param_log_level = opts["d"]
+if param_log_level  == true then param_log_level ='DEBUG' end
+if param_log_level then
+	local conf = toribio.configuration
+	conf.log = conf.log or {}
+	conf.log.level = conf.log.level or {}
+	conf.log.level.default = param_log_level
+end
+
+local function table_path_exists(t, ...)
+	local p = t
+	for i = 1, select('#', ...) do
+		local field = select(i, ...)
+		p = p[field]
+		if p==nil then return end
+	end
+	return p
+end
 
 --set log level
-if toribio.configuration and toribio.configuration.log 
-and toribio.configuration.log and toribio.configuration.log.defaultlevel then
-	print ('Setting log level', toribio.configuration.log.defaultlevel)
-	log.setlevel(toribio.configuration.log.defaultlevel)
+local loglevel = table_path_exists(toribio.configuration, 'log', 'level')
+for logmod,level in pairs(loglevel or {}) do
+	print ('Setting log level for', logmod, level)
+	if logmod == 'default' then
+		log.setlevel(level)
+	else
+		log.setlevel(level, logmod)
+	end
 end
+
 
 sched.run(function()
 	for _, section in ipairs({'deviceloaders', 'tasks'}) do
