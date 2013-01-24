@@ -10,7 +10,7 @@
 
 package.path = package.path .. ";;;Lumen/?.lua"
 
-require 'strict'
+--require 'strict'
 
 local sched = require 'sched'
 local log = require 'log'

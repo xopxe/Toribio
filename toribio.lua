@@ -220,7 +220,11 @@ M.start = function(section, taskname)
 	local sect = M.configuration[section] or {}
 	local conf = sect[taskname] or {}
 	local taskmodule = require (packagename)
-	log('TORIBIO', 'INFO', 'module %s loaded', packagename)
+	log('TORIBIO', 'INFO', 'module %s loaded: %s', packagename, tostring(taskmodule))
+	if taskmodule==true then 
+		log('TORIBIO', 'WARN', 'Task module "%s" did not return a table!', packagename)
+		error('Task module "'..packagename..'" did not return a table!')
+	end
 	if taskmodule and taskmodule.init then
 		sched.run(function()
 			taskmodule.init(conf)
