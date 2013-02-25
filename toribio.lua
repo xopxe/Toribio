@@ -167,11 +167,13 @@ M.add_device = function (device)
 	device.name=devicename
 	devices[devicename] = device
 	
-	log ('TORIBIO', 'INFO', 'Cataloging task %s by for device %s', tostring(device.task), device.name)
-	assert(catalog_tasks:register(device.name, device.task))
+	if device.task then
+		log ('TORIBIO', 'INFO', 'Cataloging task %s for device %s', tostring(device.task), device.name)
+		assert(catalog_tasks:register(device.name, device.task))
+	end
 	
 	for evname, ev in pairs(device.events or {}) do
-		log ('TORIBIO', 'INFO', 'Cataloging event %s by for device %s', evname, device.name)
+		log ('TORIBIO', 'INFO', 'Cataloging event %s for device %s', evname, device.name)
 		assert(catalog_events:register(evname, ev))
 	end
 	

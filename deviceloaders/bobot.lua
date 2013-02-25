@@ -24,7 +24,7 @@ local function check_open_device(d, ep1, ep2)
 	if d.handler or not d.open or d.name=='pnp' then return true end --FIXME bug in usb4butia pnp module
 
         -- if the device is not open, then open the device
-	log('BOBOT', 'INFO', 'Opening %s on %s', d.name, d.handler)
+	log('BOBOT', 'INFO', 'Opening %s on %s', tostring(d.name), tostring(d.handler))
  
 	return d:open(ep1 or 1, ep2 or 1) --TODO asignacion de ep?
 end
