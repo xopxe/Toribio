@@ -11,7 +11,7 @@ local M ={}
 
 local sched = require 'sched'
 local catalog_tasks = require 'catalog'.get_catalog('tasks')
-local events_catalog = require 'catalog'.get_catalog('events')
+local catalog_events = require 'catalog'.get_catalog('events')
 
 local log= require 'log'
 local mutex = require 'mutex'
@@ -172,7 +172,7 @@ M.add_device = function (device)
 	
 	for evname, ev in pairs(device.events or {}) do
 		log ('TORIBIO', 'INFO', 'Cataloging event %s by for device %s', evname, device.name)
-		assert(events_catalog:register(evname, ev))
+		assert(catalog_events:register(evname, ev))
 	end
 	
 	 -- for device:register_callback() notation
@@ -259,7 +259,7 @@ M.catalog_tasks = catalog_tasks
 
 --- A catalog for events.
 -- This is a catalog used to give well known names to events.
-M.events_catalog = events_catalog
+M.catalog_events = catalog_events
 
 --- The configuration table.
 -- This table contains the configurations specified in toribio-go.conf file.
