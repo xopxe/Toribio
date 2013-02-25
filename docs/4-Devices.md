@@ -158,7 +158,7 @@ abstract service. The user can define his own device modules. For that
 it must instantiate a table with the appropriate structure, and feed it to 
 Toribio using `toribio.add_device(device)`. This will allow other tasks
 to easily request it (using `toribio.wait_for_device()`), and register callbacks
-(using `toribio.wait_for_device()`).
+(using `toribio.register_callback()`).
 
 The following code creates devices that are attached to distance-sensor devices, 
 and trigger signals when the sensed distance below a configurable threshold.
