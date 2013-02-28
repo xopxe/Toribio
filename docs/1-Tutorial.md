@@ -7,7 +7,7 @@ Here we will build a few programs, step-by-step.
 
 First we will do a data logger, that will save information read from an AX-12 motor to a file. We will call the task "axlogger".
 
-We start by editing the configuration file. We must configure two things: enable the dynamixel device loader, and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to toribio-go.conf:
+We start by editing the configuration file. We must configure two things: enable the dynamixel device loader, and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to miconf.conf:
 
     deviceloaders.dynamixel.load = true
     deviceloaders.dynamixel.filename = '/dev/ttyUSB0'
@@ -23,16 +23,15 @@ Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:
     local toribio = require 'toribio'
 
     M.init = function(conf)
-    	sched.run(function()
-    		local file = io.open(conf.outfile or 'data.log', 'w')
-    		local motor = toribio.wait_for_device(conf.motorname)
-    		while true do
-    			local l = motor:get_load()
-    			file:write(sched.get_time()..' '..l..'\n')
-    			file:flush()
-    			sched.sleep(conf.interval or 5)
-    		end
-    	end)
+
+    	local file = io.open(conf.outfile or 'data.log', 'w')
+    	local motor = toribio.wait_for_device(conf.motorname)
+    	while true do
+    		local l = motor:get_load()
+    		file:write(sched.get_time()..' '..l..'\n')
+    		file:flush()
+    		sched.sleep(conf.interval or 5)
+    	end
     end
 
     return M
@@ -45,7 +44,7 @@ Notice how in the program we provide default values for configuration parameters
 
 Finally, we run the program:
 
-    lua toribio-go.lua
+    lua toribio-go.lua -c miconf.conf
 
 ## Remote controlled robot
 
@@ -93,7 +92,7 @@ This method is very convenient, but does not adapt very well for a remote contro
 
 ### Remote Control
 
-We will need the mice device, and a task to process mice input and generate commands. We begin with the toribio-go.conf configuration file:
+We will need the mice device, and a task to process mice input and generate commands. We begin with the rc_control.conf configuration file:
 
     deviceloaders.mice.load = true
     tasks.rc_control.load=true
@@ -112,19 +111,18 @@ The remote control will behave as follows: it tracks mouse's movements, generate
     		--calculate velocities and send them over udp
     	end
     
-    	sched.run(function()
-    		local mice = toribio.wait_for_device('mice:/dev/input/mice')
-    		local lastx, lasty = 0, 0
-    		mice:register_callback('move', function (x, y)
-    			if x then 
-    				generate_output(x, y)
-    				lastx, lasty = x, y
-    			else
-    				-- timeout with no mouse movements
-    				generate_output(lastx, lasty)
-    			end
-    		end, 0.5)
-    	end)
+    	local mice = toribio.wait_for_device('mice:/dev/input/mice')
+    	local lastx, lasty = 0, 0
+    	mice:register_callback('move', function (x, y)
+    		if x then 
+    			generate_output(x, y)
+    			lastx, lasty = x, y
+    		else
+    			-- timeout with no mouse movements
+    			generate_output(lastx, lasty)
+    		end
+    	end, 0.5)
+    
     end
     
     return M
@@ -154,7 +152,7 @@ This program can be easily improved adding a callback that would react to mouse 
 
 ### Controlled bot
 
-The bot listens for UDP packets, parses them and set motor velocities. As allways, the configuration in toribio-go.conf:
+The bot listens for UDP packets, parses them and set motor velocities. As allways, the configuration in rc_bot.conf:
 
     deviceloaders.dynamixel.load = true
     deviceloaders.dynamixel.filename = '/dev/ttyUSB0'
@@ -172,31 +170,31 @@ And the tasks/rc\_bot.lua skeleton:
     
     M.init = function(conf)
     
-    	sched.run(function()
-    		--initialize motors
-    		local motor_left = toribio.wait_for_device(conf.motor_left)
-    		local motor_right = toribio.wait_for_device(conf.motor_right)
-    		motor_left.init_mode_wheel()
-    		motor_right.init_mode_wheel()
 
-    		--initialize socket
-    		local nixio = require 'nixio'
-    		local udp = assert(nixio.bind(conf.ip, conf.port, 'inet', 'dgram'))
-    		local selector = require 'tasks/selector'
-    		local udp = selector.new_udp(conf.ip, conf.port, 1480)
+    	--initialize motors
+    	local motor_left = toribio.wait_for_device(conf.motor_left)
+    	local motor_right = toribio.wait_for_device(conf.motor_right)
+    	motor_left.init_mode_wheel()
+    	motor_right.init_mode_wheel()
+
+    	--initialize socket
+    	local nixio = require 'nixio'
+    	local udp = assert(nixio.bind(conf.ip, conf.port, 'inet', 'dgram'))
+    	local selector = require 'tasks/selector'
+    	local udp = selector.new_udp(conf.ip, conf.port, 1480)
     
-    		--listen for messages
-    		sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=1}, 
-    			function(_, _, msg) 
-    				local left, right = 0, 0
-    				if msg then
-    					left, right = msg:match('^([^,]+),([^,]+)$')
-    				end
-    				motor_left.set_speed(left)
-    				motor_right.set_speed(right)
+    	--listen for messages
+    	sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=1}, 
+    		function(_, _, msg) 
+    			local left, right = 0, 0
+    			if msg then
+    				left, right = msg:match('^([^,]+),([^,]+)$')
     			end
-    		)
-    	end)
+    			motor_left.set_speed(left)
+    			motor_right.set_speed(right)
+    		end
+    	)
+
     end
     
     return M
@@ -205,13 +203,18 @@ Notice how we use the selector service to create a udp socket object, that will 
 
 Now we run toribio with rc\_control task enabled on one machine, connected to a second machine with rc\_bot enabled.
 
-    lua toribio-go.lua
+    lua toribio-go.lua -c rc_control.conf
+
+and
+
+    lua toribio-go.lua -c rc_bot.conf
+
 
 Notice that rc\_control might have to be run as sudo, if your distribution request such thing for accesing /dev/input/mice.
 
 ## Reactive robotics
 
-In this example, we will use a usb4butia IO board. Our task will be called bootia, and we will use the deviceloader/bobot task to access the hardware. Thus, our toribio-go.conf will have the following:
+In this example, we will use a usb4butia IO board. Our task will be called bootia, and we will use the deviceloader/bobot task to access the hardware. Thus, our configuration file will have the following:
 
     deviceloaders.bobot.load = true
     deviceloaders.bobot.path = '../bobot' --path to bobot library

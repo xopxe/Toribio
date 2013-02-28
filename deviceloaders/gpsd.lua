@@ -76,7 +76,7 @@ M.init = function(conf)
 			log('GPSD', 'INFO', 'Watch enabled')
 			sktd_gpsd:send_sync('?WATCH={"enable":true,"json":true}\r\n')
 		else
-			log('GPSD', 'INFO', 'Watch disaabled')
+			log('GPSD', 'INFO', 'Watch disabled')
 			sktd_gpsd:send_sync('?WATCH={"enable":false}\r\n')
 		end
 	end

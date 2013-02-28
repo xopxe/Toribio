@@ -81,7 +81,7 @@
 
 <p>First we will do a data logger, that will save information read from an AX-12 motor to a file. We will call the task "axlogger".</p>
 
-<p>We start by editing the configuration file. We must configure two things: enable the dynamixel device loader, and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to toribio-go.conf:</p>
+<p>We start by editing the configuration file. We must configure two things: enable the dynamixel device loader, and register the new task, adding the configuration parameters we might use. We do that by adding the following lines to miconf.conf:</p>
 
 
 <pre>
@@ -102,16 +102,15 @@
  <span class="keyword">local</span> toribio = <span class="global">require</span> <span class="string">'toribio'</span>
 
  M.init = <span class="keyword">function</span>(conf)
-     sched.run(<span class="keyword">function</span>()
-         <span class="keyword">local</span> file = <span class="global">io</span>.open(conf.outfile <span class="keyword">or</span> <span class="string">'data.log'</span>, <span class="string">'w'</span>)
-         <span class="keyword">local</span> motor = toribio.wait_for_device(conf.motorname)
-         <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
-             <span class="keyword">local</span> l = motor:get_load()
-             file:write(sched.get_time()..<span class="string">' '</span>..l..<span class="string">'\n'</span>)
-             file:flush()
-             sched.sleep(conf.interval <span class="keyword">or</span> <span class="number">5</span>)
-         <span class="keyword">end</span>
-     <span class="keyword">end</span>)
+
+     <span class="keyword">local</span> file = <span class="global">io</span>.open(conf.outfile <span class="keyword">or</span> <span class="string">'data.log'</span>, <span class="string">'w'</span>)
+     <span class="keyword">local</span> motor = toribio.wait_for_device(conf.motorname)
+     <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+         <span class="keyword">local</span> l = motor:get_load()
+         file:write(sched.get_time()..<span class="string">' '</span>..l..<span class="string">'\n'</span>)
+         file:flush()
+         sched.sleep(conf.interval <span class="keyword">or</span> <span class="number">5</span>)
+     <span class="keyword">end</span>
  <span class="keyword">end</span>
 
  <span class="keyword">return</span> M
@@ -127,7 +126,7 @@
 
 
 <pre>
- lua toribio-go.lua
+ lua toribio-go.lua -c miconf.conf
 </pre>
 
 <p><a name="Remote_controlled_robot"></a></p>
@@ -187,7 +186,7 @@
 
 <h3>Remote Control</h3>
 
-<p>We will need the mice device, and a task to process mice input and generate commands. We begin with the toribio-go.conf configuration file:</p>
+<p>We will need the mice device, and a task to process mice input and generate commands. We begin with the rc_control.conf configuration file:</p>
 
 
 <pre>
@@ -211,19 +210,18 @@
          <span class="comment">--calculate velocities and send them over udp
 </span>     <span class="keyword">end</span>
 
-     sched.run(<span class="keyword">function</span>()
-         <span class="keyword">local</span> mice = toribio.wait_for_device(<span class="string">'mice:/dev/input/mice'</span>)
-         <span class="keyword">local</span> lastx, lasty = <span class="number">0</span>, <span class="number">0</span>
-         mice:register_callback(<span class="string">'move'</span>, <span class="keyword">function</span> (x, y)
-             <span class="keyword">if</span> x <span class="keyword">then</span> 
-                 generate_output(x, y)
-                 lastx, lasty = x, y
-             <span class="keyword">else</span>
-                 <span class="comment">-- timeout with no mouse movements
-</span>                 generate_output(lastx, lasty)
-             <span class="keyword">end</span>
-         <span class="keyword">end</span>, <span class="number">0.5</span>)
-     <span class="keyword">end</span>)
+     <span class="keyword">local</span> mice = toribio.wait_for_device(<span class="string">'mice:/dev/input/mice'</span>)
+     <span class="keyword">local</span> lastx, lasty = <span class="number">0</span>, <span class="number">0</span>
+     mice:register_callback(<span class="string">'move'</span>, <span class="keyword">function</span> (x, y)
+         <span class="keyword">if</span> x <span class="keyword">then</span> 
+             generate_output(x, y)
+             lastx, lasty = x, y
+         <span class="keyword">else</span>
+             <span class="comment">-- timeout with no mouse movements
+</span>             generate_output(lastx, lasty)
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>, <span class="number">0.5</span>)
+
  <span class="keyword">end</span>
 
  <span class="keyword">return</span> M
@@ -260,7 +258,7 @@
 
 <h3>Controlled bot</h3>
 
-<p>The bot listens for UDP packets, parses them and set motor velocities. As allways, the configuration in toribio-go.conf:</p>
+<p>The bot listens for UDP packets, parses them and set motor velocities. As allways, the configuration in rc_bot.conf:</p>
 
 
 <pre>
@@ -283,31 +281,31 @@
 
  M.init = <span class="keyword">function</span>(conf)
 
-     sched.run(<span class="keyword">function</span>()
-         <span class="comment">--initialize motors
-</span>         <span class="keyword">local</span> motor_left = toribio.wait_for_device(conf.motor_left)
-         <span class="keyword">local</span> motor_right = toribio.wait_for_device(conf.motor_right)
-         motor_left.init_mode_wheel()
-         motor_right.init_mode_wheel()
 
-         <span class="comment">--initialize socket
-</span>         <span class="keyword">local</span> nixio = <span class="global">require</span> <span class="string">'nixio'</span>
-         <span class="keyword">local</span> udp = <span class="global">assert</span>(nixio.bind(conf.ip, conf.port, <span class="string">'inet'</span>, <span class="string">'dgram'</span>))
-         <span class="keyword">local</span> selector = <span class="global">require</span> <span class="string">'tasks/selector'</span>
-         <span class="keyword">local</span> udp = selector.new_udp(conf.ip, conf.port, <span class="number">1480</span>)
+     <span class="comment">--initialize motors
+</span>     <span class="keyword">local</span> motor_left = toribio.wait_for_device(conf.motor_left)
+     <span class="keyword">local</span> motor_right = toribio.wait_for_device(conf.motor_right)
+     motor_left.init_mode_wheel()
+     motor_right.init_mode_wheel()
 
-         <span class="comment">--listen for messages
-</span>         sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=<span class="number">1</span>}, 
-             <span class="keyword">function</span>(_, _, msg) 
-                 <span class="keyword">local</span> left, right = <span class="number">0</span>, <span class="number">0</span>
-                 <span class="keyword">if</span> msg <span class="keyword">then</span>
-                     left, right = msg:match(<span class="string">'^([^,]+),([^,]+)$'</span>)
-                 <span class="keyword">end</span>
-                 motor_left.set_speed(left)
-                 motor_right.set_speed(right)
+     <span class="comment">--initialize socket
+</span>     <span class="keyword">local</span> nixio = <span class="global">require</span> <span class="string">'nixio'</span>
+     <span class="keyword">local</span> udp = <span class="global">assert</span>(nixio.bind(conf.ip, conf.port, <span class="string">'inet'</span>, <span class="string">'dgram'</span>))
+     <span class="keyword">local</span> selector = <span class="global">require</span> <span class="string">'tasks/selector'</span>
+     <span class="keyword">local</span> udp = selector.new_udp(conf.ip, conf.port, <span class="number">1480</span>)
+
+     <span class="comment">--listen for messages
+</span>     sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=<span class="number">1</span>}, 
+         <span class="keyword">function</span>(_, _, msg) 
+             <span class="keyword">local</span> left, right = <span class="number">0</span>, <span class="number">0</span>
+             <span class="keyword">if</span> msg <span class="keyword">then</span>
+                 left, right = msg:match(<span class="string">'^([^,]+),([^,]+)$'</span>)
              <span class="keyword">end</span>
-         )
-     <span class="keyword">end</span>)
+             motor_left.set_speed(left)
+             motor_right.set_speed(right)
+         <span class="keyword">end</span>
+     )
+
  <span class="keyword">end</span>
 
  <span class="keyword">return</span> M
@@ -319,7 +317,14 @@
 
 
 <pre>
- lua toribio-go.lua
+ lua toribio-go.lua -c rc_control.conf
+</pre>
+
+<p>and</p>
+
+
+<pre>
+ lua toribio-go.lua -c rc_bot.conf
 </pre>
 
 <p>Notice that rc_control might have to be run as sudo, if your distribution request such thing for accesing /dev/input/mice.</p>
@@ -327,7 +332,7 @@
 <p><a name="Reactive_robotics"></a></p>
 <h2>Reactive robotics</h2>
 
-<p>In this example, we will use a usb4butia IO board. Our task will be called bootia, and we will use the deviceloader/bobot task to access the hardware. Thus, our toribio-go.conf will have the following:</p>
+<p>In this example, we will use a usb4butia IO board. Our task will be called bootia, and we will use the deviceloader/bobot task to access the hardware. Thus, our configuration file will have the following:</p>
 
 
 <pre>
