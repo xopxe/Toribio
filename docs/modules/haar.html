@@ -32,7 +32,6 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Functions">Functions</a></li>
 <li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
 </ul>
@@ -43,8 +42,8 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
-  <li><strong>gpsd</strong></li>
-  <li><a href="../modules/haar.html">haar</a></li>
+  <li><a href="../modules/gpsd.html">gpsd</a></li>
+  <li><strong>haar</strong></li>
   <li><a href="../modules/mice.html">mice</a></li>
   <li><a href="../modules/openmoko.html">openmoko</a></li>
   <li><a href="../modules/openmoko_accel.html">openmoko_accel</a></li>
@@ -69,20 +68,14 @@
 
 <div id="content">
 
-<h1>Module <code>gpsd</code></h1>
+<h1>Module <code>haar</code></h1>
 
-<p>Library for accesing gpsd.</p>
-<p> The device will be named "gpsd", module "gpsd", and will generate signals
- from gpsd. The gpsd service must be started. For an example using this module, 
- see listener_gpsd.lua</p>
+<p>Library for accesing Haar clasificator.</p>
+<p> The device will be named "haar", module "haar", and will generate signals
+ from a external program using OpenCV (see deviceloaders/haar/haar_stream.py). 
+ The external haar_stream.py must be started separately.
+ The configuration fields and defaults are conf.ip = '127.0.01', conf.port='45454' </p>
 
-<h2><a href="#Functions">Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#set_watch">set_watch&nbsp;(enable)</a></td>
-	<td class="summary">Start and Stop gpsd watching.</td>
-	</tr>
-</table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
@@ -94,11 +87,11 @@
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#name">name</a></td>
-	<td class="summary">Name of the device (in this case, 'gpsd').</td>
+	<td class="summary">Name of the device (in this case, 'haar').</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module name (in this case, 'gpsd').</td>
+	<td class="summary">Module name (in this case, 'haar').</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#task">task</a></td>
@@ -110,26 +103,6 @@
 <br/>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
-    
-    <dl class="function">
-    <dt>
-    <a name = "set_watch"></a>
-    <strong>set_watch&nbsp;(enable)</strong>
-    </dt>
-    <dd>
-    Start and Stop gpsd watching. 
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>enable</em></code>:  true to start, false to stop</li>
-    </ul>
-
-
-
-
-</dd>
-</dl>
     <h2><a name="Tables"></a>Tables</h2>
     
     <dl class="function">
@@ -139,32 +112,11 @@
     </dt>
     <dd>
     Events emitted by this device. 
- Each event represent a gpsd event. The signal has a single
- parameter, a table containing the gpsd provided data.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>VERSION</em></code>: 
-
-</li>
-       <li><code><em>WATCH</em></code>: 
-
-</li>
-       <li><code><em>DEVICES</em></code>: 
-
-</li>
-       <li><code><em>DEVICE</em></code>: 
-
-</li>
-       <li><code><em>SKY</em></code>: 
-
-</li>
-       <li><code><em>TPV</em></code>: 
-
-</li>
-       <li><code><em>AIS</em></code>: 
-
-</li>
+       <li><code><em>match</em></code>:  a match has been received. Parameters are centerx, centery, sizex, sizey
+ of the matching area.</li>
     </ul>
 
 
@@ -180,7 +132,7 @@
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device (in this case, 'gpsd'). 
+    Name of the device (in this case, 'haar'). 
 
 
 
@@ -192,7 +144,7 @@
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'gpsd'). 
+    Module name (in this case, 'haar'). 
 
 
 

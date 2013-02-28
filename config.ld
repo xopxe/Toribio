@@ -2,7 +2,7 @@ file = {"toribio.lua", "toribio-go.lua", "deviceloaders/dynamixel.lua",
 	"deviceloaders/dynamixel/motor.lua", "deviceloaders/mice.lua",
 	"deviceloaders/bobot.lua", "deviceloaders/xo_accel.lua",
 	"deviceloaders/openmoko_accel.lua", "deviceloaders/openmoko.lua",
-	"deviceloaders/gpsd.lua"}
+	"deviceloaders/gpsd.lua", "deviceloaders/haar.lua"}
 project = "Toribio"
 description = "Embedded Robotics Library."
 format = 'markdown'
