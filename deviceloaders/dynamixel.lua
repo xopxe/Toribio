@@ -41,7 +41,6 @@ local ax_errors = {
 	[0x20] = 'ERROR_OVERLOAD',
 	[0x40] = 'ERROR_INSTRUCTION',
 }
-local signal_ax_error = {}
 
 local function generate_checksum(data)
 	local checksum = 0
@@ -55,27 +54,29 @@ M.init = function (conf)
 	local selector = require 'tasks/selector'
 	
 	local filename = assert(conf.filename)
-	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, 65000)--TODO message usual size?
+	log('AX', 'INFO', 'usb device file: %s', tostring(filename))
+
+	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)
 	
 	local opencount=60
 	while not filehandler and opencount>0 do
 		print('retrying open...', opencount)
 		sched.sleep(1)
-		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, 65000)--TODO message usual size?
+		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)
 		opencount=opencount-1
 	end
 	if not filehandler then 
-		log('AX', 'ERROR', 'usb %s failed to open with %s', filename, erropen)
-		return 
+		log('AX', 'ERROR', 'usb %s failed to open with %s', tostring(filename), tostring(erropen))
+		return
 	end
-	log('AX', 'INFO', 'usb %s opened with %s', filename, erropen)
+	log('AX', 'INFO', 'usb %s opened', tostring(filename))
 
-	local tty_params = '-parenb -parodd cs8 hupcl -cstopb cread -clocal -crtscts -ignbrk -brkint '
+	local tty_flags = conf.stty_flags or '-parenb -parodd cs8 hupcl -cstopb cread -clocal -crtscts -ignbrk -brkint '
 	..'-ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -iuclc -ixany -imaxbel '
 	..'-opost -olcuc -ocrnl -onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0 -isig -icanon '
 	..'-iexten -echo -echoe -echok -echonl -noflsh -xcase -tostop -echoprt -echoctl -echoke'
 	local speed = conf.serialspeed or 1000000
-	local init_tty_string ='stty -F ' .. filename .. ' ' .. speed .. ' ' .. tty_params
+	local init_tty_string ='stty -F ' .. filename .. ' ' .. speed .. ' ' .. tty_flags
 
 	os.execute(init_tty_string)
 	filehandler.fd:sync() --flush()
@@ -83,7 +84,11 @@ M.init = function (conf)
 	--local message_pipe=sched.pipes.new({}, 10)
 	
 	local taskf_protocol = function() 
-		local waitd_traffic = {emitter=selector.task,events={filehandler.events.data}, buff_len=-1}
+		local waitd_traffic = sched.new_waitd({
+			emitter=selector.task,
+			events={filehandler.events.data}, 
+			buff_len=-1
+		})
 		local packet=''
 		local insync=false
 		local packlen=nil -- -1
@@ -93,22 +98,28 @@ M.init = function (conf)
 			local id = s:sub(3,3)
 			--local data_length = s:byte(4)
 			local data = s:sub(5, -1)
-			if generate_checksum(s:sub(3,-1))~=0 then return nil,'checksum error' end
-			local errinpacket = data:sub(1,1)
-			if errinpacket ~= NULL_CHAR then
-				sched.signal(signal_ax_error, id, ax_errors[errinpacket:byte()])
+			if generate_checksum(s:sub(3,-1))~=0 then return nil,'READ_CHECKSUM_ERROR' end
+			local errinpacket= data:byte(1,1)
+			if errinpacket ~= 0 then
+				local errmessage = ax_errors[errinpacket]
+				print ('parseAx12Packet error', errinpacket, errmessage)
+				--sched.signal(signal_ax_error, id, ax_errors[errinpacket:byte()])
 			end
 			local payload = data:sub(2,-2)
-			--print('parsed', id:byte(1, #id),'$', err:byte(1, #err),':', payload:byte(1, #payload))
+			--print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket:byte(1, #errinpacket),':', payload:byte(1, #payload))
 			return id, errinpacket, payload
 		end
 
 		while true do
 			local _, _, fragment, err_read = sched.wait(waitd_traffic)
 			
-			if err_read=='closed' then 
-				print('dynamixel file closed:', filename)
-				return
+			if not fragment then 
+				--if err_read=='closed' then 
+				--	print('dynamixel file closed:', filename)
+				--	return
+				--end
+				log('AX', 'ERROR', 'Read from dynamixel device file failed with %s', tostring(err_read))
+				return 
 			end
 			if fragment==NULL_CHAR  then 
 				error('No power on serial?')
@@ -134,7 +145,7 @@ M.init = function (conf)
 				if #packet == packlen+4 then  --fast lane
 					local id, errcode, payload=parseAx12Packet(packet)
 					if id then 
-						--print('dynamixel message parsed (fast):',id:byte(), errcode:byte(),':', payload:byte(1,#payload))
+						--print('dynamixel message parsed (fast):',id:byte(), errcode,':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
 					packet = ''
@@ -144,7 +155,7 @@ M.init = function (conf)
 					local id, errcode, payload=parseAx12Packet(packet_pre)
 					--assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
 					if id then 
-						--print('dynamixel message parsed (slow):',id, errcode:byte(),':', payload:byte(1,#payload))
+						--print('dynamixel message parsed (slow):',id:byte(), errcode,':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
 
@@ -156,7 +167,14 @@ M.init = function (conf)
 			end
 		end
 	end
-	local task_protocol = sched.run(taskf_protocol)
+	local task_protocol = sched.new_task(taskf_protocol)
+	local waitd_protocol = sched.new_waitd({
+		emitter=task_protocol, 
+		events='*', 
+		timeout = conf.serialtimeout or 0.01, 
+		--buff_len=1
+	})
+	task_protocol:run()
 
 	-- -----------------------------------------
 	local function buildAX12packet(id, payload)
@@ -165,8 +183,6 @@ M.init = function (conf)
 		local packet = PACKET_START..data..string.char(checksum)
 		return packet
 	end
-	
-	local waitd_protocol = {emitter=task_protocol, events='*', timeout = conf.serialtimeout or 0.01}
 	
 	local ping = mx:synchronize(function(id)
 		id = id or BROADCAST_ID
@@ -277,7 +293,7 @@ M.init = function (conf)
 	-- @field ax_error Error detected. The first parameter is the motor ID, the second is the error description.
 	-- @table events
 	busdevice.events = {
-		ax_error=signal_ax_error,
+		--ax_error=signal_ax_error,
 	}
 	-- --- Sync write method.
 	-- sync_write=sync_write,
@@ -343,7 +359,7 @@ M.init = function (conf)
 		return ax.get_motor(busdevice, ids)
 	end
 	
-	log('AX', 'INFO', 'Device %s created: %s', busdevice.module, busdevice.name)
+	log('AX', 'INFO', 'Device %s created: %s', tostring(busdevice.module), tostring(busdevice.name))
 	toribio.add_device(busdevice)
 	
 	sched.run(function()
