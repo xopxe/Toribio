@@ -106,7 +106,7 @@ M.init = function (conf)
 				--sched.signal(signal_ax_error, id, ax_errors[errinpacket:byte()])
 			end
 			local payload = data:sub(2,-2)
-			--print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket:byte(1, #errinpacket),':', payload:byte(1, #payload))
+			--print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket,':', payload:byte(1, #payload))
 			return id, errinpacket, payload
 		end
 
@@ -167,14 +167,13 @@ M.init = function (conf)
 			end
 		end
 	end
-	local task_protocol = sched.new_task(taskf_protocol)
+	local task_protocol = sched.run(taskf_protocol)
 	local waitd_protocol = sched.new_waitd({
 		emitter=task_protocol, 
 		events='*', 
 		timeout = conf.serialtimeout or 0.01, 
 		--buff_len=1
 	})
-	task_protocol:run()
 
 	-- -----------------------------------------
 	local function buildAX12packet(id, payload)
@@ -210,11 +209,12 @@ M.init = function (conf)
 		end
 	end)
 	local read_data = mx:synchronize(function(id,startAddress,length)
-		local packet_read = buildAX12packet(id, 
+		if id==BROADCAST_ID then return nil, 'read from broadcast' end
+		local packet_read = buildAX12packet(id,
 			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
 		filehandler:send_sync(packet_read)
 		local _, _, err, data = sched.wait(waitd_protocol)
-		--if #data ~= length then return nil, 'read error' end
+		if data and #data ~= length then return nil, 'read error' end
 		return data, err
 	end)
 	local reg_write_data = mx:synchronize(function(id,address,data)
