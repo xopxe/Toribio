@@ -80,7 +80,7 @@ M.get_motor= function (busdevice, id)
 		-- @return Model number
 		Motor.get_model = function()
 			local ret = read_data(idb,0x00,2)
-			if ret and #ret==2 then return ret:byte(1) + 256*ret:byte(2) end
+			if ret then return ret:byte(1) + 256*ret:byte(2) end
 		end
 		--- Get firmware version.
 		-- Get the version of the actuator's firmware
@@ -303,9 +303,9 @@ M.get_motor= function (busdevice, id)
 			Motor.name = 'ax:broadcast'
 		else
 			Motor.name = 'ax'..(Motor.get_model() or '??')..':'..id
+			Motor.mode = Motor.get_rotation_mode()
 		end
 		Motor.module = 'ax'
-		Motor.mode = Motor.get_rotation_mode()
 	else
 		Motor.module = 'ax-sync'
 		Motor.name = 'ax-sync:'..tostring(math.random(2^30))
