@@ -1,9 +1,9 @@
 --- Library for Dynamixel protocol.
--- This library allows to manipulate devices that use Dynamixel 
+-- This library allows to manipulate devices that use Dynamixel
 -- protocol, such as AX-12 robotic servo motors.
 -- When available, a dynamixel bus will be represented by a Device
--- object in toribio.devices table. The device will be named (as an 
--- example), "dynamixel:/dev/ttyUSB0". 
+-- object in toribio.devices table. The device will be named (as an
+-- example), "dynamixel:/dev/ttyUSB0".
 -- @module dynamixel-bus
 -- @alias busdevice
 
@@ -19,7 +19,7 @@ local mx = mutex.new()
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
-local NULL_CHAR = string.char(0x00) 
+local NULL_CHAR = string.char(0x00)
 local BROADCAST_ID = string.char(0xFE)
 local PACKET_START = string.char(0xFF,0xFF)
 
@@ -65,7 +65,7 @@ M.init = function (conf)
 		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)
 		opencount=opencount-1
 	end
-	if not filehandler then 
+	if not filehandler then
 		log('AX', 'ERROR', 'usb %s failed to open with %s', tostring(filename), tostring(erropen))
 		return
 	end
@@ -81,12 +81,10 @@ M.init = function (conf)
 	os.execute(init_tty_string)
 	filehandler.fd:sync() --flush()
 	
-	--local message_pipe=sched.pipes.new({}, 10)
-	
-	local taskf_protocol = function() 
+	local taskf_protocol = function()
 		local waitd_traffic = sched.new_waitd({
 			emitter=selector.task,
-			events={filehandler.events.data}, 
+			events={filehandler.events.data},
 			buff_len=-1
 		})
 		local packet=''
@@ -94,17 +92,19 @@ M.init = function (conf)
 		local packlen=nil -- -1
 
 		local function parseAx12Packet(s)
-			--print('parsing', s:byte(1, #s))
+			--print('parseAx12Packet parsing', s:byte(1, #s))
 			local id = s:sub(3,3)
 			--local data_length = s:byte(4)
 			local data = s:sub(5, -1)
 			if generate_checksum(s:sub(3,-1))~=0 then return nil,'READ_CHECKSUM_ERROR' end
 			local errinpacket= data:byte(1,1)
+			--[[
 			if errinpacket ~= 0 then
 				local errmessage = ax_errors[errinpacket]
-				print ('parseAx12Packet error', errinpacket, errmessage)
+				print ('parseAx12Packet error', errinpacket)
 				--sched.signal(signal_ax_error, id, ax_errors[errinpacket:byte()])
 			end
+			--]]
 			local payload = data:sub(2,-2)
 			--print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket,':', payload:byte(1, #payload))
 			return id, errinpacket, payload
@@ -113,22 +113,22 @@ M.init = function (conf)
 		while true do
 			local _, _, fragment, err_read = sched.wait(waitd_traffic)
 			
-			if not fragment then 
-				--if err_read=='closed' then 
+			if not fragment then
+				--if err_read=='closed' then
 				--	print('dynamixel file closed:', filename)
 				--	return
 				--end
 				log('AX', 'ERROR', 'Read from dynamixel device file failed with %s', tostring(err_read))
-				return 
+				return
 			end
-			if fragment==NULL_CHAR  then 
+			if fragment==NULL_CHAR  then
 				error('No power on serial?')
 			end
 
 			packet=packet..fragment
 
 			---[[
-			while (not insync) and (#packet>2) and (packet:sub(1,2) ~= PACKET_START) do 
+			while (not insync) and (#packet>2) and (packet:sub(1,2) ~= PACKET_START) do
 				log('AX', 'DEBUG', 'resync on "%s"', packet:byte(1,10))
 				packet=packet:sub(2, -1) --=packet:sub(packet:find(PACKET_START) or -1, -1)
 
@@ -144,7 +144,7 @@ M.init = function (conf)
 			while packlen and #packet>=packlen+4 do --#packet >3 and packlen <= #packet - 3 do
 				if #packet == packlen+4 then  --fast lane
 					local id, errcode, payload=parseAx12Packet(packet)
-					if id then 
+					if id then
 						--print('dynamixel message parsed (fast):',id:byte(), errcode,':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
@@ -154,7 +154,7 @@ M.init = function (conf)
 					local packet_pre = packet:sub( 1, packlen+4 )
 					local id, errcode, payload=parseAx12Packet(packet_pre)
 					--assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
-					if id then 
+					if id then
 						--print('dynamixel message parsed (slow):',id:byte(), errcode,':', payload:byte(1,#payload))
 						sched.signal(id, errcode, payload)
 					end
@@ -169,9 +169,9 @@ M.init = function (conf)
 	end
 	local task_protocol = sched.run(taskf_protocol)
 	local waitd_protocol = sched.new_waitd({
-		emitter=task_protocol, 
-		events='*', 
-		timeout = conf.serialtimeout or 0.01, 
+		emitter=task_protocol,
+		events='*',
+		timeout = conf.serialtimeout or 0.05,
 		--buff_len=1
 	})
 
@@ -188,9 +188,13 @@ M.init = function (conf)
 		local packet_ping = buildAX12packet(id, INSTRUCTION_PING)
 		filehandler:send_sync(packet_ping)
 		if id ~= BROADCAST_ID then
-			local emitter, _, err = sched.wait(waitd_protocol)
-			if emitter then 
-				return err 
+			local emitter, ev, err = sched.wait(waitd_protocol)
+			if emitter then
+				if id~=ev then
+					log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+					return
+				end
+				return err
 			else
 				return
 			end
@@ -198,12 +202,16 @@ M.init = function (conf)
 	end)
 	local write_data_now = mx:synchronize(function(id,address,data)
 		id = id or BROADCAST_ID
-		local packet_write = buildAX12packet(id, 
+		local packet_write = buildAX12packet(id,
 			INSTRUCTION_WRITE_DATA..string.char(address)..data)
 		filehandler:send_sync(packet_write)
 		if id ~= BROADCAST_ID then
-			local _, _, err = sched.wait(waitd_protocol)
-			if type (err)=='string' and #err==1 then
+			local emitter, ev, err = sched.wait(waitd_protocol)
+			if id~=ev then
+				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+				return
+			end
+			if type (err)=='number' then
 				return err
 			end
 		end
@@ -213,18 +221,28 @@ M.init = function (conf)
 		local packet_read = buildAX12packet(id,
 			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
 		filehandler:send_sync(packet_read)
-		local _, _, err, data = sched.wait(waitd_protocol)
+		local emitter, ev, err, data = sched.wait(waitd_protocol)
+		
+		if id~=ev then
+			log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+			return
+		end
+
+		if not emitter then return nil, 'read error' end
+		
 		if data and #data ~= length then return nil, 'read error' end
+		if data==nil and err==nil then print (debug.traceback()) end
+		assert(data~=nil or err~=nil)
 		return data, err
 	end)
 	local reg_write_data = mx:synchronize(function(id,address,data)
 		id = id or BROADCAST_ID
-		local packet_reg_write = buildAX12packet(id, 
+		local packet_reg_write = buildAX12packet(id,
 			INSTRUCTION_REG_WRITE..string.char(address)..data)
 		filehandler:send_sync(packet_reg_write)
 		if id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
-			if type (err)=='string' and #err==1 then
+			if type (err)=='number' then
 				return err
 			end
 		end
@@ -234,8 +252,12 @@ M.init = function (conf)
 		local packet_action = buildAX12packet(id, INSTRUCTION_ACTION)
 		filehandler:writeall(packet_action)
 		if id ~= BROADCAST_ID then
-			local _, _, err = sched.wait(waitd_protocol)
-			if type (err)=='string' and #err==1 then
+			local _, ev, err = sched.wait(waitd_protocol)
+			if id~=ev then
+				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+				return
+			end
+			if type (err)=='number' then
 				return err
 			end
 		end
@@ -245,19 +267,23 @@ M.init = function (conf)
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
 		filehandler:send_sync(packet_action)
 		if id ~= BROADCAST_ID then
-			local _, _, err = sched.wait(waitd_protocol)
-			if type (err)=='string' and #err==1 then
+			local _, ev, err = sched.wait(waitd_protocol)
+			if id~=ev then
+				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+				return
+			end
+			if type (err)=='number' then
 				return err
 			end
 		end
 	end)
-	local sync_write = mx:synchronize(function(ids, address,data) 
+	local sync_write = mx:synchronize(function(ids, address,data)
 		local dataout = string.char(address)..string.char(#data)
 		for i=1, #ids do
 			local sid = ids[i]
 			dataout=dataout..sid..data
 		end
-		local sync_packet = buildAX12packet(BROADCAST_ID, 
+		local sync_packet = buildAX12packet(BROADCAST_ID,
 			INSTRUCTION_SYNC_WRITE..dataout)
 		filehandler:send_sync(sync_packet)
 	end)
@@ -299,7 +325,7 @@ M.init = function (conf)
 	-- sync_write=sync_write,
 	
 	--- Starts a register write mode.
-	-- In reg_write mode changes in configuration to devices 
+	-- In reg_write mode changes in configuration to devices
 	-- are not applied until a @{reg_write_action} call.
 	busdevice.reg_write_start = function()
 		busdevice.write_data = reg_write_data
@@ -313,7 +339,7 @@ M.init = function (conf)
 	end
 
 	--- Set the ID of a motor.
-	-- Use with caution: all motors connected to the bus will be 
+	-- Use with caution: all motors connected to the bus will be
 	-- reconfigured to the new ID.
 	-- @param id ID number to set.
 	busdevice.set_id = function(id)
@@ -323,7 +349,7 @@ M.init = function (conf)
 
 	--- Get a broadcasting Motor object.
 	-- All commands sent to this motor will be broadcasted
-	-- to all motors. 
+	-- to all motors.
 	-- @return A Motor object.
 	busdevice.get_broadcaster = function()
 		return busdevice.get_motor(0xFE)
@@ -341,23 +367,47 @@ M.init = function (conf)
 	
 	--- Get a Sync-motor object.
 	-- A sync-motor allows to control several actuators with a single command.
-	-- The commands will be applied to all actuators it represents. 
-	-- The "get" methods are not available. 
+	-- The commands will be applied to all actuators it represents.
+	-- The "get" methods are not available.
 	-- @param ... A set of motor Device objects or numeric IDs
 	-- @return a sync_motor object
 	busdevice.get_sync_motor = function(...)
 		local ids = {}
 		for i=1, select('#', ...)  do
 			local m = select(i, ...)
-			if type (m) == 'number' then 
+			if type (m) == 'number' then
 				local motor = busdevice.get_motor(m)
 				if motor then ids[#ids+1] = motor.id end
-			else 
-				ids[#ids+1] = m.id 
+			else
+				ids[#ids+1] = m.id
 			end
 		end
 		return ax.get_motor(busdevice, ids)
 	end
+	
+	--- Decodes dynamixel error codes.
+	-- @param code a dynamixel error code as returned by the different motor methods.
+	-- @return true if there is any error set or false otherwise, followed by a set of error strings.  
+	-- The possible error strings are 'NO\_ERROR', 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT',
+	-- 'ERROR\_OVERHEATING', 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD', 'ERROR\_INSTRUCTION'
+	-- @usage local has, errorset = dynamixel.has_errors(0x10+0x08)
+	--if has then
+	--	for err, _ in pairs(errorset) do print (err) end
+	--end
+	busdevice.has_errors = function (code)
+		if code==0 then
+			return false
+		else
+			local errorset = {}
+			for n, error in pairs(ax_errors) do
+				if n~= 0 and (math.floor(code / n) % 2)==1 then
+					errorset[error] = true
+				end
+			end
+			return true, errorset
+		end
+	end
+	
 	
 	log('AX', 'INFO', 'Device %s created: %s', tostring(busdevice.module), tostring(busdevice.name))
 	toribio.add_device(busdevice)
@@ -367,8 +417,8 @@ M.init = function (conf)
 		sched.signal('discoverystart')
 		for i = 0, 253 do
 			local motor = busdevice.get_motor(i)
-			--print('XXXXXXXX',i, (motor or {}).name) 
-			if motor then 
+			--print('XXXXXXXX',i, (motor or {}).name)
+			if motor then
 				busdevice.events[i] = string.char(i)
 				log('AX', 'INFO', 'Device %s created: %s', motor.module, motor.name)
 				toribio.add_device(motor)

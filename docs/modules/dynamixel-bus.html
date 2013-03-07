@@ -72,11 +72,11 @@
 <h1>Module <code>dynamixel-bus</code></h1>
 
 <p>Library for Dynamixel protocol.</p>
-<p> This library allows to manipulate devices that use Dynamixel 
+<p> This library allows to manipulate devices that use Dynamixel
  protocol, such as AX-12 robotic servo motors.
  When available, a dynamixel bus will be represented by a Device
- object in toribio.devices table. The device will be named (as an 
- example), "dynamixel:/dev/ttyUSB0". </p>
+ object in toribio.devices table. The device will be named (as an
+ example), "dynamixel:/dev/ttyUSB0".</p>
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
@@ -103,6 +103,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#get_sync_motor">get_sync_motor&nbsp;(...)</a></td>
 	<td class="summary">Get a Sync-motor object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#has_errors">has_errors&nbsp;(code)</a></td>
+	<td class="summary">Decodes dynamixel error codes.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
@@ -149,7 +153,7 @@
     </dt>
     <dd>
     Starts a register write mode. 
- In reg_write mode changes in configuration to devices 
+ In reg_write mode changes in configuration to devices
  are not applied until a <a href="../modules/dynamixel-bus.html#reg_write_action">reg_write_action</a> call.
 
 
@@ -177,7 +181,7 @@
     </dt>
     <dd>
     Set the ID of a motor. 
- Use with caution: all motors connected to the bus will be 
+ Use with caution: all motors connected to the bus will be
  reconfigured to the new ID.
 
     <h3>Parameters:</h3>
@@ -196,7 +200,7 @@
     <dd>
     Get a broadcasting Motor object. 
  All commands sent to this motor will be broadcasted
- to all motors. 
+ to all motors.
 
 
 
@@ -234,8 +238,8 @@
     <dd>
     Get a Sync-motor object. 
  A sync-motor allows to control several actuators with a single command.
- The commands will be applied to all actuators it represents. 
- The "get" methods are not available. 
+ The commands will be applied to all actuators it represents.
+ The "get" methods are not available.
 
     <h3>Parameters:</h3>
     <ul>
@@ -246,6 +250,35 @@
     <h3>Returns:</h3>
     <ol>
         a sync_motor object
+    </ol>
+
+
+</dd>
+    <dt>
+    <a name = "has_errors"></a>
+    <strong>has_errors&nbsp;(code)</strong>
+    </dt>
+    <dd>
+    Decodes dynamixel error codes. 
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>code</em></code>:  a dynamixel error code as returned by the different motor methods.</li>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">local has, errorset = dynamixel.has_errors(0x10+0x08)
+if has then 
+	for err, _ in pairs(errorset) do print (err) end
+end</pre>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        true if there is any error set or false otherwise, followed by a set of error strings. <br/>
+ The possible error strings are 'NO_ERROR', 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
+ 'ERROR_OVERHEATING', 'ERROR_RANGE', 'ERROR_CHECKSUM', 'ERROR_OVERLOAD', 'ERROR_INSTRUCTION'
     </ol>
 
 
