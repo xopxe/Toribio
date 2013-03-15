@@ -16,12 +16,8 @@ M.init = function(conf)
 		print('xy got motor_x',motor_x)
 		local motor_y = toribio.wait_for_device(conf.motor_y)
 		print('xy got motor_y',motor_y)
-
-		motor_x.init_mode_joint()
-		motor_y.init_mode_joint()
 		
 		--print ('torqueenable:', dynamixelbus.get_broadcaster().set_torque_enable(false))
-		dynamixelbus.get_broadcaster().set_speed(0)
 
 		local pressed=false
 		
@@ -33,8 +29,8 @@ M.init = function(conf)
 		toribio.register_callback(mice, 'move', function(x, y)
 			--print('move!',x,y)
 			if pressed==true then
-				motor_x.set_position(x/5)
-				motor_y.set_position(y/5)
+				motor_x.rotate_to_angle(x/5)
+				motor_y.rotate_to_angle(y/5)
 			end
 		end)
 	end)

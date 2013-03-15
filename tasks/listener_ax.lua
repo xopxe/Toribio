@@ -15,7 +15,7 @@ M.init =  function(conf)
 		---[[
 		sched.run(function()
 			while true do
-				print(m3.get_id())
+				print(m3.get.id())
 				sched.sleep(0.1)
 			end
 		end)
@@ -23,7 +23,7 @@ M.init =  function(conf)
 		---[[
 		sched.run(function()
 			while true do
-				print('', m12.get_id())
+				print('', m12.get.id())
 				sched.sleep(0.1)
 			end
 		end)

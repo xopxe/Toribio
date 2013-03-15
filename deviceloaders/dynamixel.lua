@@ -32,14 +32,14 @@ local INSTRUCTION_RESET = string.char(0x06)
 local INSTRUCTION_SYNC_WRITE = string.char(0x83)
 
 local ax_errors = {
-	[0x00] = 'NO_ERROR',
-	[0x01] = 'ERROR_INPUT_VOLTAGE',
-	[0x02] = 'ERROR_ANGLE_LIMIT',
-	[0x04] = 'ERROR_OVERHEATING',
-	[0x08] = 'ERROR_RANGE',
-	[0x10] = 'ERROR_CHECKSUM',
-	[0x20] = 'ERROR_OVERLOAD',
-	[0x40] = 'ERROR_INSTRUCTION',
+	--[0x00] = 'NO_ERROR',
+	ERROR_INPUT_VOLTAGE = 0x01,
+	ERROR_ANGLE_LIMIT = 0x02,
+	ERROR_OVERHEATING = 0x04,
+	ERROR_RANGE = 0x08,
+	ERROR_CHECKSUM = 0x10,
+	ERROR_OVERLOAD = 0x20,
+	ERROR_INSTRUCTION = 0x40,
 }
 
 local function generate_checksum(data)
@@ -200,12 +200,12 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local write_data_now = mx:synchronize(function(id,address,data)
+	local write_data_now = mx:synchronize(function(id,address,data, return_level)
 		id = id or BROADCAST_ID
 		local packet_write = buildAX12packet(id,
 			INSTRUCTION_WRITE_DATA..string.char(address)..data)
 		filehandler:send_sync(packet_write)
-		if id ~= BROADCAST_ID then
+		if return_level>=2 and id ~= BROADCAST_ID then
 			local emitter, ev, err = sched.wait(waitd_protocol)
 			if id~=ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
@@ -216,42 +216,43 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local read_data = mx:synchronize(function(id,startAddress,length)
+	local read_data = mx:synchronize(function(id,startAddress,length, return_level)
 		if id==BROADCAST_ID then return nil, 'read from broadcast' end
 		local packet_read = buildAX12packet(id,
 			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
 		filehandler:send_sync(packet_read)
-		local emitter, ev, err, data = sched.wait(waitd_protocol)
-		
-		if id~=ev then
-			log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
-			return
-		end
+		if return_level>=1 then
+			local emitter, ev, err, data = sched.wait(waitd_protocol)
+			
+			if id~=ev then
+				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+				return
+			end
 
-		if not emitter then return nil, 'read error' end
-		
-		if data and #data ~= length then return nil, 'read error' end
-		if data==nil and err==nil then print (debug.traceback()) end
-		assert(data~=nil or err~=nil)
-		return data, err
+			if not emitter then return nil, 'read error' end
+			
+			if data and #data ~= length then return nil, 'read error' end
+			assert(data~=nil or err~=nil, debug.traceback())
+			return data, err
+		end
 	end)
-	local reg_write_data = mx:synchronize(function(id,address,data)
+	local reg_write_data = mx:synchronize(function(id,address,data, return_level)
 		id = id or BROADCAST_ID
 		local packet_reg_write = buildAX12packet(id,
 			INSTRUCTION_REG_WRITE..string.char(address)..data)
 		filehandler:send_sync(packet_reg_write)
-		if id ~= BROADCAST_ID then
+		if return_level>=2 and id ~= BROADCAST_ID then
 			local _, _, err = sched.wait(waitd_protocol)
 			if type (err)=='number' then
 				return err
 			end
 		end
 	end)
-	local action = mx:synchronize(function(id)
+	local action = mx:synchronize(function(id, return_level)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_ACTION)
 		filehandler:writeall(packet_action)
-		if id ~= BROADCAST_ID then
+		if return_level>=2 and id ~= BROADCAST_ID then
 			local _, ev, err = sched.wait(waitd_protocol)
 			if id~=ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
@@ -262,11 +263,11 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local reset = mx:synchronize(function(id)
+	local reset = mx:synchronize(function(id, return_level)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
 		filehandler:send_sync(packet_action)
-		if id ~= BROADCAST_ID then
+		if return_level>=2 and id ~= BROADCAST_ID then
 			local _, ev, err = sched.wait(waitd_protocol)
 			if id~=ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
@@ -294,6 +295,7 @@ M.init = function (conf)
 		reset = reset,
 		read_data =read_data,
 		write_data = write_data_now,
+		reg_write_data = reg_write_data,
 		sync_write = sync_write,
 	}
 
@@ -324,25 +326,12 @@ M.init = function (conf)
 	-- --- Sync write method.
 	-- sync_write=sync_write,
 	
-	--- Starts a register write mode.
-	-- In reg_write mode changes in configuration to devices
-	-- are not applied until a @{reg_write_action} call.
-	busdevice.reg_write_start = function()
-		busdevice.write_data = reg_write_data
-	end
-	--- Finishes a register write mode.
-	-- All changes in configuration applied after a previous
-	-- @{reg_write_start} are commited.
-	busdevice.reg_write_action = function()
-		action()
-		busdevice.write_data = write_data_now
-	end
-
 	--- Set the ID of a motor.
 	-- Use with caution: all motors connected to the bus will be
 	-- reconfigured to the new ID.
-	-- @param id ID number to set.
-	busdevice.set_id = function(id)
+	-- @param newid ID number to set.
+	busdevice.set_id = function(newid)
+		assert(newid>=0 and newid<=0xFD, 'Invalid ID: '.. tostring(newid))
 		local idb=string.char(id)
 		busdevice.write_data(BROADCAST_ID,0x03,idb)
 	end
@@ -388,26 +377,28 @@ M.init = function (conf)
 	--- Decodes dynamixel error codes.
 	-- @param code a dynamixel error code as returned by the different motor methods.
 	-- @return true if there is any error set or false otherwise, followed by a set of error strings.  
-	-- The possible error strings are 'NO\_ERROR', 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT',
-	-- 'ERROR\_OVERHEATING', 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD', 'ERROR\_INSTRUCTION'
-	-- @usage local has, errorset = dynamixel.has_errors(0x10+0x08)
+	-- The possible error strings are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT',
+	-- 'ERROR\_OVERHEATING', 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD', 'ERROR\_INSTRUCTION'.  
+	-- The table is double-indexed by entry number to allow array-like traversal.
+	-- @usage local errorset = dynamixel.has_errors(0x10+0x08)
 	--if has then
-	--	for err, _ in pairs(errorset) do print (err) end
+	--	print ("has errors:" #errorset>0 )
+	--	print ("has range error:", errorset['ERROR\_RANGE']==true )
 	--end
 	busdevice.has_errors = function (code)
-		if code==0 then
-			return false
-		else
-			local errorset = {}
-			for n, error in pairs(ax_errors) do
-				if n~= 0 and (math.floor(code / n) % 2)==1 then
-					errorset[error] = true
+		local errorset = {}
+		if code~=0 then
+			for err, n in pairs(ax_errors) do
+				if (math.floor(code / n) % 2)==1 then
+					errorset[err] = true
+					errorset[#errorset+1] = err
 				end
 			end
-			return true, errorset
 		end
+		return errorset
 	end
 	
+	busdevice.ax_errors = ax_errors
 	
 	log('AX', 'INFO', 'Device %s created: %s', tostring(busdevice.module), tostring(busdevice.name))
 	toribio.add_device(busdevice)

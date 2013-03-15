@@ -81,15 +81,7 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#reg_write_start">reg_write_start&nbsp;()</a></td>
-	<td class="summary">Starts a register write mode.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#reg_write_action">reg_write_action&nbsp;()</a></td>
-	<td class="summary">Finishes a register write mode.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#set_id">set_id&nbsp;(id)</a></td>
+	<td class="name" nowrap><a href="#set_id">set_id&nbsp;(newid)</a></td>
 	<td class="summary">Set the ID of a motor.</td>
 	</tr>
 	<tr>
@@ -148,36 +140,8 @@
     
     <dl class="function">
     <dt>
-    <a name = "reg_write_start"></a>
-    <strong>reg_write_start&nbsp;()</strong>
-    </dt>
-    <dd>
-    Starts a register write mode. 
- In reg_write mode changes in configuration to devices
- are not applied until a <a href="../modules/dynamixel-bus.html#reg_write_action">reg_write_action</a> call.
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "reg_write_action"></a>
-    <strong>reg_write_action&nbsp;()</strong>
-    </dt>
-    <dd>
-    Finishes a register write mode. 
- All changes in configuration applied after a previous
- <a href="../modules/dynamixel-bus.html#reg_write_start">reg_write_start</a> are commited.
-
-
-
-
-
-</dd>
-    <dt>
     <a name = "set_id"></a>
-    <strong>set_id&nbsp;(id)</strong>
+    <strong>set_id&nbsp;(newid)</strong>
     </dt>
     <dd>
     Set the ID of a motor. 
@@ -186,7 +150,7 @@
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>id</em></code>:  ID number to set.</li>
+       <li><code><em>newid</em></code>:  ID number to set.</li>
     </ul>
 
 
@@ -268,17 +232,19 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">local has, errorset = dynamixel.has_errors(0x10+0x08)
-if has then 
-	for err, _ in pairs(errorset) do print (err) end
+        <pre class="example">local errorset = dynamixel.has_errors(0x10+0x08)
+if has then
+	print ("has errors:" #errorset>0 )
+	print ("has range error:", errorset['ERROR\_RANGE']==true )
 end</pre>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
         true if there is any error set or false otherwise, followed by a set of error strings. <br/>
- The possible error strings are 'NO_ERROR', 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
- 'ERROR_OVERHEATING', 'ERROR_RANGE', 'ERROR_CHECKSUM', 'ERROR_OVERLOAD', 'ERROR_INSTRUCTION'
+ The possible error strings are 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
+ 'ERROR_OVERHEATING', 'ERROR_RANGE', 'ERROR_CHECKSUM', 'ERROR_OVERLOAD', 'ERROR_INSTRUCTION'. <br/>
+ The table is double-indexed by entry number to allow array-like traversal.
     </ol>
 
 
