@@ -318,19 +318,19 @@ M.init = function (conf)
 	-- For example, '/dev/ttyUSB0'
 	busdevice.filename = filename
 	
+	--[[
 	--- Task that will emit signals associated to this device.
 	busdevice.task = task_protocol
 	
-	--- Signals emitted by this device.
+	-- --- Signals emitted by this device.
 	-- @field ax_error Error detected. The first parameter is the motor ID, the second is the error description.
 	-- @table events
 	busdevice.events = {
 		--ax_error=signal_ax_error,
 	}
-	-- --- Sync write method.
-	-- sync_write=sync_write,
+	--]]
 	
-	--- Set the ID of a motor.
+	-- --- Set the ID of a motor.
 	-- Use with caution: all motors connected to the bus will be
 	-- reconfigured to the new ID.
 	-- @param newid ID number to set.
@@ -412,7 +412,7 @@ M.init = function (conf)
 			local motor = busdevice.get_motor(i)
 			--print('XXXXXXXX',i, (motor or {}).name)
 			if motor then
-				busdevice.events[i] = string.char(i)
+				--busdevice.events[i] = string.char(i)
 				log('AX', 'INFO', 'Device %s created: %s', motor.module, motor.name)
 				toribio.add_device(motor)
 			end

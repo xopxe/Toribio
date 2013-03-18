@@ -81,10 +81,6 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#set_id">set_id&nbsp;(newid)</a></td>
-	<td class="summary">Set the ID of a motor.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#get_broadcaster">get_broadcaster&nbsp;()</a></td>
 	<td class="summary">Get a broadcasting Motor object.</td>
 	</tr>
@@ -107,10 +103,6 @@
 	<td class="name" nowrap><a href="#motors">motors</a></td>
 	<td class="summary">Motors connected to the bus.</td>
 	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#events">events</a></td>
-	<td class="summary">Signals emitted by this device.</td>
-	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
@@ -126,10 +118,6 @@
 	<td class="name" nowrap><a href="#filename">filename</a></td>
 	<td class="summary">Device file of the bus.</td>
 	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#task">task</a></td>
-	<td class="summary">Task that will emit signals associated to this device.</td>
-	</tr>
 </table>
 
 <br/>
@@ -139,24 +127,6 @@
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
-    <dt>
-    <a name = "set_id"></a>
-    <strong>set_id&nbsp;(newid)</strong>
-    </dt>
-    <dd>
-    Set the ID of a motor. 
- Use with caution: all motors connected to the bus will be
- reconfigured to the new ID.
-
-    <h3>Parameters:</h3>
-    <ul>
-       <li><code><em>newid</em></code>:  ID number to set.</li>
-    </ul>
-
-
-
-
-</dd>
     <dt>
     <a name = "get_broadcaster"></a>
     <strong>get_broadcaster&nbsp;()</strong>
@@ -264,22 +234,6 @@ print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
 
 
 </dd>
-    <dt>
-    <a name = "events"></a>
-    <strong>events</strong>
-    </dt>
-    <dd>
-    Signals emitted by this device. 
-
-    <h3>Fields:</h3>
-    <ul>
-       <li><code><em>ax_error</em></code>:  Error detected. The first parameter is the motor ID, the second is the error description.</li>
-    </ul>
-
-
-
-
-</dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
     
@@ -316,18 +270,6 @@ print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
     <dd>
     Device file of the bus. 
  For example, '/dev/ttyUSB0'
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "task"></a>
-    <strong>task</strong>
-    </dt>
-    <dd>
-    Task that will emit signals associated to this device. 
 
 
 

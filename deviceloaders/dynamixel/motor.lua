@@ -1,6 +1,9 @@
 --- Library for Dynamixel motors.
 -- This library allows to manipulate devices that use Dynamixel 
 -- protocol, such as AX-12 robotic servo motors.
+-- For basic manipulation, it is enough to use the @{rotate_to_angle} and @{spin},
+-- and perhaps set the @{set.torque_enable}. For more sophisticated tasks, the full 
+-- Dynamixel functionality is available trough getter and setter functions.  
 -- When available, each conected motor will be published
 -- as a device in torobio.devices table, named
 -- (for example) 'ax12:1', labeled as module 'ax'. Aditionally, an 'ax:all'
@@ -510,6 +513,11 @@ end
 
 return M
 
+--- Atribute getters.
+-- Functions used to get values from the Dynamixel control table. These functions
+-- are not available for broadcast nor sync motors.
+-- @section getters
+
 --- Get the dynamixel model number.
 -- For an AX-12 this will return 12.
 -- @function get.model_number
@@ -524,73 +532,32 @@ return M
 -- @function get.id
 -- @return a ID number, followed by a dynamixel error code.
 
---- Set the ID number of the actuator (persist).
---- @function set.id
--- @param ID number, must be in the 0 .. 253 range.
--- @return A dynamixel error code.
-
 --- Get the baud rate.
 -- @function get.baud_rate
 -- @return a serial bus speed in bps, followed by a dynamixel error code.
-
---- Set the baud rate (persist).
--- @function set.baud_rate
--- @param bps bus rate in bps, in the 9600 to 1000000 range. Check the Dynamixel docs for supported values.
--- @return A dynamixel error code.
 
 --- Get the response delay.
 -- The time in secs an actuator waits before answering a call.
 -- @function get.return_delay_time
 -- @return the edlay time in secs, followed by a dynamixel error code.
 
---- Set the response delay (persist).
--- The time in secs an actuator waits before answering a call.
--- @function set.return_delay_time
--- @param sec a time in sec.
--- @return A dynamixel error code.
-
 --- Get the rotation mode.
 --  Wheel mode is equivalent to having limits cw=0, ccw=0, and mode joint is equivalent to cw=0, ccw=300
 -- @function get.rotation_mode
 -- @return Either 'wheel' or 'joint', followed by a dynamixel error code.
-
---- Set the rotation mode (persist).
---  Wheel mode is for continuous rotation, Joint is for servo. Setting this attribute resets the 
--- `angle_limit` parameter. Wheel mode is equivalent to having limits cw=0, ccw=0, and mode joint is equivalent to cw=0, ccw=300
--- @function set.rotation_mode
--- @param mode Either 'wheel' or 'joint'.
--- @return A dynamixel error code.
 
 --- Get the angle limit.
 --  The extreme positions possible for the Joint mode.
 -- @function get.angle_limit
 -- @return the cw limit, then the ccw limit, followed by a dynamixel error code.
 
---- Set the angle limit (persist).
---  The extreme positions possible for the Joint mode. The angles are given in degrees, and must be in the 0<=cw<=ccw<=300 range.
--- @function set.angle_limit
--- @param cw the clockwise limit.
--- @param ccw the clockwise limit.
--- @return A dynamixel error code.
-
 --- Get the temperature limit.
 -- @function get.limit_temperature
 -- @return The maximum allowed temperature in degrees Celsius, followed by a dynamixel error code.
 
---- Set the temperature limit  (persist).
--- @function set.limit_temperature
--- @param deg the temperature in degrees Celsius.
--- @return A dynamixel error code.
-
 --- Get the voltage limit.
 -- @function get.limit_voltage
 -- @return The minumum and maximum allowed voltage in Volts, followed by a dynamixel error code.
-
---- Set the voltage limit  (persist).
--- @function set.limit_voltage
--- @param min the minimum allowed voltage in Volts.
--- @param max the maximum allowed voltage in Volts.
--- @return A dynamixel error code.
 
 --- Get the torque limit.
 -- This is also the default value for `torque_limit`.
@@ -598,24 +565,11 @@ return M
 -- @return the maximum producible torque, as percentage of maximum possible (in the 0% - 100% range), 
 -- followed by a dynamixel error code.
 
---- Set the torque limit  (persist).
--- This is also the default value for `torque_limit`.
--- @function set.max_torque
--- @param torque the maximum producible torque, as percentage of maximum possible (in the 0% - 100% range)
--- @return A dynamixel error code.
-
 --- Get the Return Level.
 -- Control what commands must generate a status response 
 -- from the actuator. Possible values are 'ONLY\_PING', 'ONLY\_READ' and 'ALL' (default)
 -- @function get.status_return_level
 -- @return the return level, followed by a dynamixel error code.
-
---- Set the Return Level (persist).
--- Control what commands must generate a status response 
--- from the actuator. 
--- @function set.status_return_level
--- @param return_level Possible values are 'ONLY\_PING', 'ONLY\_READ' and 'ALL' (default)
--- @return A dynamixel error code.
 
 --- Get the LED alarm setup.
 -- A list of error conditions that cause the LED to blink.
@@ -623,13 +577,6 @@ return M
 -- @return A double indexed set, by entry number and error code, followed by a dynamixel error code. The possible 
 -- error codes in the list are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
 -- 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD' and 'ERROR\_INSTRUCTION'.
-
---- Set LED alarm (persist).
--- A list of error conditions that cause the LED to blink.
--- @function set.alarm_led
--- @param  errors A list of error codes. The possible 
--- error codes are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
--- @return A dynamixel error code.
 
 --- Get the alarm shutdown setup.
 -- A list of error conditions that cause the  `torque_limit` attribute to
@@ -639,81 +586,35 @@ return M
 -- error codes in the list are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
 -- 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD' and 'ERROR\_INSTRUCTION'.
 
---- Set alarm shutdown (persist).
--- A list of error conditions that cause the  `torque_limit` attribute to
--- be set to 0, halting the motor.
--- @function set.alarm_shutodown
--- @param  errors A list of error codes. The possible 
--- error codes are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
--- @return A dynamixel error code.
-
 --- Get the Torque Enable status.
 -- Control the power supply to the motor.
 -- @function get.torque_enable
 -- @return Boolean
-
---- Set the Torque Enable status (volatile).
--- Control the power supply to the motor.
--- @function set.torque_enable
--- @param status Boolean
--- @return A dynamixel error code.
 
 --- Get the Compliance Margin.
 --  See Dynamiel reference.
 -- @function get.compliance_margin
 -- @return cw margin, ccw margin (both in degrees), followed by a Dynamiel error code.
 
---- Set the Compliance Margin (volatile).
--- See Dynamiel reference.
--- @function set.compliance_margin
--- @param cw clockwise margin, in deg.
--- @param ccw counterclockwise margin, in deg.
--- @return A dynamixel error code.
-
 --- Get the Compliance Slope.
 -- See Dynamiel reference.
 -- @function get.compliance_slope
 -- @return the step value, followed by a Dynamiel error code.
-
---- Set the Compliance Slope (volatile).
--- See Dynamiel reference.
--- @function set.compliance_slope
--- @param step the step value.
--- @return A dynamixel error code.
 
 --- Get the Punch value.
 -- See Dynamiel reference.
 -- @function get.punch
 -- @return punch as % of max torque (in the 0..100 range)
 
---- Set the Punch value (volatile).
--- See Dynamiel reference.
--- @function set.punch
--- @param punch as % of max torque (in the 0..100 range)
--- @return A dynamixel error code.
-
 --- Get the goal angle.
 -- The target position for the actuator is going to. Only works in joint mode.
 -- @function get.goal_position
 -- @return the target angle in degrees, followed by a Dynamiel error code.
 
---- Set the goal angle (volatile).
--- The target position for the actuator to go, in degrees. Only works in joint mode.
--- @function set.goal_position
--- @param angle the target angle in degrees
--- @return A dynamixel error code.
-
 --- Get rotation speed.
 -- @function get.moving_speed
 -- @return If motor in joint mode, speed in deg/sec (0 means max unregulated speed), if in wheel
 -- mode, as a % of max torque, followed by a Dynamiel error code.
-
---- Set the rotation speed (volatile).
--- @function set.moving_speed
--- @param speed If motor in joint mode, speed in deg/sec in the 0 .. 684 range 
--- (0 means max unregulated speed).  
--- If in wheel mode, as a % of max torque (in the -100 .. 100 range).
--- @return A dynamixel error code.
 
 --- Get the torque limit.
 -- Controls the 'ERROR\_OVERLOAD' error triggering.
@@ -721,13 +622,6 @@ return M
 -- @return  The torque limit as percentage of maximum possible.
 -- If in wheel mode, as a % of max torque (in the -100 .. 100 range)
 -- , followed by a Dynamiel error code.
-
---- Set the torque limit (volatile).
--- Controls the 'ERROR\_OVERLOAD' error triggering.
--- @function set.torque_limit
--- @param torque The torque limit as percentage of maximum possible.
--- If in wheel mode, as a % of max torque (in the -100 .. 100 range).
--- @return A dynamixel error code.
 
 --- Get the axle position.
 -- @function get.present_position
@@ -768,6 +662,128 @@ return M
 -- Whether the EEPROM (persistent) attributes are blocked for writing.
 -- @function get.lock
 -- @return boolean, followed by a Dynamiel error code.
+
+--- Atribute setters.
+-- Functions used to set values for the Dynamixel control table. 
+-- Some of the setable parameters set are located on the motors EEPROM (marked "persist"),
+-- and others are on RAM (marked "volatile"). The attributes stored in RAM are reset when the 
+-- motor is powered down.  
+-- @section setters
+
+--- Set the ID number of the actuator (persist).
+--- @function set.id
+-- @param ID number, must be in the 0 .. 253 range.
+-- @return A dynamixel error code.
+
+--- Set the baud rate (persist).
+-- @function set.baud_rate
+-- @param bps bus rate in bps, in the 9600 to 1000000 range. Check the Dynamixel docs for supported values.
+-- @return A dynamixel error code.
+
+--- Set the response delay (persist).
+-- The time in secs an actuator waits before answering a call.
+-- @function set.return_delay_time
+-- @param sec a time in sec.
+-- @return A dynamixel error code.
+
+--- Set the rotation mode (persist).
+--  Wheel mode is for continuous rotation, Joint is for servo. Setting this attribute resets the 
+-- `angle_limit` parameter. Wheel mode is equivalent to having limits cw=0, ccw=0, and mode joint is equivalent to cw=0, ccw=300
+-- @function set.rotation_mode
+-- @param mode Either 'wheel' or 'joint'.
+-- @return A dynamixel error code.
+
+--- Set the angle limit (persist).
+--  The extreme positions possible for the Joint mode. The angles are given in degrees, and must be in the 0<=cw<=ccw<=300 range.
+-- @function set.angle_limit
+-- @param cw the clockwise limit.
+-- @param ccw the clockwise limit.
+-- @return A dynamixel error code.
+
+--- Set the temperature limit  (persist).
+-- @function set.limit_temperature
+-- @param deg the temperature in degrees Celsius.
+-- @return A dynamixel error code.
+
+--- Set the voltage limit  (persist).
+-- @function set.limit_voltage
+-- @param min the minimum allowed voltage in Volts.
+-- @param max the maximum allowed voltage in Volts.
+-- @return A dynamixel error code.
+
+--- Set the torque limit  (persist).
+-- This is also the default value for `torque_limit`.
+-- @function set.max_torque
+-- @param torque the maximum producible torque, as percentage of maximum possible (in the 0% - 100% range)
+-- @return A dynamixel error code.
+
+
+--- Set the Return Level (persist).
+-- Control what commands must generate a status response 
+-- from the actuator. 
+-- @function set.status_return_level
+-- @param return_level Possible values are 'ONLY\_PING', 'ONLY\_READ' and 'ALL' (default)
+-- @return A dynamixel error code.
+
+--- Set LED alarm (persist).
+-- A list of error conditions that cause the LED to blink.
+-- @function set.alarm_led
+-- @param  errors A list of error codes. The possible 
+-- error codes are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
+-- @return A dynamixel error code.
+
+--- Set alarm shutdown (persist).
+-- A list of error conditions that cause the  `torque_limit` attribute to
+-- be set to 0, halting the motor.
+-- @function set.alarm_shutodown
+-- @param  errors A list of error codes. The possible 
+-- error codes are 'ERROR\_INPUT\_VOLTAGE', 'ERROR\_ANGLE\_LIMIT', 'ERROR\_OVERHEATING', 
+-- @return A dynamixel error code.
+
+--- Set the Torque Enable status (volatile).
+-- Control the power supply to the motor.
+-- @function set.torque_enable
+-- @param status Boolean
+-- @return A dynamixel error code.
+
+--- Set the Compliance Margin (volatile).
+-- See Dynamiel reference.
+-- @function set.compliance_margin
+-- @param cw clockwise margin, in deg.
+-- @param ccw counterclockwise margin, in deg.
+-- @return A dynamixel error code.
+
+--- Set the Compliance Slope (volatile).
+-- See Dynamiel reference.
+-- @function set.compliance_slope
+-- @param step the step value.
+-- @return A dynamixel error code.
+
+--- Set the Punch value (volatile).
+-- See Dynamiel reference.
+-- @function set.punch
+-- @param punch as % of max torque (in the 0..100 range)
+-- @return A dynamixel error code.
+
+--- Set the goal angle (volatile).
+-- The target position for the actuator to go, in degrees. Only works in joint mode.
+-- @function set.goal_position
+-- @param angle the target angle in degrees
+-- @return A dynamixel error code.
+
+--- Set the rotation speed (volatile).
+-- @function set.moving_speed
+-- @param speed If motor in joint mode, speed in deg/sec in the 0 .. 684 range 
+-- (0 means max unregulated speed).  
+-- If in wheel mode, as a % of max torque (in the -100 .. 100 range).
+-- @return A dynamixel error code.
+
+--- Set the torque limit (volatile).
+-- Controls the 'ERROR\_OVERLOAD' error triggering.
+-- @function set.torque_limit
+-- @param torque The torque limit as percentage of maximum possible.
+-- If in wheel mode, as a % of max torque (in the -100 .. 100 range).
+-- @return A dynamixel error code.
 
 --- Set the lock status (volatile).
 -- @function set.lock
