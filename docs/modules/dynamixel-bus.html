@@ -233,10 +233,8 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example">local errorset = dynamixel.has_errors(0x10+0x08)
-if has then
-	print ("has errors:" #errorset>0 )
-	print ("has range error:", errorset['ERROR\_RANGE']==true )
-end</pre>
+print ("has errors:" #errorset>0 )
+print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
     </ul>
 
     <h3>Returns:</h3>

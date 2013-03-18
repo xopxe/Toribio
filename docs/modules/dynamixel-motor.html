@@ -97,8 +97,8 @@ motor.set.led(true)</pre>
 	<td class="summary">Ping the motor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#reset">reset&nbsp;()</a></td>
-	<td class="summary">Reset configuration.</td>
+	<td class="name" nowrap><a href="#reset_factory_default">reset_factory_default&nbsp;()</a></td>
+	<td class="summary">Reset configuration to factory default.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#reg_write_start">reg_write_start&nbsp;()</a></td>
@@ -346,12 +346,13 @@ motor.set.led(true)</pre>
 
 </dd>
     <dt>
-    <a name = "reset"></a>
-    <strong>reset&nbsp;()</strong>
+    <a name = "reset_factory_default"></a>
+    <strong>reset_factory_default&nbsp;()</strong>
     </dt>
     <dd>
-    Reset configuration. 
- This will reset configuration to factory defaults Use with care, as it also resets the ID number. <br/>
+    Reset configuration to factory default. 
+ Use with care, as it also resets the ID number and baud rate. 
+ For factory defaults, check Dynamixal documentation.
  This command only works for single motors (not sync nor broadcast). <br/>
  For defaut values, check the Dynamixel documentation.
 

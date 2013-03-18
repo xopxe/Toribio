@@ -100,12 +100,13 @@ M.get_motor= function (busdevice, motor_id)
 	
 	-- calls that are only avalable on proper motors (not 'syncs motors')
 	if motor_type ~= 'sync' then
-		--- Reset configuration.
-		-- This will reset configuration to factory defaults Use with care, as it also resets the ID number.  
+		--- Reset configuration to factory default.
+		-- Use with care, as it also resets the ID number and baud rate. 
+		-- For factory defaults, check Dynamixal documentation.
 		-- This command only works for single motors (not sync nor broadcast).  
 		-- For defaut values, check the Dynamixel documentation.
 		-- @return a dynamixel error code
-		Motor.reset = function()
+		Motor.reset_factory_default = function()
 			return busdevice.reset(idb, status_return_level)
 		end
 		--- Starts a register write mode.

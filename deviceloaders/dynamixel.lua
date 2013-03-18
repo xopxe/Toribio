@@ -172,7 +172,7 @@ M.init = function (conf)
 		emitter=task_protocol,
 		events='*',
 		timeout = conf.serialtimeout or 0.05,
-		--buff_len=1
+		buff_len=1
 	})
 
 	-- -----------------------------------------
@@ -223,12 +223,11 @@ M.init = function (conf)
 		filehandler:send_sync(packet_read)
 		if return_level>=1 then
 			local emitter, ev, err, data = sched.wait(waitd_protocol)
-			
 			if id~=ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
 				return
 			end
-
+			
 			if not emitter then return nil, 'read error' end
 			
 			if data and #data ~= length then return nil, 'read error' end
@@ -242,7 +241,11 @@ M.init = function (conf)
 			INSTRUCTION_REG_WRITE..string.char(address)..data)
 		filehandler:send_sync(packet_reg_write)
 		if return_level>=2 and id ~= BROADCAST_ID then
-			local _, _, err = sched.wait(waitd_protocol)
+			local emitter, ev, err = sched.wait(waitd_protocol)
+			if id~=ev then
+				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+				return
+			end
 			if type (err)=='number' then
 				return err
 			end
@@ -251,7 +254,7 @@ M.init = function (conf)
 	local action = mx:synchronize(function(id, return_level)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_ACTION)
-		filehandler:writeall(packet_action)
+		filehandler:send_sync(packet_action)
 		if return_level>=2 and id ~= BROADCAST_ID then
 			local _, ev, err = sched.wait(waitd_protocol)
 			if id~=ev then
@@ -263,7 +266,7 @@ M.init = function (conf)
 			end
 		end
 	end)
-	local reset = mx:synchronize(function(id, return_level)
+	local reset_factory_default = mx:synchronize(function(id, return_level)
 		id = id or BROADCAST_ID
 		local packet_action = buildAX12packet(id, INSTRUCTION_RESET)
 		filehandler:send_sync(packet_action)
@@ -292,10 +295,11 @@ M.init = function (conf)
 	
 	local busdevice = {
 		ping = ping,
-		reset = reset,
+		reset_factory_default = reset_factory_default,
 		read_data =read_data,
 		write_data = write_data_now,
 		reg_write_data = reg_write_data,
+		action = action,
 		sync_write = sync_write,
 	}
 
@@ -381,10 +385,8 @@ M.init = function (conf)
 	-- 'ERROR\_OVERHEATING', 'ERROR\_RANGE', 'ERROR\_CHECKSUM', 'ERROR\_OVERLOAD', 'ERROR\_INSTRUCTION'.  
 	-- The table is double-indexed by entry number to allow array-like traversal.
 	-- @usage local errorset = dynamixel.has_errors(0x10+0x08)
-	--if has then
-	--	print ("has errors:" #errorset>0 )
-	--	print ("has range error:", errorset['ERROR\_RANGE']==true )
-	--end
+	--print ("has errors:" #errorset>0 )
+	--print ("has range error:", errorset['ERROR\_RANGE']==true )
 	busdevice.has_errors = function (code)
 		local errorset = {}
 		if code~=0 then
