@@ -103,6 +103,10 @@
 	<td class="name" nowrap><a href="#motors">motors</a></td>
 	<td class="summary">Motors connected to the bus.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#events">events</a></td>
+	<td class="summary">Signals emitted by this device.</td>
+	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
@@ -117,6 +121,14 @@
 	<tr>
 	<td class="name" nowrap><a href="#filename">filename</a></td>
 	<td class="summary">Device file of the bus.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#discovery_finished">discovery_finished</a></td>
+	<td class="summary">The bus scannning status.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#task">task</a></td>
+	<td class="summary">Task that will emit signals associated to this device.</td>
 	</tr>
 </table>
 
@@ -197,20 +209,19 @@
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>code</em></code>:  a dynamixel error code as returned by the different motor methods.</li>
+       <li><code><em>code</em></code>:  A dynamixel error code as returned by the different motor methods.</li>
     </ul>
 
     <h3>Usage:</h3>
     <ul>
         <pre class="example">local errorset = dynamixel.has_errors(0x10+0x08)
 print ("has errors:" #errorset>0 )
-print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
+print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
-        true if there is any error set or false otherwise, followed by a set of error strings. <br/>
- The possible error strings are 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
+        A set of error strings. The possible error strings are 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
  'ERROR_OVERHEATING', 'ERROR_RANGE', 'ERROR_CHECKSUM', 'ERROR_OVERLOAD', 'ERROR_INSTRUCTION'. <br/>
  The table is double-indexed by entry number to allow array-like traversal.
     </ol>
@@ -229,6 +240,22 @@ print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
     Motors connected to the bus. 
  The keys are device numbers, the values are Motor objects.
 
+
+
+
+
+</dd>
+    <dt>
+    <a name = "events"></a>
+    <strong>events</strong>
+    </dt>
+    <dd>
+    Signals emitted by this device. 
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>discovery_end</em></code>:  The discovery of attached motors has finished.</li>
+    </ul>
 
 
 
@@ -270,6 +297,31 @@ print ("has range error:", errorset['ERROR\_RANGE']==true )</pre>
     <dd>
     Device file of the bus. 
  For example, '/dev/ttyUSB0'
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "discovery_finished"></a>
+    <strong>discovery_finished</strong>
+    </dt>
+    <dd>
+    The bus scannning status. 
+ This flag will be set to true once the bus has been scanned and all motors discovered..
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "task"></a>
+    <strong>task</strong>
+    </dt>
+    <dd>
+    Task that will emit signals associated to this device. 
 
 
 

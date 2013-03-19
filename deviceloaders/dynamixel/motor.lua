@@ -1,10 +1,10 @@
 --- Library for Dynamixel motors.
 -- This library allows to manipulate devices that use Dynamixel 
 -- protocol, such as AX-12 robotic servo motors.
--- For basic manipulation, it is enough to use the @{rotate_to_angle} and @{spin},
+-- For basic manipulation, it is enough to use the @{rotate_to_angle} and @{spin} functions,
 -- and perhaps set the @{set.torque_enable}. For more sophisticated tasks, the full 
 -- Dynamixel functionality is available trough getter and setter functions.  
--- When available, each conected motor will be published
+-- When available, each connected motor will be published
 -- as a device in torobio.devices table, named
 -- (for example) 'ax12:1', labeled as module 'ax'. Aditionally, an 'ax:all'
 -- device will represent the broadcast wide motor. Also, 'ax:sync' motors can be used to 
@@ -161,8 +161,8 @@ M.get_motor= function (busdevice, motor_id)
 		angle_limit = function()
 			local ret, err = read_data(idb,0x06,4, status_return_level)
 			if ret then 
-				local cw = 0.29*(ret:byte(1) +256*ret:byte(2))
-				local ccw = 0.29*(ret:byte(3) +256*ret:byte(4))
+				local cw = 0.29*(ret:byte(1) + 256*ret:byte(2))
+				local ccw = 0.29*(ret:byte(3) + 256*ret:byte(4))
 				return cw, ccw, err 
 			end -- deg
 		end,
@@ -267,7 +267,7 @@ M.get_motor= function (busdevice, motor_id)
 		present_load = function()
 			local ret, err = read_data(idb,0x28,2, status_return_level)
 			if ret then 
-				local load = ret:byte(1) +256*ret:byte(2)
+				local load = ret:byte(1) + 256*ret:byte(2)
 				if load > 1023 then load = 1024-load end
 				return load/10.23, err -- % of torque max
 			end
@@ -295,7 +295,7 @@ M.get_motor= function (busdevice, motor_id)
 		punch = function()
 			local ret, err = read_data(idb,0x30,2, status_return_level)
 			if ret then 
-				local load = ret:byte(1) +256*ret:byte(2)
+				local load = ret:byte(1) + 256*ret:byte(2)
 				return load/10.23, err -- % of torque max
 			end
 		end
@@ -523,7 +523,7 @@ return M
 -- @function get.model_number
 -- @return a model number, followed by a dynamixel error code.
 
---- Get the version of the actuator's firmware (persist).
+--- Get the version of the actuator's firmware.
 -- For an AX-12 this will return 12.
 -- @function get.firmware_version
 -- @return a version number, followed by a dynamixel error code.

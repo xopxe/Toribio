@@ -75,10 +75,10 @@
 <p>Library for Dynamixel motors.</p>
 <p> This library allows to manipulate devices that use Dynamixel 
  protocol, such as AX-12 robotic servo motors.
- For basic manipulation, it is enough to use the <a href="../modules/dynamixel-motor.html#rotate_to_angle">rotate_to_angle</a> and <a href="../modules/dynamixel-motor.html#spin">spin</a>,
+ For basic manipulation, it is enough to use the <a href="../modules/dynamixel-motor.html#rotate_to_angle">rotate_to_angle</a> and <a href="../modules/dynamixel-motor.html#spin">spin</a> functions,
  and perhaps set the <a href="../modules/dynamixel-motor.html#set.torque_enable">set.torque_enable</a>. For more sophisticated tasks, the full 
  Dynamixel functionality is available trough getter and setter functions. <br/>
- When available, each conected motor will be published
+ When available, each connected motor will be published
  as a device in torobio.devices table, named
  (for example) 'ax12:1', labeled as module 'ax'. Aditionally, an 'ax:all'
  device will represent the broadcast wide motor. Also, 'ax:sync' motors can be used to 
@@ -145,7 +145,7 @@ motor.set.led(true)</pre>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#get.firmware_version">get.firmware_version&nbsp;()</a></td>
-	<td class="summary">Get the version of the actuator's firmware (persist).</td>
+	<td class="summary">Get the version of the actuator's firmware.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#get.id">get.id&nbsp;()</a></td>
@@ -510,7 +510,7 @@ motor.set.led(true)</pre>
     <strong>get.firmware_version&nbsp;()</strong>
     </dt>
     <dd>
-    Get the version of the actuator's firmware (persist). 
+    Get the version of the actuator's firmware. 
  For an AX-12 this will return 12.
 
 
