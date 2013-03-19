@@ -53,7 +53,7 @@ M.init = function(conf)
 		local buff = ''
 		return function(sktd, data, err) 
 			--print ('', data)
-			if not data then sched.running_task:kill() end
+			if not data then return end
 			buff = buff .. data
 			--print ('incomming', buff)
 			local decoded, index, e = json.decode(buff)
