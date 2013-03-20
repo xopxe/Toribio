@@ -9,8 +9,9 @@ M.init = function()
 		print ('BUTTON FOUND', button.name)
 		local pressed = false
 		while true do
-			local now = ( button.getValue()==1 )
+			local now = ( button.getValue()==0 )
 			if pressed and not now then 
+				print ('change direction!')
 				sched.signal('change direction!')
 				pressed=now
 			elseif not pressed and now then
@@ -32,12 +33,14 @@ M.init = function()
 		end)
 	end)
 	
+	--[[
 	sched.run(function()
 		while true do
 			sched.sleep(10 + 10*math.random())
 			sched.signal('change direction!')
 		end
 	end)
+	--]]
 end
 
 return M
