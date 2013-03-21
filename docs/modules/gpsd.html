@@ -43,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><strong>gpsd</strong></li>
   <li><a href="../modules/haar.html">haar</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -80,6 +81,10 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and starts the module.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#set_watch">set_watch&nbsp;(enable)</a></td>
 	<td class="summary">Start and Stop gpsd watching.</td>
 	</tr>
@@ -89,6 +94,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Events emitted by this device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -114,6 +123,24 @@
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and starts the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/gpsd.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
     <dt>
     <a name = "set_watch"></a>
     <strong>set_watch&nbsp;(enable)</strong>
@@ -166,6 +193,25 @@
        <li><code><em>AIS</em></code>: 
 
 </li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ This table is populated by toribio from the configuration file.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
+       <li><code><em>ip</em></code>:  of the gpsd daemon (defaults to '127.0.0.1')</li>
+       <li><code><em>port</em></code>:  of the gpsd daemon (defaults to 2947)</li>
     </ul>
 
 

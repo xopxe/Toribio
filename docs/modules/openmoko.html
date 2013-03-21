@@ -33,6 +33,7 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
 </ul>
 
@@ -42,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><a href="../modules/haar.html">haar</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -89,6 +91,10 @@ print (om.battery_energy())</pre>
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and starts the module.</td>
+	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#usb_mode">usb_mode&nbsp;(mode)</a></td>
 	<td class="summary">Set USB mode.</td>
@@ -166,6 +172,13 @@ print (om.battery_energy())</pre>
 	<td class="summary">Control the red light of the aux button.</td>
 	</tr>
 </table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
+	</tr>
+</table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
@@ -185,6 +198,24 @@ print (om.battery_energy())</pre>
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and starts the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/openmoko.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
     <dt>
     <a name = "usb_mode"></a>
     <strong>usb_mode&nbsp;(mode)</strong>
@@ -602,6 +633,30 @@ print (om.battery_energy())</pre>
     <ol>
         the parameters as set.
     </ol>
+
+
+</dd>
+</dl>
+    <h2><a name="Tables"></a>Tables</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ This table is populated by toribio from the configuration file. Can also be used to automatically
+ setup the openmoko calling the method with provided parameters. For example, to automatically 
+ start with a blinkig led, the following entrie could be added to the configuration file:
+ <em>deviceloaders.openmoko.led</em>aux<em>red</em>power = {true, 500, 500}_.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
+    </ul>
+
+
 
 
 </dd>

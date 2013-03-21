@@ -24,6 +24,10 @@ local run_shell = function(s)
 	return l
 end
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
 	conf = conf or {}
@@ -355,7 +359,7 @@ om uevent dump
 			local reton, retontime, retofftime = ret:match('^(%d+)%D*(%d*)%D*(%d*)$')
 			return tonumber(reton)>0, tonumber(retontime), tonumber(retofftime)
 		end,
-			
+		
 		--- Control the red light of the aux button.
 		-- @param on true switches on, false off, nil keeps as is.
 		-- @param ontime if provided with offtime, will blink at the indicated rate (milliseconds)
@@ -393,10 +397,18 @@ om uevent dump
 		end
 	end
 	
-	log('OMACCEL', 'INFO', 'Device %s created: %s', device.module, device.name)
+	log('OMOKO', 'INFO', 'Device %s created: %s', device.module, device.name)
 	toribio.add_device(device)
 
 end
 
 return M
+
+--- Configuration Table.
+-- This table is populated by toribio from the configuration file. Can also be used to automatically
+-- setup the openmoko calling the method with provided parameters. For example, to automatically 
+-- start with a blinkig led, the following entrie could be added to the configuration file:
+-- _deviceloaders.openmoko.led_aux_red_power = {true, 500, 500}_.
+-- @table conf
+-- @field load whether toribio should start this module automatically at startup.
 

@@ -6,6 +6,10 @@
 local M = {}
 local log = require 'log'
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	toribio = require 'toribio'
 
@@ -64,3 +68,9 @@ M.init = function(conf)
 end
 
 return M
+
+--- Configuration Table.
+-- This table is populated by toribio from the configuration file.
+-- @table conf
+-- @field filename device file for the accelerometer (defaults to '/sys/devices/platform/lis3lv02d')
+

@@ -14,7 +14,7 @@ local NULL_CHAR = string.char(0x00)
 local PACKET_START = string.char(0xFF,0xFF)
 
 M.new_bus = function (conf)
-	local filename = assert(conf.filename)
+	local filename = conf.filename or '/dev/ttyUSB0'
 	log('AX', 'INFO', 'usb device file: %s', tostring(filename))
 
 	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)

@@ -35,7 +35,6 @@
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
-<li><a href="#Configuration">Configuration</a></li>
 </ul>
 
 
@@ -44,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><a href="../modules/haar.html">haar</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -81,6 +81,10 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and starts the module.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#subscribe">subscribe&nbsp;(subscrib_id, filter)</a></td>
 	<td class="summary">Add a Subscription.</td>
 	</tr>
@@ -99,6 +103,10 @@
 	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Events emitted by this device.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
+	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
@@ -115,13 +123,6 @@
 	<td class="summary">Task that will emit signals associated to this device.</td>
 	</tr>
 </table>
-<h2><a href="#Configuration">Configuration</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#conf">conf</a></td>
-	<td class="summary">Configuration Table.</td>
-	</tr>
-</table>
 
 <br/>
 <br/>
@@ -130,6 +131,24 @@
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and starts the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/rnr_client.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
     <dt>
     <a name = "subscribe"></a>
     <strong>subscribe&nbsp;(subscrib_id, filter)</strong>
@@ -215,6 +234,24 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
 
 
 </dd>
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ This table is populated by toribio from the configuration file.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>ip</em></code>:  the ip where the Rnr agent listens (defaults to '127.0.0.1')</li>
+       <li><code><em>port</em></code>:  the port where the Rnr agent listens (defaults to 8182)</li>
+    </ul>
+
+
+
+
+</dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
     
@@ -250,30 +287,6 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     <dd>
     Task that will emit signals associated to this device. 
 
-
-
-
-
-</dd>
-</dl>
-    <h2><a name="Configuration"></a>Configuration</h2>
-    
-
-
-    <dl class="function">
-    <dt>
-    <a name = "conf"></a>
-    <strong>conf</strong>
-    </dt>
-    <dd>
-    Configuration Table. 
- This table is populated by toribio from the configuration file.
-
-    <h3>Fields:</h3>
-    <ul>
-       <li><code><em>ip</em></code>:  the ip where the Rnr agent listens (defaults to '127.0.0.1')</li>
-       <li><code><em>port</em></code>:  the port where the Rnr agent listens (defaults to 8182)</li>
-    </ul>
 
 
 

@@ -98,7 +98,10 @@ local function server_refresh ()
 	read_devices_list()
 end
 
-
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function (conf)
 	local timeout_refresh = conf.timeout_refresh or -1
 
@@ -132,3 +135,12 @@ M.init = function (conf)
 end
 
 return M
+
+--- Configuration Table.
+-- This table is populated by toribio from the configuration file.
+-- @table conf
+-- @field load whether toribio should start this module automatically at startup.
+-- @field comms communitaction parameter to provide to bobot library (such as `{"usb", "serial"}`)
+-- @field path where the bobot library is installed.
+-- @field timeout_refresh Time before triggering a re-detection of attached modules 
+-- (nil or negative disables).

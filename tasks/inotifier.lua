@@ -13,6 +13,10 @@ local run_shell = function (s)
 end
 
 M.init = function(masks_to_watch)
+	M.events = {
+		file_add = {},
+		file_del = {},
+	}
 	M.task = sched.run(function()
 		require 'catalog'.get_catalog('tasks'):register(masks_to_watch, sched.running_task)
 
@@ -57,7 +61,7 @@ M.init = function(masks_to_watch)
 						for devfile in nixio.fs.glob(mask) do
 							if devfile==fullpath then
 								print('FILE+', fullpath, mask)
-								sched.signal('FILE+', fullpath, mask)
+								sched.signal(M.events.file_add, fullpath, mask)
 							end
 							--print('confline starting', devfile, modulename)
 							--local devmodule = require ('../drivers/filedev/'..modulename)
@@ -66,7 +70,7 @@ M.init = function(masks_to_watch)
 					end
 				elseif action=='DELETE' then
 					print('FILE-', fullpath)
-					sched.signal('FILE-', fullpath)
+					sched.signal(M.events.file_del, fullpath)
 				end
 			end
 		end

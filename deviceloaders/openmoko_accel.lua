@@ -22,6 +22,10 @@
 local M = {}
 local log = require 'log'
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local nixio = require 'nixio'
@@ -159,3 +163,9 @@ M.init = function(conf)
 end
 
 return M
+
+--- Configuration Table.
+-- This table is populated by toribio from the configuration file.
+-- @table conf
+-- @field load whether toribio should start this module automatically at startup.
+-- @field delay_read the time between consecutive readngs. Defaults to 1 sec.

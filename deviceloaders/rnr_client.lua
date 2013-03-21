@@ -4,6 +4,10 @@
 
 local M = {}
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'tasks/selector'
@@ -130,9 +134,6 @@ M.init = function(conf)
 end
 
 return M
-
---- Configuration.
--- @section configuration
 
 --- Configuration Table.
 -- This table is populated by toribio from the configuration file.

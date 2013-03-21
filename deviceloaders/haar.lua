@@ -2,7 +2,6 @@
 -- The device will be named "haar", module "haar", and will generate signals
 -- from a external program using OpenCV (see deviceloaders/haar/haar\_stream.py). 
 -- The external haar\_stream.py must be started separately.
--- The configuration fields and defaults are conf.ip = '127.0.01', conf.port='45454' 
 -- @module haar
 -- @alias device
 
@@ -15,6 +14,10 @@ local run_shell = function(s)
 	return l
 end
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'tasks/selector'
@@ -67,3 +70,11 @@ M.init = function(conf)
 end
 
 return M
+
+--- Configuration Table.
+-- This table is populated by toribio from the configuration file.
+-- @table conf
+-- @field load whether toribio should start this module automatically at startup.
+-- @field ip where listen for the haar\_stream.py data (defaults to '127.0.0.1')
+-- @field port where listen for the haar\_stream.py data (defaults to 45454)
+

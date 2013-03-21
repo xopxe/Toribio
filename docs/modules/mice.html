@@ -43,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><a href="../modules/haar.html">haar</a></li>
   <li><strong>mice</strong></li>
@@ -80,6 +81,10 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and starts the module.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#get_pos">get_pos&nbsp;()</a></td>
 	<td class="summary">Get mouse position.</td>
 	</tr>
@@ -97,6 +102,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Events emitted by this device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -126,6 +135,24 @@
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and starts the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/mice.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
     <dt>
     <a name = "get_pos"></a>
     <strong>get_pos&nbsp;()</strong>
@@ -199,6 +226,25 @@
        <li><code><em>rightbutton</em></code>:  Right button click.</li>
        <li><code><em>middlebutton</em></code>:  Middle button click.</li>
        <li><code><em>move</em></code>:  Mouse moved, first parameter x, second parameter y coordinates.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ When the start is done automatically (trough configuration), 
+ this table points to the modules section in the global configuration table loaded from the configuration file.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
+       <li><code><em>filename</em></code>:  the device file for themouse (defaults to ''/dev/input/mice'').</li>
     </ul>
 
 

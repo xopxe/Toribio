@@ -43,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><strong>dynamixel-bus</strong></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><a href="../modules/haar.html">haar</a></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -82,6 +83,10 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and start the module.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#get_broadcaster">get_broadcaster&nbsp;()</a></td>
 	<td class="summary">Get a broadcasting Motor object.</td>
 	</tr>
@@ -107,6 +112,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Signals emitted by this device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -140,6 +149,24 @@
     <h2><a name="Functions"></a>Functions</h2>
     
     <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and start the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/dynamixel-bus.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
     <dt>
     <a name = "get_broadcaster"></a>
     <strong>get_broadcaster&nbsp;()</strong>
@@ -256,6 +283,28 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <h3>Fields:</h3>
     <ul>
        <li><code><em>discovery_end</em></code>:  The discovery of attached motors has finished.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ When the start is done automatically (trough configuration), 
+ this table points to the modules section in the global configuration table loaded from the configuration file.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
+       <li><code><em>filename</em></code>:  the device file for the serial bus (defaults to '/dev/ttyUSB0').</li>
+       <li><code><em>serialtimeout</em></code>:  the timeout when waiting for a response from an actuator (defaults to 0.05s)</li>
+       <li><code><em>stty_flags</em></code>:  parameters to pass to stty for configuring the serial bus.</li>
+       <li><code><em>serialspeed</em></code>:  serial bus speed in bps (defaults to 1000000).</li>
     </ul>
 
 

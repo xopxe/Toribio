@@ -32,6 +32,7 @@
 
 <h2>Contents</h2>
 <ul>
+<li><a href="#Functions">Functions</a></li>
 <li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
 </ul>
@@ -42,6 +43,7 @@
   <li><a href="../modules/bobot.html">bobot</a></li>
   <li><a href="../modules/dynamixel-bus.html">dynamixel-bus</a></li>
   <li><a href="../modules/dynamixel-motor.html">dynamixel-motor</a></li>
+  <li><a href="../modules/filedev.html">filedev</a></li>
   <li><a href="../modules/gpsd.html">gpsd</a></li>
   <li><strong>haar</strong></li>
   <li><a href="../modules/mice.html">mice</a></li>
@@ -74,14 +76,24 @@
 <p>Library for accesing Haar clasificator.</p>
 <p> The device will be named "haar", module "haar", and will generate signals
  from a external program using OpenCV (see deviceloaders/haar/haar_stream.py). 
- The external haar_stream.py must be started separately.
- The configuration fields and defaults are conf.ip = '127.0.01', conf.port='45454' </p>
+ The external haar_stream.py must be started separately.</p>
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#init">init&nbsp;(conf)</a></td>
+	<td class="summary">Initialize and starts the module.</td>
+	</tr>
+</table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#events">events</a></td>
 	<td class="summary">Events emitted by this device.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conf">conf</a></td>
+	<td class="summary">Configuration Table.</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -104,6 +116,28 @@
 <br/>
 
 
+    <h2><a name="Functions"></a>Functions</h2>
+    
+    <dl class="function">
+    <dt>
+    <a name = "init"></a>
+    <strong>init&nbsp;(conf)</strong>
+    </dt>
+    <dd>
+    Initialize and starts the module. 
+ This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
+ true.
+
+    <h3>Parameters:</h3>
+    <ul>
+       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/haar.html#conf">conf</a>).</li>
+    </ul>
+
+
+
+
+</dd>
+</dl>
     <h2><a name="Tables"></a>Tables</h2>
     
     <dl class="function">
@@ -118,6 +152,25 @@
     <ul>
        <li><code><em>match</em></code>:  a match has been received. Parameters are centerx, centery, sizex, sizey
  of the matching area.</li>
+    </ul>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "conf"></a>
+    <strong>conf</strong>
+    </dt>
+    <dd>
+    Configuration Table. 
+ This table is populated by toribio from the configuration file.
+
+    <h3>Fields:</h3>
+    <ul>
+       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
+       <li><code><em>ip</em></code>:  where listen for the haar_stream.py data (defaults to '127.0.0.1')</li>
+       <li><code><em>port</em></code>:  where listen for the haar_stream.py data (defaults to 45454)</li>
     </ul>
 
 

@@ -7,6 +7,10 @@
 
 local M = {}
 
+--- Initialize and starts the module.
+-- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
+-- true.
+-- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'tasks/selector'
@@ -113,3 +117,10 @@ M.init = function(conf)
 end
 
 return M
+
+--- Configuration Table.
+-- When the start is done automatically (trough configuration), 
+-- this table points to the modules section in the global configuration table loaded from the configuration file.
+-- @table conf
+-- @field load whether toribio should start this module automatically at startup.
+-- @field filename the device file for themouse (defaults to ''/dev/input/mice'').
