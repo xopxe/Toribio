@@ -39,7 +39,7 @@ M.init = function(conf)
 		end,
 
 		--- Set the sensor sample rate.
-		-- This is the intarnal sample rate, and the supported values are
+		-- This is the internal sample rate, and the supported values are
 		-- 1, 10, 25, 50, 100, 200, 400, 1600, and 5000 Hz.
 		-- The driver has a limit on reading at about 25 Hz.
 		-- @param hz The rate in hz.

@@ -12,10 +12,12 @@ udp_ip = '127.0.0.1'
 udp_port = 45454
 capture_size = [320,200]
 haarfile ='haarcascade_frontalface_alt.xml'
+showvideo = False
 
 class FaceDetect():
 	def __init__(self):
-		cv.NamedWindow ("CamShiftDemo", 1)
+		if showvideo:
+			cv.NamedWindow ("CamShiftDemo", 1)
 		device = 0
 		self.capture = cv.CaptureFromCAM(device)
 		cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, capture_size[0])
@@ -35,11 +37,12 @@ class FaceDetect():
 			for i in faces:
 				if i[1] > 10:
 					center = ((2*i[0][0]+i[0][2])/2,(2*i[0][1]+i[0][3])/2)
-					radius = (i[0][2]+i[0][3])/4
 					#print  center, i, i[0][2]*i[0][3], framesize,size
 					packet = '%d %d %d %d' % (center[0], center[1], i[0][2], i[0][3])
 					cs.sendto(packet, (udp_ip, udp_port))
-					cv.Circle(self.frame, center, radius, (128, 255, 128), 2, 8, 0)
+					if showvideo:
+						radius = (i[0][2]+i[0][3])/4
+						cv.Circle(self.frame, center, radius, (128, 255, 128), 2, 8, 0)
 	
 	def run(self):
 		# check if capture device is OK
@@ -71,30 +74,32 @@ class FaceDetect():
 			self.detect()
 
 			# display webcam image
-			cv.ShowImage('CamShiftDemo', self.frame)
+			if showvideo:
+				cv.ShowImage('CamShiftDemo', self.frame)
+				
 			# handle events
 			k = cv.WaitKey(10)
 
 if __name__ == "__main__":
-	
+	help_string = """python haar_stream.py [PARAMS]
+	-o --ip     defaults to '127.0.0.1'
+	-p --port   defaults to 45454
+	-v --video  open a window with the video preview
+	-s --size   defaults to '320x200'
+	-f --file   defaults to 'haarcascade_frontalface_alt.xml'"""
+
 	argv = sys.argv[1:]
 	try:
-		opts, args = getopt.getopt(argv,"ho:p:s:f:",["help","ip=", "port=", "size=", "file="])
+		opts, args = getopt.getopt(argv,"hvo:p:s:f:",["help","view","ip=", "port=", "size=", "file="])
 	except getopt.GetoptError:
-		print 'test.py -o <ip> -p <port> -s <size> -f <file>'
-		print '<ip> defaults to "127.0.0.1"'
-		print '<port> defaults to 45454'
-		print '<size> defaults to "320x200"'
-		print '<file> defaults to "haarcascade_frontalface_alt.xml"'
+		print help_string
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
-			print 'test.py -o <ip> -p <port> -s <size> -f <file>'
-			print '<ip> defaults to "127.0.0.1"'
-			print '<port> defaults to 45454'
-			print '<size> defaults to "320x200"'
-			print '<file> defaults to "haarcascade_frontalface_alt.xml"'
+			print help_string
 			sys.exit()
+		elif opt in ("-v", "--video"):
+			showvideo = True
 		elif opt in ("-f", "--file"):
 			haarfile = arg
 		elif opt in ("-o", "--ip"):
