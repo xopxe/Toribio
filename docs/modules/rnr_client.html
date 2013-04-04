@@ -93,7 +93,7 @@
 	<td class="summary">Remove a Subscription.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#emit_notification">emit_notification&nbsp;(notif_id, data)</a></td>
+	<td class="name" nowrap><a href="#emit_notification">emit_notification&nbsp;(data)</a></td>
 	<td class="summary">Emit a Notification.</td>
 	</tr>
 </table>
@@ -194,14 +194,13 @@ rnr.subscribe( 'subscrib100', {
 </dd>
     <dt>
     <a name = "emit_notification"></a>
-    <strong>emit_notification&nbsp;(notif_id, data)</strong>
+    <strong>emit_notification&nbsp;(data)</strong>
     </dt>
     <dd>
     Emit a Notification. 
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>notif_id</em></code>:  a unique notification id. If nil, a random one will be generated.</li>
        <li><code><em>data</em></code>:  a table with the data to be sent.</li>
     </ul>
 
