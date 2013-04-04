@@ -10,8 +10,6 @@
 local M ={}
 
 local sched = require 'sched'
-local catalog_tasks = require 'catalog'.get_catalog('tasks')
-local catalog_events = require 'catalog'.get_catalog('events')
 
 local log= require 'log'
 local mutex = require 'mutex'
@@ -108,7 +106,7 @@ M.wait_for_device = function(devdesc, timeout)
 	if in_devices then 
 		return in_devices
 	else
-		local tortask = catalog_tasks:waitfor('toribio')
+		local tortask = M.task
 		local waitd = {emitter=tortask, events={M.events.new_device}}
 		if wait_until then waitd.timeout=wait_until-sched.get_time() end
 		while true do
@@ -166,17 +164,7 @@ M.add_device = function (device)
 	if device.name~=devicename then print ('WARN!, device renamed!') end
 	device.name=devicename
 	devices[devicename] = device
-	
-	if device.task then
-		log ('TORIBIO', 'INFO', 'Cataloging task %s for device %s', tostring(device.task), device.name)
-		assert(catalog_tasks:register(device.name, device.task))
-	end
-	
-	for evname, ev in pairs(device.events or {}) do
-		log ('TORIBIO', 'INFO', 'Cataloging event %s for device %s', evname, device.name)
-		assert(catalog_events:register(evname, ev))
-	end
-	
+
 	 -- for device:register_callback() notation
 	device.register_callback = M.register_callback 
 	device.remove = M.remove_device
@@ -240,7 +228,6 @@ end
 -- This is the task that emits toribios @{events}
 -- @return toribio's task
 M.task = sched.run( function ()
-	catalog_tasks:register('toribio', sched.running_task)
 	local waitd_control={emitter='*', buff_size=10, 
 		events={signal_new_device, signal_remove_device}}
 	while true do
@@ -254,14 +241,6 @@ M.task = sched.run( function ()
 		end
 	end
 end)
-
---- A catalog for tasks.
--- This is a catalog used to give well known names to tasks.
-M.catalog_tasks = catalog_tasks
-
---- A catalog for events.
--- This is a catalog used to give well known names to events.
-M.catalog_events = catalog_events
 
 --- The configuration table.
 -- This table contains the configurations specified in toribio-go.conf file.
