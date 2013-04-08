@@ -133,12 +133,11 @@ end
 -- @param f the callback function. It will be passed the signal's parameters.
 -- @param timeout Timeout on wait. On expiration, f will be invoked with 
 -- nil, 'timeout' as parameters.
--- @return The callback task
+-- @return The callback task, or _nil, error_ on failure
 M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
-	assert(device.task, "Device has no task associated")
-	assert(device.events, "Device has no events associated")
-	assert(device.events[event], "Device has no such signal associated")
+	if not device.task then return nil, "Device has no task" end
+	if not device.events or not device.events[event] then return nil, "Device has no such event" end
 
 	local waitd = {
 		emitter=device.task,
