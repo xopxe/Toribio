@@ -38,8 +38,8 @@ M.init = function(conf)
 	local function get_incomming_handler()
 		local notification_lines
 		return function(sktd, line, err) 
-			--print ('', data)
-			if not line then return end
+			--print ('++++++++', sktd, line, err)
+			--if not line then return end
 			
 			if line == 'NOTIFICATION' then
 				notification_lines = {}
@@ -119,7 +119,7 @@ M.init = function(conf)
 	-- @usage local rnr = bobot.wait_for_device('rnr_client')
 	--rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )
 	device.emit_notification = function (data)
-		data.notif_id = data.notif_id or tostring(math.random(2^30))
+		data.notification_id = data.notification_id or tostring(math.random(2^30))
 		local vlines={[1]='NOTIFICATION'}
 		for k, v in pairs(data) do
 			vlines[#vlines+1]= tostring(k) .. '=' .. tostring(v)
