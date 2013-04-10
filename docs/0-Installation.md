@@ -11,7 +11,7 @@ If you are on OpenWRT, nixio is already installed. You can also crosscompile nix
 
 Then, download the latest version of [Toribio](https://github.com/xopxe/Toribio). You can either get the [tarball](https://github.com/xopxe/Toribio/tarball/master) , or use git:
 
-    # git clone git@github.com:xopxe/Toribio.git
+    # git clone git://github.com/xopxe/Toribio.git
     # cd Toribio
     # git submodule init
     # git submodule update

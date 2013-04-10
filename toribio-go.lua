@@ -72,7 +72,9 @@ end
 local opts = getopt( _G.arg, "cd" )
 
 --watches for task die events and prints out
-sched.sigrun({emitter='*', events={sched.EVENT_DIE}}, print)
+sched.sigrun({emitter='*', events={sched.EVENT_DIE}}, function(task, _, normal)
+	log ('TORIBIOGO', 'DETAIL', 'Task %s died, a natural death: %s', tostring(task), tostring(normal))
+end)
 
 --loads from a configuration file
 local function load_configuration(file)
@@ -158,7 +160,7 @@ sched.run(function()
 	end
 end)
 
-print('Toribio go!')
+--print('Toribio go!')
 log ('TORIBIOGO', 'INFO', 'Ready')
 sched.go()
 
