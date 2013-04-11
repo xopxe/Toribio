@@ -20,7 +20,7 @@ local function split_words(s)
 	return words
 end
 
-process = {}
+local process = {}
 
 process["INIT"] = function () --to check the new state of hardware on the fly
 	--server_init()
