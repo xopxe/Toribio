@@ -56,10 +56,10 @@ local function read_devices_list()
 		end
 		bfound = true
 	end
-	for regname, _ in pairs(devices_attached) do
+	for regname, d in pairs(devices_attached) do
 		if not devices_attached_now[regname] then
-			devices_attached[regname]=false
-			toribio.remove_devices({name=regname})
+			toribio.remove_devices({name=d.name})
+			devices_attached[regname]=nil
 		end
 	end
 	for regname, d in pairs(devices_attached_now) do

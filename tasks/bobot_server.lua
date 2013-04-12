@@ -93,7 +93,10 @@ process["DESCRIBE"] = function (parameters)
 			if not skip_fields[fname] then 
 			ret = ret .. fname .. "={"
 			ret = ret .. " parameters={"
-			local meta_parameters = device.bobot_metadata[fdef].parameters
+			local bobot_metadata = ((device.bobot_metadata or {})[fdef] or {
+				parameters={}, returns={}
+			})
+			local meta_parameters = bobot_metadata.parameters
 			for i,pars in ipairs(meta_parameters) do
 				ret = ret .. "[" ..i.."]={"
 				for k, v in pairs(pars) do
@@ -102,7 +105,7 @@ process["DESCRIBE"] = function (parameters)
 				ret = ret .. "},"
 			end
 			ret = ret .. "}, returns={"
-			local meta_returns = device.bobot_metadata[fdef].returns
+			local meta_returns = bobot_metadata.returns
 			for i,rets in ipairs(meta_returns) do
 				ret = ret .. "[" ..i.."]={"
 				for k, v in pairs(rets) do
