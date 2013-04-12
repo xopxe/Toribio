@@ -76,7 +76,14 @@ local function read_devices_list()
 					-- by bobot. For example, "bb-dist".
 					module="bb-"..d.module,
 				}
-				for fn, ff in pairs(d.api or {}) do device[fn]=ff.call end
+				device.bobot_metadata = {}
+				for fn, ff in pairs(d.api or {}) do 
+					device[fn]=ff.call 
+					device.bobot_metadata[ff.call] = {
+						parameters = ff.parameters,
+						returns = ff.returns,
+					}
+				end
 				toribio.add_device(device)
 				devices_attached[regname]=device
 			else

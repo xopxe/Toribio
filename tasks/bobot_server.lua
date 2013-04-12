@@ -86,14 +86,15 @@ process["DESCRIBE"] = function (parameters)
 	--end
 
 	local  skip_fields = {remove=true, name=true, register_callback=true, events=true,
-		task=true, filename=true, module=true}
+		task=true, filename=true, module=true, bobot_metadata=true}
 	
 	local ret = "{"
 	for fname, fdef in pairs(device) do
 			if not skip_fields[fname] then 
 			ret = ret .. fname .. "={"
 			ret = ret .. " parameters={"
-			for i,pars in ipairs({}) do
+			local meta_parameters = device.bobot_metadata[fdef].parameters
+			for i,pars in ipairs(meta_parameters) do
 				ret = ret .. "[" ..i.."]={"
 				for k, v in pairs(pars) do
 					ret = ret .."['".. k .."']='"..tostring(v).."',"
@@ -101,7 +102,8 @@ process["DESCRIBE"] = function (parameters)
 				ret = ret .. "},"
 			end
 			ret = ret .. "}, returns={"
-			for i,rets in ipairs({}) do
+			local meta_returns = device.bobot_metadata[fdef].returns
+			for i,rets in ipairs(meta_returns) do
 				ret = ret .. "[" ..i.."]={"
 				for k, v in pairs(rets) do
 					ret = ret .."['".. k .."']='"..tostring(v).."',"
