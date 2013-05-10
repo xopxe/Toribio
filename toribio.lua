@@ -159,9 +159,11 @@ local signal_new_device = {}
 -- @param device a Device object.
 M.add_device = function (device)
 	local devicename=get_device_name(device.name)
-	log ('TORIBIO', 'INFO', 'Adding device %s a (%s)', device.name, device.module)
-	if device.name~=devicename then print ('WARN!, device renamed!') end
-	device.name=devicename
+	log ('TORIBIO', 'INFO', 'Adding device "%s" (module "%s")', device.name, device.module)
+	if device.name~=devicename then 
+		log ('TORIBIO', 'WARN', 'device renamed from "%s" to "%s" (module "%s")', device.name, devicename, device.module)
+		device.name=devicename
+	end
 	devices[devicename] = device
 
 	 -- for device:register_callback() notation
