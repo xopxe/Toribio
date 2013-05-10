@@ -9,10 +9,11 @@ local toribio = require 'toribio'
 local sched = require 'sched'
 local log = require 'log'
 local messages = require 'tasks/ran/messages'
+local ran_util= require 'tasks/ran/util'
 --local rmoon = require 'ran/rmoon'
 
 local configuration --holds conf after init()
-local rnr --holds rnr_client after init()
+local rnr --holds rnr connection after init()
 
 --list of set-up watchers
 --{watcher_id=taskd}
@@ -103,7 +104,7 @@ print ("---value", mibis, mib, op, value, hysteresis, timeout, interval)
 				mib=mib, 
 				value=ret,
 			})
-			rnr.emit_notification(trap)
+			rnr:emit_notification(trap)
 		end
 	end
 end
@@ -152,7 +153,7 @@ print ("---delta", mib, op, delta, hysteresis, timeout)
 				mib=mib, 
 				value=ret,
 			})
-			rnr.emit_notification(trap)
+			rnr:emit_notification(trap)
 		end
 	end
 end
@@ -204,7 +205,7 @@ local function delta_e_tracker (mibis, mibdev, mibf, params)
 				mib=mib, 
 				value=ret,
 			})
-			rnr.emit_notification(trap)
+			rnr:emit_notification(trap)
 		end
 	end
 end
@@ -226,36 +227,8 @@ local function register_watcher(mibis, mibdev, mibf, params)
 		return nil, "malformed watcher request"
 	end
 	environment_trackers[watcher_id]=task
-
+	
 	return watcher_id
-end
-
-
-local function get_mib_func(mib)
-	local entry = toribio.devices
-	local n = 1
-	local tokens = {}
-	local device
-	for token in string.gmatch(mib, "[^%.]+") do
-		tokens[#tokens+1]=token
-		entry = entry[token]
-		if not entry then
-			log('RMOON', 'WARN', 'unknown mib "%s", failed at level %i', tostring(mib), n)
-			return
-		end
-		if n==1 then device=entry end
-		n = n+1
-	end
-	print ('>>>>>>', tokens[#tokens-1], entry)
-	if tokens[#tokens-1]=='events' then
-		return 'event', device, entry
-	else
-		if type(entry) == 'function' then
-			return 'function', device, entry
-		end
-	end
-	log('RMOON', 'WARN', 'malformed mib "%s", not a function nor event', tostring(mib))
-	return
 end
 
 local rmoon_commands = {
@@ -263,7 +236,7 @@ local rmoon_commands = {
 		--local mib, op, value, histeresis = params.mib, params.op, params.value, params.hysteresis or 0
 		
 		if params.mib then
-			local mibis, mibdev, mibf = get_mib_func(params.mib)
+			local mibis, mibdev, mibf = ran_util.get_mib_func(params.mib)
 			if mibis then
 				local wid, err = register_watcher(mibis, mibdev, mibf, params)
 				if wid then
@@ -273,6 +246,7 @@ local rmoon_commands = {
 					return {status = err}
 				end
 			else
+				log('RMOON', 'WARN', tostring(mibdev)) 
 				return {status = "mib not supported"}
 			end
 		elseif params.event then
@@ -287,7 +261,7 @@ local rmoon_commands = {
 					event=params.event, 
 					value=tostring(data),
 				})
-				rnr.emit_notification(trap)
+				rnr:emit_notification(trap)
 			end)
 			if not taskd then 
 				log('RMOON', 'WARN', 'monitoring failed with "%s"', tostring(err)) 
@@ -319,7 +293,7 @@ M.init = function(conf)
 	conf.my_hostname = conf.my_hostname or 'host'..math.random(2^30)
 	conf.my_servicename = conf.my_servicename or '/lupa/rmoon'
 	
-	rnr = toribio.wait_for_device('rnr_client')
+	rnr = toribio.wait_for_device('rnr_client').new_connection()
 	local watcher_count = 0
 	
 	local waitd_rnr = sched.new_waitd({
@@ -335,14 +309,14 @@ M.init = function(conf)
 		if notif.message_type == 'action' and command then
 			local response
 			if rmoon_commands[command] then
-				log('RMOON', 'INFO', 'Incomming command %s, id "%s"', tostring(command), tostring(notif.watcher_id))
+				log('RMOON', 'INFO', 'Incomming command "%s", wid %s', tostring(command), tostring(notif.watcher_id))
 				response = rmoon_commands[command](notif)
 				if response then
 					local msg=messages.prepare_response(conf, notif, response)
-					rnr.emit_notification(msg)
+					rnr:emit_notification(msg)
 				end
 			else
-				log('RMOON', 'WARN', 'Incomming unknown command %s, id "%s"', tostring(command), tostring(notif.watcher_id))
+				log('RMOON', 'WARN', 'Incomming unknown command "%s", wid %s', tostring(command), tostring(notif.watcher_id))
 			end
 		end
 	end)
@@ -354,7 +328,7 @@ M.init = function(conf)
 		{attrib='target_host', op= '=', value=conf.my_hostname},
 		{attrib='target_service', op= '=', value=conf.my_servicename},
 	}
-	rnr.subscribe( "rmoon_sub_"..tostring(math.random(2^30)), filter )
+	rnr:subscribe( "rmoon_sub_"..tostring(math.random(2^30)), filter )
 	log('RMOON', 'INFO', 'Task started as host %s, service %s', tostring(conf.my_hostname), tostring(conf.my_servicename))
 	
 	---[[

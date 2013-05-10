@@ -85,23 +85,27 @@
 	<td class="summary">Initialize and starts the module.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#subscribe">subscribe&nbsp;(subscrib_id, filter)</a></td>
+	<td class="name" nowrap><a href="#new_connection">new_connection&nbsp;()</a></td>
+	<td class="summary">Open a new connection.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#subscribe">subscribe&nbsp;(connd, subscrib_id, filter)</a></td>
 	<td class="summary">Add a Subscription.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#unsubscribe">unsubscribe&nbsp;(subscrib_id)</a></td>
+	<td class="name" nowrap><a href="#unsubscribe">unsubscribe&nbsp;(connd, subscrib_id)</a></td>
 	<td class="summary">Remove a Subscription.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#emit_notification">emit_notification&nbsp;(data)</a></td>
+	<td class="name" nowrap><a href="#emit_notification">emit_notification&nbsp;(connd, data)</a></td>
 	<td class="summary">Emit a Notification.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#events">events</a></td>
-	<td class="summary">Events emitted by this device.</td>
+	<td class="name" nowrap><a href="#connd">connd</a></td>
+	<td class="summary">Connection descriptor.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#conf">conf</a></td>
@@ -112,15 +116,11 @@
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#name">name</a></td>
-	<td class="summary">Name of the device (in this case, 'gpsd').</td>
+	<td class="summary">Name of the device (in this case, 'rnr_client').</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#module">module</a></td>
-	<td class="summary">Module name (in this case, 'gpsd').</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#task">task</a></td>
-	<td class="summary">Task that will emit signals associated to this device.</td>
+	<td class="summary">Module name (in this case, 'rnr_client').</td>
 	</tr>
 </table>
 
@@ -150,15 +150,33 @@
 
 </dd>
     <dt>
+    <a name = "new_connection"></a>
+    <strong>new_connection&nbsp;()</strong>
+    </dt>
+    <dd>
+    Open a new connection. 
+ The descriptor allows object-oriented acces to methods, like connd:emite_notification(data)
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        a connection descriptor (see <a href="../modules/rnr_client.html#connd">connd</a>) on success, <em>nil, message</em> on failure.
+    </ol>
+
+
+</dd>
+    <dt>
     <a name = "subscribe"></a>
-    <strong>subscribe&nbsp;(subscrib_id, filter)</strong>
+    <strong>subscribe&nbsp;(connd, subscrib_id, filter)</strong>
     </dt>
     <dd>
     Add a Subscription. 
- When subscribed, matching notification will arrive as signals (see <a href="../modules/rnr_client.html#events">events</a>)
+ When subscribed, matching notification will arrive as signals (see <a href="../modules/rnr_client.html#connd">connd</a>)
 
     <h3>Parameters:</h3>
     <ul>
+       <li><code><em>connd</em></code>:  a connection descriptor.</li>
        <li><code><em>subscrib_id</em></code>:  a unique subscription id. If nil, a random one will be generated.</li>
        <li><code><em>filter</em></code>:  an array contaning the subscription filter. Each entry in the array is a table
  containing 'attr', 'op' and 'value' fields describing an expression.</li>
@@ -182,13 +200,14 @@ rnr.subscribe( 'subscrib100', {
 </dd>
     <dt>
     <a name = "unsubscribe"></a>
-    <strong>unsubscribe&nbsp;(subscrib_id)</strong>
+    <strong>unsubscribe&nbsp;(connd, subscrib_id)</strong>
     </dt>
     <dd>
     Remove a Subscription. 
 
     <h3>Parameters:</h3>
     <ul>
+       <li><code><em>connd</em></code>:  a connection descriptor.</li>
        <li><code><em>subscrib_id</em></code>:  a unique subscription id.</li>
     </ul>
 
@@ -202,13 +221,14 @@ rnr.subscribe( 'subscrib100', {
 </dd>
     <dt>
     <a name = "emit_notification"></a>
-    <strong>emit_notification&nbsp;(data)</strong>
+    <strong>emit_notification&nbsp;(connd, data)</strong>
     </dt>
     <dd>
     Emit a Notification. 
 
     <h3>Parameters:</h3>
     <ul>
+       <li><code><em>connd</em></code>:  a connection descriptor.</li>
        <li><code><em>data</em></code>:  a table with the data to be sent.</li>
     </ul>
 
@@ -230,15 +250,19 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     
     <dl class="function">
     <dt>
-    <a name = "events"></a>
-    <strong>events</strong>
+    <a name = "connd"></a>
+    <strong>connd</strong>
     </dt>
     <dd>
-    Events emitted by this device. 
+    Connection descriptor. 
+ This table is populated by toribio from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>notification_arrival</em></code>:  a new notification has arrived.  The first parameter is a table with the notifications content.</li>
+       <li><code><em>task</em></code>:  task that will emit signals associated to this device.</li>
+       <li><code><em>events</em></code>:  task that will emit signals associated to this device.
+ It is a table with a single field, <code>notification_arrival</code>,  a new notification has arrived. <br/>
+ The first parameter of the signal is a table with the notification's content.</li>
     </ul>
 
 
@@ -272,7 +296,7 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device (in this case, 'gpsd'). 
+    Name of the device (in this case, 'rnr_client'). 
 
 
 
@@ -284,19 +308,7 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'gpsd'). 
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "task"></a>
-    <strong>task</strong>
-    </dt>
-    <dd>
-    Task that will emit signals associated to this device. 
+    Module name (in this case, 'rnr_client'). 
 
 
 
