@@ -15,7 +15,7 @@ local response_counter = newCounter()
 local trap_counter = newCounter()
 
 M.prepare_response = function (conf, reply_to, data)
-	data.message_type = 'reponse'
+	data.message_type = 'response'
 	data.notification_id = data.notification_id or  conf.my_hostname .. "_resp_" .. response_counter() 
 	data.host = conf.my_hostname
 	data.service = conf.my_servicename
