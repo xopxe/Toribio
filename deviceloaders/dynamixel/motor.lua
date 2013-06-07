@@ -26,6 +26,26 @@ local log = require 'log'
 
 local M = {}
 
+local function getunsigned_2bytes(s)
+	return s:byte(1) + 256*s:byte(2)
+end
+local function get2bytes_unsigned(n)
+	if n<0 then n=0
+	elseif n>1023 then n=1023 end
+	local lowb, highb = n%256, math.floor(n/256)
+	return lowb, highb
+end
+local function get2bytes_signed(n)
+	if n<-1023 then n=-1023
+	elseif n>1023 then n=1023 end
+	if n < 0 then n = 1024 - n end
+	local lowb, highb = n%256, math.floor(n/256)
+	return lowb, highb
+end
+local function log2( x ) 
+	return  math.log( x ) / math.log( 2 )
+end
+
 M.get_motor= function (busdevice, motor_id)
 	local read_data = busdevice.read_data
 	local write_method
@@ -53,23 +73,7 @@ M.get_motor= function (busdevice, motor_id)
 		write_method='sync_write'
 	end
 
-	local function get2bytes_unsigned(n)
-		if n<0 then n=0
-		elseif n>1023 then n=1023 end
-		local lowb, highb = n%256, math.floor(n/256)
-		return lowb, highb
-	end
-	local function get2bytes_signed(n)
-		if n<-1023 then n=-1023
-		elseif n>1023 then n=1023 end
-		if n < 0 then n = 1024 - n end
-		local lowb, highb = n%256, math.floor(n/256)
-		return lowb, highb
-	end
-	local function getunsigned_2bytes(s)
-		return s:byte(1) + 256*s:byte(2)
-	end
-	
+
 	--Check wether the motor with id actually exists. If not, return nil.
 	if motor_type == 'single' then 
 		if not busdevice.ping(idb) then
@@ -218,7 +222,6 @@ M.get_motor= function (busdevice, motor_id)
 		compliance_slope = function()
 			local ret, err = read_data(idb,0x1C,2, status_return_level)
 			if ret then
-				local function log2( x ) return  math.log( x ) / math.log( 2 ); end
 				return log2(ret:byte(1)), log2(ret:byte(2)), err
 			end
 		end,
