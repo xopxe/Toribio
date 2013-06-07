@@ -43,19 +43,19 @@ M.init = function(conf)
 	--local stream2 = assert(nixio.open('/dev/input/event3', nixio.open_flags('rdonly', 'nonblock')))
 
 	
-			--- Read the acceleration from sensor 1.
-			-- The acceleration is measured in mg (1/1000th of earth gravity)
-			-- the axis are, when looking from the front and the phone laying on a desk:
-			-- x (horizontal to the right and away), y (horizontal to the left and away) 
-			-- and z (down)
-			-- @return The x, y and z magnitudes.
+	--- Read the acceleration from sensor 1.
+	-- The acceleration is measured in mg (1/1000th of earth gravity)
+	-- the axis are, when looking from the front and the phone laying on a desk:
+	-- x (horizontal to the right and away), y (horizontal to the left and away) 
+	-- and z (down)
+	-- @return The x, y and z magnitudes.
 
-			--- Read the acceleration from sensor 2.
-			-- The acceleration is measured in mg (1/1000th of earth gravity)
-			-- the axis are, when looking from the front and the phone laying on a desk:
-			-- x (horizontal to the right), y (horizontal and away) 
-			-- and z (down)
-			-- @return The x, y and z magnitudes.
+	--- Read the acceleration from sensor 2.
+	-- The acceleration is measured in mg (1/1000th of earth gravity)
+	-- the axis are, when looking from the front and the phone laying on a desk:
+	-- x (horizontal to the right), y (horizontal and away) 
+	-- and z (down)
+	-- @return The x, y and z magnitudes.
 
 		
 	local function build_device(name, sysfs, stream, event_accel)
@@ -71,11 +71,9 @@ M.init = function(conf)
 						--local time=message:sub(1, 4)
 						local etype = event:byte(9) -- only last byte
 						local ecode = event:byte(11) -- only last byte
-			--			print (etype,ecode)
 						if etype==3 or etype==2 then
 							local value = event:byte(13) + 256*event:byte(14)--2 bytes (~65.5 g)
 							if value>32768 then value=value-0xFFFF end
-			--			print ('',value)
 							if ecode==0 then x=value 
 							elseif ecode==1 then y=value 
 							elseif ecode==2 then z=value end
@@ -169,3 +167,4 @@ return M
 -- @table conf
 -- @field load whether toribio should start this module automatically at startup.
 -- @field delay_read the time between consecutive readngs. Defaults to 1 sec.
+
