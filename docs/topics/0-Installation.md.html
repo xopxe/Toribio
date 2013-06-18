@@ -70,29 +70,34 @@
     
 <h1>Install Toribio.</h1>
 
-<p>First, install <a href="https://github.com/Neopallium/nixio">nixio</a>:</p>
+<p>Toribio runs on Lua 5.1, so make sure you have it installed.</p>
+
+<p>Then, install <a href="https://github.com/Neopallium/nixio">nixio</a>. 
+If you are on OpenWRT, nixio is already installed. Otherwise, you probably
+have to build it from sources. Under Ubuntu, you will need <code>build-essential</code>, <code>liblua5.1-dev</code> and <code>libssl-dev</code> packages. </p>
 
 
 <pre>
- # git clone https://github.com/Neopallium/nixio.git
- # cd nixio
- # make
- # sudo make install
+ $ git clone https://github.com/Neopallium/nixio.git
+ $ cd nixio
+ $ make
+ $ sudo make install
 </pre>
 
-<p>If you are on OpenWRT, nixio is already installed. You can also crosscompile nixio, for example <code>make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-</code> to crosscompile for ARM.</p>
+<p>You can also crosscompile nixio for other platforms. For example <code>make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi-</code> to crosscompile for ARM (you will have to check your toolchain docs).</p>
 
 <p>Then, download the latest version of <a href="https://github.com/xopxe/Toribio">Toribio</a>. You can either get the <a href="https://github.com/xopxe/Toribio/tarball/master">tarball</a> , or use git:</p>
 
 
 <pre>
- # git clone git://github.com/xopxe/Toribio.git
- # cd Toribio
- # git submodule init
- # git submodule update
+ $ git clone git://github.com/xopxe/Toribio.git
+ $ cd Toribio
+ $ git submodule init
+ $ git submodule update
 </pre>
 
-<p>Finally, to use the filedev device-loader make sure you have the inotifywait program installed (on Ubuntu, do a <code>sudo apt-get install inotify-tools</code>).</p>
+<p>Finally, to use the filedev device loader you will need the inotifywait program (on Ubuntu, do a <code>sudo apt-get install inotify-tools</code>).</p>
+
 
 
 </div> <!-- id="content" -->
