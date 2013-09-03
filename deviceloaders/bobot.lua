@@ -95,7 +95,7 @@ local function read_devices_list()
 	if not bfound then log('BOBOT', 'WARNING', ' No Baseboard found') end
 end
 
-local function server_refresh ()
+M.refresh = function ()
 	print ('bobot refreshing!')
 	for i, bb in ipairs(bobot.baseboards) do
 		if not bb:refresh() then
@@ -133,12 +133,7 @@ M.init = function (conf)
 		count = count-1
 	end
 	read_devices_list()
-	sched.sigrun({
-		emitter='*', 
-		buff_size=1, 
-		timeout=timeout_refresh, 
-		events={'do_bobot_refresh'}
-	}, server_refresh)
+	M.refresh()
 end
 
 return M

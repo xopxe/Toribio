@@ -66,9 +66,6 @@ M.init = function(conf)
 	--- Module name (in this case, 'mice').
 	device.module='mice'
 
-	--- Task that will emit signals associated to this device.
-	device.task=selector.task
-
 	--- Device file of the mouse.
 	-- For example, '/dev/input/mice'
 	device.filename=filename

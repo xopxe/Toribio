@@ -41,11 +41,11 @@ to devices, etc.
 
 * toribio-go.lua
 
-The launch script. Uses toribio-go.conf to start tasks and provide them parameters.
+The launch script. Uses a configuration file to start tasks and provide them parameters.
 
-* toribio-go.conf
+* toribio-go.conf and sample-confs/
 
-Central configuration repository. Will be available to tasks trough toribio library. 
+Configuration files. Will be available to tasks trough toribio library. 
 Also determines what tasks to start.
 
 * /deviceloaders/*

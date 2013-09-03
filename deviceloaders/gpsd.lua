@@ -28,12 +28,10 @@ M.init = function(conf)
 		--- Module name (in this case, 'gpsd').
 		module = 'gpsd', 
 		
-		--- Task that will emit signals associated to this device.
-		task = selector.task,  
-		
 		--- Events emitted by this device.
 		-- Each event represent a gpsd event. The signal has a single
 		-- parameter, a table containing the gpsd provided data.
+    -- @table events
 		-- @field VERSION
 		-- @field WATCH
 		-- @field DEVICES

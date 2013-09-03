@@ -100,11 +100,7 @@ Some devices can connect and disconnect at runtime. If you're
 interested in these events, you can listen for the _'new\_device'_ and
 _'removed\_device'_ events. For example:
 
-    sched.sigrun(
-    	{
-    		emitter=toribio.task, 
-    		signals={toribio.signals.new_device}
-    	}, 
+    sched.sigrun({toribio.signals.new_device}, 
     	function(device) 
     		print('new device!', device.name)
     	end
@@ -182,7 +178,7 @@ periodically checks the reading from the sensor, and if needed triggers a signal
     			too_close=too_close_event
     		}
     		device.task = sched.run(function()
-			local too_close = false
+			    local too_close = false
     			while true do
     				if sensor.getValue() < sconf.min_threshold then
     					if not too_close then 
@@ -190,7 +186,7 @@ periodically checks the reading from the sensor, and if needed triggers a signal
     						too_close=true
     					end
     				else too_close=false end
-    				sched.sleep( sconf.rate )
+    			  	sched.sleep( sconf.rate )
     			end
     		end)
     		device.set_pause = function ( pause )

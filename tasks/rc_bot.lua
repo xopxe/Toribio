@@ -16,7 +16,7 @@ M.init = function(conf)
 		local udp = selector.new_udp(nil, nil, conf.ip, conf.port, -1)
 
 		--listen for messages
-		sched.sigrun({emitter=selector.task, events={udp.events.data}}, function(_, _, msg) 
+		sched.sigrun({udp.events.data}, function(_, msg) 
 			local left, right
 			if msg then
 				left, right = msg:match('^([^,]+),([^,]+)$')

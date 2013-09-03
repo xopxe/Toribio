@@ -78,22 +78,23 @@
  sensors of a OpenMoko FreeRunner smartphone. Runs under SHR-testing OS.
  The module of both devices is "openmoko_accel".
  The acceleration is measured in mg (1/1000th of earth gravity).
- The first Device is named "accelerometer.1" and the axes are, when 
+ The first Device is named "accelerometer.1" and the axes are, when
  looking from the front and the phone laying on a desk:
- x (horizontal to the right and away), y (horizontal to the left and away) 
+ x (horizontal to the right and away), y (horizontal to the left and away)
  and z (down).
- The second Device is named "accelerometer.2" and the axes are, when 
+ The second Device is named "accelerometer.2" and the axes are, when
  looking from the front and the phone laying on a desk:
- x (horizontal to the right), y (horizontal and away) 
+ x (horizontal to the right), y (horizontal and away)
  and z (down).</p>
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">local accel = toribio.wait_for_device('accelerometer.1')
+        <pre class="example"> local accel = toribio.wait_for_device(&apos;accelerometer.1&apos;)
 sched.sigrun(
     {emitter=accel.task, events={accel.events.data}},
     function(_,_,x,y,z) print (x,y,z) end
 )</pre>
     </ul>
+
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
@@ -146,21 +147,22 @@ sched.sigrun(
 
 
     <h2><a name="Functions"></a>Functions</h2>
-    
     <dl class="function">
     <dt>
     <a name = "init"></a>
     <strong>init&nbsp;(conf)</strong>
     </dt>
     <dd>
-    Initialize and starts the module. 
+    Initialize and starts the module.
  This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
  true.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/openmoko_accel.html#conf">conf</a>).</li>
+        <li><span class="parameter">conf</span>
+         the configuration table (see <a href="../modules/openmoko_accel.html#conf">conf</a>).</li>
     </ul>
+
 
 
 
@@ -171,14 +173,16 @@ sched.sigrun(
     <strong>set_rate&nbsp;(hz)</strong>
     </dt>
     <dd>
-    Set the sample rate for sensor. 
+    Set the sample rate for sensor.
  This is the intarnal sample rate, and the known supported values are
  100 and 400 Hz.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>hz</em></code>:  The rate in hz.</li>
+        <li><span class="parameter">hz</span>
+         The rate in hz.</li>
     </ul>
+
 
 
 
@@ -189,13 +193,15 @@ sched.sigrun(
     <strong>set_threshold&nbsp;(threshold)</strong>
     </dt>
     <dd>
-    Set the threshold for sensor. 
+    Set the threshold for sensor.
  Values around 10 or 18 are usual.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>threshold</em></code>:  The threshold value</li>
+        <li><span class="parameter">threshold</span>
+         The threshold value</li>
     </ul>
+
 
 
 
@@ -206,15 +212,18 @@ sched.sigrun(
     <strong>run&nbsp;(enable, delay)</strong>
     </dt>
     <dd>
-    Enable sensing. 
+    Enable sensing.
  This allows to enable and disable the sensing.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>enable</em></code>:  boolean indicating if the sensor data events must be generated.</li>
-       <li><code><em>delay</em></code>:  time delay between events. If omitted, a configuration value 
+        <li><span class="parameter">enable</span>
+         boolean indicating if the sensor data events must be generated.</li>
+        <li><span class="parameter">delay</span>
+         time delay between events. If omitted, a configuration value
  is used (field <em>deviceloaders.openmoko_accel.delay</em>), 1 otherwise.</li>
     </ul>
+
 
 
 
@@ -222,20 +231,21 @@ sched.sigrun(
 </dd>
 </dl>
     <h2><a name="Tables"></a>Tables</h2>
-    
     <dl class="function">
     <dt>
     <a name = "events"></a>
     <strong>events</strong>
     </dt>
     <dd>
-    Sensor data events. 
+    Sensor data events.
  The events that the sensor can emit.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>data</em></code>:  A data signal, with x,y,z acceleration values as parameters.</li>
+        <li><span class="parameter">data</span>
+         A data signal, with x,y,z acceleration values as parameters.</li>
     </ul>
+
 
 
 
@@ -246,14 +256,17 @@ sched.sigrun(
     <strong>conf</strong>
     </dt>
     <dd>
-    Configuration Table. 
+    Configuration Table.
  This table is populated by toribio from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
-       <li><code><em>delay_read</em></code>:  the time between consecutive readngs. Defaults to 1 sec.</li>
+        <li><span class="parameter">load</span>
+         whether toribio should start this module automatically at startup.</li>
+        <li><span class="parameter">delay_read</span>
+         the time between consecutive readngs. Defaults to 1 sec.</li>
     </ul>
+
 
 
 
@@ -261,15 +274,15 @@ sched.sigrun(
 </dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
-    
     <dl class="function">
     <dt>
     <a name = "name"></a>
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device. 
+    Name of the device.
  Either 'accelerometer.1' or 'accelerometer.2'
+
 
 
 
@@ -281,8 +294,9 @@ sched.sigrun(
     <strong>module</strong>
     </dt>
     <dd>
-    Module name. 
+    Module name.
  In this case, "openmoko_accel".
+
 
 
 
@@ -294,8 +308,9 @@ sched.sigrun(
     <strong>task</strong>
     </dt>
     <dd>
-    Sensor task. 
+    Sensor task.
  This is the task that will emit data signals.
+
 
 
 
@@ -308,7 +323,7 @@ sched.sigrun(
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

@@ -47,11 +47,9 @@ M.init = function(conf)
 	rnr = toribio.wait_for_device('rnr_client').new_connection()
 	
 	local waitd_rnr = sched.new_waitd({
-		emitter = rnr.task,
-		events = {rnr.events.notification_arrival},
-		buffer = 10,
+		rnr.events.notification_arrival,
 	})
-	sched.sigrun(waitd_rnr, function(_, _, notif)
+	sched.sigrun(waitd_rnr, function(_, notif)
 		local command = notif.command
 		
 		if notif.message_type == 'action' and command then

@@ -74,12 +74,11 @@ The rcp_bot.lua file to place in the tasks/ folder is the following:
     
     M.init = function(conf)
     	local waitd = proxy.new_remote_waitd(conf.rc_ip, conf.rc_port, {
-    		emitter = {'mice:/dev/input/mice'},
     		events = {'move', 'leftbutton'},
     	})
     	
     	local left, right = 0, 0
-    	sched.sigrun(waitd, function(_, _, _, event, v1, v2) 
+    	sched.sigrun(waitd, function(_, event, v1, v2) 
     		print (event, v1, v2)
     	end)
     end
@@ -184,7 +183,7 @@ And the tasks/rc\_bot.lua skeleton:
     	local udp = selector.new_udp(conf.ip, conf.port, 1480)
     
     	--listen for messages
-    	sched.sigrun({emitter=udp.task, events={udp.events.data}, timeout=1}, 
+    	sched.sigrun({udp.events.data, timeout=1}, 
     		function(_, _, msg) 
     			local left, right = 0, 0
     			if msg then
@@ -267,7 +266,7 @@ motor direction (the motors will start moving at the first button press):
     	sched.run(function()
     		local motors = toribio.wait_for_device('bb-motors')
     		local direction = 1
-    		sched.sigrun({emitter='*', events={'change direction!'}}, function()
+    		sched.sigrun({'change direction!'}, function()
     			motors.setvel2mtr(direction, 500, direction, 500)
     			direction=1-direction
     		end)

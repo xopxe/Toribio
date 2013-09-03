@@ -21,14 +21,14 @@ M.init = function(conf)
 
 	print('listener starting', accel1.name,accel2.name)
 	sched.sigrun(
-		{emitter=accel1.task, events={accel1.events.data}},
-		function(_,_,x,y,z)
+		{accel1.events.data},
+		function(_,x,y,z)
 			print (x,y,z)
 		end
 	)
 	sched.sigrun(
-		{emitter=accel2.task, events={accel2.events.data}},
-		function(_,_,x,y,z)
+		{events={accel2.events.data},
+		function(_,x,y,z)
 			print ('','','','',"",x,y,z)
 		end
 	)

@@ -78,6 +78,7 @@
 
 </p>
 
+
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
@@ -129,21 +130,22 @@
 
 
     <h2><a name="Functions"></a>Functions</h2>
-    
     <dl class="function">
     <dt>
     <a name = "init"></a>
     <strong>init&nbsp;(conf)</strong>
     </dt>
     <dd>
-    Initialize and starts the module. 
+    Initialize and starts the module.
  This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
  true.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/rnr_client.html#conf">conf</a>).</li>
+        <li><span class="parameter">conf</span>
+         the configuration table (see <a href="../modules/rnr_client.html#conf">conf</a>).</li>
     </ul>
+
 
 
 
@@ -154,15 +156,17 @@
     <strong>new_connection&nbsp;()</strong>
     </dt>
     <dd>
-    Open a new connection. 
+    Open a new connection.
  The descriptor allows object-oriented acces to methods, like connd:emite_notification(data)
-
 
 
     <h3>Returns:</h3>
     <ol>
+
         a connection descriptor (see <a href="../modules/rnr_client.html#connd">connd</a>) on success, <em>nil, message</em> on failure.
     </ol>
+
+
 
 
 </dd>
@@ -171,31 +175,36 @@
     <strong>subscribe&nbsp;(connd, subscrib_id, filter)</strong>
     </dt>
     <dd>
-    Add a Subscription. 
+    Add a Subscription.
  When subscribed, matching notification will arrive as signals (see <a href="../modules/rnr_client.html#connd">connd</a>)
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>connd</em></code>:  a connection descriptor.</li>
-       <li><code><em>subscrib_id</em></code>:  a unique subscription id. If nil, a random one will be generated.</li>
-       <li><code><em>filter</em></code>:  an array contaning the subscription filter. Each entry in the array is a table
+        <li><span class="parameter">connd</span>
+         a connection descriptor.</li>
+        <li><span class="parameter">subscrib_id</span>
+         a unique subscription id. If nil, a random one will be generated.</li>
+        <li><span class="parameter">filter</span>
+         an array contaning the subscription filter. Each entry in the array is a table
  containing 'attr', 'op' and 'value' fields describing an expression.</li>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">local rnr = bobot.wait_for_device('rnr_client')
-rnr.subscribe( 'subscrib100', {
-	{attrib='sensor', op='=', value='node1'},
-	{attrib='temperature', op='>', value='30'},
-})</pre>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
+
         <em>true</em> on succes, <em>nil, err</em> on failure
     </ol>
 
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"> <span class="keyword">local</span> rnr = bobot.wait_for_device(<span class="string">'rnr_client'</span>)
+rnr.subscribe( <span class="string">'subscrib100'</span>, {
+	{attrib=<span class="string">'sensor'</span>, op=<span class="string">'='</span>, value=<span class="string">'node1'</span>},
+	{attrib=<span class="string">'temperature'</span>, op=<span class="string">'&gt;'</span>, value=<span class="string">'30'</span>},
+})</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -203,19 +212,23 @@ rnr.subscribe( 'subscrib100', {
     <strong>unsubscribe&nbsp;(connd, subscrib_id)</strong>
     </dt>
     <dd>
-    Remove a Subscription. 
+    Remove a Subscription.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>connd</em></code>:  a connection descriptor.</li>
-       <li><code><em>subscrib_id</em></code>:  a unique subscription id.</li>
+        <li><span class="parameter">connd</span>
+         a connection descriptor.</li>
+        <li><span class="parameter">subscrib_id</span>
+         a unique subscription id.</li>
     </ul>
-
 
     <h3>Returns:</h3>
     <ol>
+
         <em>true</em> on succes, <em>nil, err</em> on failure
     </ol>
+
+
 
 
 </dd>
@@ -224,46 +237,52 @@ rnr.subscribe( 'subscrib100', {
     <strong>emit_notification&nbsp;(connd, data)</strong>
     </dt>
     <dd>
-    Emit a Notification. 
+    Emit a Notification.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>connd</em></code>:  a connection descriptor.</li>
-       <li><code><em>data</em></code>:  a table with the data to be sent.</li>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">local rnr = bobot.wait_for_device('rnr_client')
-rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
+        <li><span class="parameter">connd</span>
+         a connection descriptor.</li>
+        <li><span class="parameter">data</span>
+         a table with the data to be sent.</li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
+
         <em>true</em> on succes, <em>nil, err</em> on failure
     </ol>
 
 
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> rnr = bobot.wait_for_device(<span class="string">'rnr_client'</span>)
+rnr.subscribe( <span class="string">'notif100'</span>, {sensor = <span class="string">'node2'</span>, temperature = <span class="number">25</span>} )</pre>
+    </ul>
+
 </dd>
 </dl>
     <h2><a name="Tables"></a>Tables</h2>
-    
     <dl class="function">
     <dt>
     <a name = "connd"></a>
     <strong>connd</strong>
     </dt>
     <dd>
-    Connection descriptor. 
+    Connection descriptor.
  This table is populated by toribio from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>task</em></code>:  task that will emit signals associated to this device.</li>
-       <li><code><em>events</em></code>:  task that will emit signals associated to this device.
+        <li><span class="parameter">task</span>
+         task that will emit signals associated to this device.</li>
+        <li><span class="parameter">events</span>
+         task that will emit signals associated to this device.
  It is a table with a single field, <code>notification_arrival</code>,  a new notification has arrived. <br/>
  The first parameter of the signal is a table with the notification's content.</li>
     </ul>
+
 
 
 
@@ -274,14 +293,17 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     <strong>conf</strong>
     </dt>
     <dd>
-    Configuration Table. 
+    Configuration Table.
  This table is populated by toribio from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>ip</em></code>:  the ip where the Rnr agent listens (defaults to '127.0.0.1')</li>
-       <li><code><em>port</em></code>:  the port where the Rnr agent listens (defaults to 8182)</li>
+        <li><span class="parameter">ip</span>
+         the ip where the Rnr agent listens (defaults to '127.0.0.1')</li>
+        <li><span class="parameter">port</span>
+         the port where the Rnr agent listens (defaults to 8182)</li>
     </ul>
+
 
 
 
@@ -289,14 +311,14 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
 </dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
-    
     <dl class="function">
     <dt>
     <a name = "name"></a>
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device (in this case, 'rnr_client'). 
+    Name of the device (in this case, 'rnr_client').
+
 
 
 
@@ -308,7 +330,8 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'rnr_client'). 
+    Module name (in this case, 'rnr_client').
+
 
 
 
@@ -321,7 +344,7 @@ rnr.subscribe( 'notif100', {sensor = 'node2', temperature = 25} )</pre>
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

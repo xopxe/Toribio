@@ -12,7 +12,6 @@ M.init = function()
 			--sched.sleep(5)
 			--print(lback.read())
 			sched.sleep(1)
-			sched.yield()
 		end
 	end)
 end

@@ -11,8 +11,6 @@ local log = require 'log'
 -- true.
 -- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
-	toribio = require 'toribio'
-
 	local sysfs = conf.filename or '/sys/devices/platform/lis3lv02d'
 	local sysfs_position = sysfs .. '/position'
 	local sysfs_selftest = sysfs .. '/selftest'
@@ -64,6 +62,7 @@ M.init = function(conf)
 	}
 
 	log('XOACCEL', 'INFO', 'Device %s created: %s', device.module, device.name)
+	local toribio = require 'toribio'
 	toribio.add_device(device)
 end
 

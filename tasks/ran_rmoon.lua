@@ -84,7 +84,7 @@ print ("---value", mibis, mib, op, value, hysteresis, timeout, interval)
 			events = {mibf},
 		}
 		getter  = function()
-			local _, _, evval = sched.wait(waitd)
+			local _, evval = sched.wait(waitd)
 			return evval
 		end
 	else
@@ -173,11 +173,10 @@ local function delta_e_tracker (mibis, mibdev, mibf, params)
 		end
 	elseif mibis=='event' then
 		local waitd = {
-			emitter = mibdev.task,
-			events = {mibf},
+			mibf,
 		}
 		getter  = function()
-			local _, _, evval = sched.wait(waitd)
+			local _, evval = sched.wait(waitd)
 			return evval
 		end
 	else
@@ -297,11 +296,9 @@ M.init = function(conf)
 	local watcher_count = 0
 	
 	local waitd_rnr = sched.new_waitd({
-		emitter = rnr.task,
-		events = {rnr.events.notification_arrival},
-		buffer = 10,
+		rnr.events.notification_arrival,
 	})
-	sched.sigrun(waitd_rnr, function(_, _, notif)
+	sched.sigrun(waitd_rnr, function(_, notif)
 		local command = notif.command
 		watcher_count  = watcher_count +1
 		notif.watcher_id = notif.watcher_id or conf.my_hostname .. '_watcher_'..watcher_count

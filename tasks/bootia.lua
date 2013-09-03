@@ -26,7 +26,7 @@ M.init = function()
 		print ('MOTORS FOUND', motors.name, motors.getVersion())
 		motors.testMotors()
 		local direction = 1
-		sched.sigrun({emitter='*', events={'change direction!'}}, function()
+		sched.sigrun({'change direction!'}, function()
 			motors.setvel2mtr(direction, 200, direction, 200)
 			print ('OPA', direction)
 			direction=1-direction

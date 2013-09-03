@@ -78,6 +78,7 @@
  such as it's coordinates and button presses.
  The device will be named "mice", module "mice". </p>
 
+
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
@@ -119,10 +120,6 @@
 	<td class="summary">Module name (in this case, 'mice').</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#task">task</a></td>
-	<td class="summary">Task that will emit signals associated to this device.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#filename">filename</a></td>
 	<td class="summary">Device file of the mouse.</td>
 	</tr>
@@ -133,21 +130,22 @@
 
 
     <h2><a name="Functions"></a>Functions</h2>
-    
     <dl class="function">
     <dt>
     <a name = "init"></a>
     <strong>init&nbsp;(conf)</strong>
     </dt>
     <dd>
-    Initialize and starts the module. 
+    Initialize and starts the module.
  This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
  true.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/mice.html#conf">conf</a>).</li>
+        <li><span class="parameter">conf</span>
+         the configuration table (see <a href="../modules/mice.html#conf">conf</a>).</li>
     </ul>
+
 
 
 
@@ -158,14 +156,16 @@
     <strong>get_pos&nbsp;()</strong>
     </dt>
     <dd>
-    Get mouse position. 
-
+    Get mouse position.
 
 
     <h3>Returns:</h3>
     <ol>
+
         a pair of x, y coordinates.
     </ol>
+
+
 
 
 </dd>
@@ -174,17 +174,20 @@
     <strong>reset_pos&nbsp;(newx, newy)</strong>
     </dt>
     <dd>
-    Reset position. 
+    Reset position.
  Fixes the coordinates associated to the current
  position.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>newx</em></code>:  number to set as x coordinate of
+        <li><span class="parameter">newx</span>
+         number to set as x coordinate of
  the cursos (defaults to 0)</li>
-       <li><code><em>newy</em></code>:  number to set as y coordinate of
+        <li><span class="parameter">newy</span>
+         number to set as y coordinate of
  the cursos (defaults to 0)</li>
     </ul>
+
 
 
 
@@ -195,13 +198,15 @@
     <strong>set_pause&nbsp;(pause)</strong>
     </dt>
     <dd>
-    Pause the event generation. 
+    Pause the event generation.
  While the device is paused, no events are generated, nor movements tracked.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>pause</em></code>:  mode, true to pause, false to unpause</li>
+        <li><span class="parameter">pause</span>
+         mode, true to pause, false to unpause</li>
     </ul>
+
 
 
 
@@ -209,24 +214,28 @@
 </dd>
 </dl>
     <h2><a name="Tables"></a>Tables</h2>
-    
     <dl class="function">
     <dt>
     <a name = "events"></a>
     <strong>events</strong>
     </dt>
     <dd>
-    Events emitted by this device. 
+    Events emitted by this device.
  Button presses have single parameter: true on press,
  false on release.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>leftbutton</em></code>:  Left button click.</li>
-       <li><code><em>rightbutton</em></code>:  Right button click.</li>
-       <li><code><em>middlebutton</em></code>:  Middle button click.</li>
-       <li><code><em>move</em></code>:  Mouse moved, first parameter x, second parameter y coordinates.</li>
+        <li><span class="parameter">leftbutton</span>
+         Left button click.</li>
+        <li><span class="parameter">rightbutton</span>
+         Right button click.</li>
+        <li><span class="parameter">middlebutton</span>
+         Middle button click.</li>
+        <li><span class="parameter">move</span>
+         Mouse moved, first parameter x, second parameter y coordinates.</li>
     </ul>
+
 
 
 
@@ -237,15 +246,18 @@
     <strong>conf</strong>
     </dt>
     <dd>
-    Configuration Table. 
- When the start is done automatically (trough configuration), 
+    Configuration Table.
+ When the start is done automatically (trough configuration),
  this table points to the modules section in the global configuration table loaded from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
-       <li><code><em>filename</em></code>:  the device file for themouse (defaults to ''/dev/input/mice'').</li>
+        <li><span class="parameter">load</span>
+         whether toribio should start this module automatically at startup.</li>
+        <li><span class="parameter">filename</span>
+         the device file for themouse (defaults to ''/dev/input/mice'').</li>
     </ul>
+
 
 
 
@@ -253,14 +265,14 @@
 </dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
-    
     <dl class="function">
     <dt>
     <a name = "name"></a>
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device (in this case, 'mice'). 
+    Name of the device (in this case, 'mice').
+
 
 
 
@@ -272,19 +284,8 @@
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, 'mice'). 
+    Module name (in this case, 'mice').
 
-
-
-
-
-</dd>
-    <dt>
-    <a name = "task"></a>
-    <strong>task</strong>
-    </dt>
-    <dd>
-    Task that will emit signals associated to this device. 
 
 
 
@@ -296,8 +297,9 @@
     <strong>filename</strong>
     </dt>
     <dd>
-    Device file of the mouse. 
+    Device file of the mouse.
  For example, '/dev/input/mice'
+
 
 
 
@@ -310,7 +312,7 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

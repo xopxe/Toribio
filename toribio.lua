@@ -44,10 +44,9 @@ end
 
 
 --- Signals that toribio can emit.
--- The emitter of these signals will be the task returned by @{task}
 -- @usage local sched = require 'sched'
 --sched.sigrun_task(
---    {emitter=toribio.task, events={toribio.events.new_device}}, 
+--    {toribio.events.new_device}, 
 --    print
 --)
 -- @field new_device A new device was added. The first parameter is the device object.
@@ -107,11 +106,11 @@ M.wait_for_device = function(devdesc, timeout)
 		return in_devices
 	else
 		local tortask = M.task
-		local waitd = {emitter=tortask, events={M.events.new_device}}
+		local waitd = {M.events.new_device}
 		if wait_until then waitd.timeout=wait_until-sched.get_time() end
 		while true do
-			local _, _, device = sched.wait(waitd) 
-			if not device then --timeout
+			local ev, device = sched.wait(waitd) 
+			if not ev then --timeout
 				return nil, 'timeout'
 			end
 			if device_matches (device, devdesc) then
@@ -136,23 +135,20 @@ end
 -- @return The callback task, or _nil, error_ on failure
 M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
-	if not device.task then return nil, "Device has no task" end
 	if not device.events or not device.events[event] then return nil, "Device has no such event" end
 
 	local waitd = {
-		emitter=device.task,
-		events={device.events[event]},
+		device.events[event],
 		timeout=timeout,
 	}
 	local mx = mutex.new()
 	local fsynched = mx:synchronize(f)
-	local wrapper = function(_, _, ...)
+	local wrapper = function(_, ...)
 		return fsynched(...)
 	end
 	return sched.sigrun(waitd, wrapper)
 end
 
-local signal_new_device = {}
 --- Provide a new Device object.
 -- Registers the Device object with Toribio. Warning: if the object's name is 
 -- already taken, Toribio will rename the object.
@@ -170,10 +166,9 @@ M.add_device = function (device)
 	device.register_callback = M.register_callback 
 	device.remove = M.remove_device
 	
-	sched.signal(signal_new_device, device )
+	sched.schedule_signal(events.new_device, device )
 end
 
-local signal_remove_device = {}
 M.remove_devices = function(devdesc)
 	if type(devdesc) == 'string' then
 		devdesc={name=devdesc}
@@ -195,7 +190,7 @@ M.remove_device = function(device)
 
 	if device.task then sched.kill(device.task) end
 	devices[device.name]=nil
-	sched.signal(signal_remove_device, device )
+	sched.schedule_signal(events.removed_device, device )
 end
 
 --- Start a task.
@@ -224,24 +219,6 @@ M.start = function(section, taskname)
 	end
 	return taskmodule 
 end
-
---- Toribio's task.
--- This is the task that emits toribios @{events}
--- @return toribio's task
-M.task = sched.run( function ()
-	local waitd_control={emitter='*', buff_size=10, 
-		events={signal_new_device, signal_remove_device}}
-	while true do
-		local _, event, p = sched.wait(waitd_control)
-		if event==signal_new_device then
-			local device = p
-			sched.signal(events.new_device, device )
-		elseif event == signal_remove_device then 
-			local device = p
-			sched.signal(events.removed_device, device )
-		end
-	end
-end)
 
 --- The configuration table.
 -- This table contains the configurations specified in toribio-go.conf file.

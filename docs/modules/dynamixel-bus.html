@@ -80,6 +80,7 @@
  object in toribio.devices table. The device will be named (as an
  example), "dynamixel:/dev/ttyUSB0".</p>
 
+
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
@@ -147,21 +148,22 @@
 
 
     <h2><a name="Functions"></a>Functions</h2>
-    
     <dl class="function">
     <dt>
     <a name = "init"></a>
     <strong>init&nbsp;(conf)</strong>
     </dt>
     <dd>
-    Initialize and start the module. 
+    Initialize and start the module.
  This is called automatically by toribio if the <em>load</em> attribute for the module in the configuration file is set to
  true.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>conf</em></code>:  the configuration table (see <a href="../modules/dynamixel-bus.html#conf">conf</a>).</li>
+        <li><span class="parameter">conf</span>
+         the configuration table (see <a href="../modules/dynamixel-bus.html#conf">conf</a>).</li>
     </ul>
+
 
 
 
@@ -172,16 +174,18 @@
     <strong>get_broadcaster&nbsp;()</strong>
     </dt>
     <dd>
-    Get a broadcasting Motor object. 
+    Get a broadcasting Motor object.
  All commands sent to this motor will be broadcasted
  to all motors.
 
 
-
     <h3>Returns:</h3>
     <ol>
+
         A Motor object.
     </ol>
+
+
 
 
 </dd>
@@ -190,18 +194,21 @@
     <strong>get_motor&nbsp;(id)</strong>
     </dt>
     <dd>
-    Get a Motor object. 
+    Get a Motor object.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>id</em></code>:  The numeric ID of the motor</li>
+        <li><span class="parameter">id</span>
+         The numeric ID of the motor</li>
     </ul>
-
 
     <h3>Returns:</h3>
     <ol>
+
         A Motor object, or nil if not such ID found.
     </ol>
+
+
 
 
 </dd>
@@ -210,21 +217,24 @@
     <strong>get_sync_motor&nbsp;(...)</strong>
     </dt>
     <dd>
-    Get a Sync-motor object. 
+    Get a Sync-motor object.
  A sync-motor allows to control several actuators with a single command.
  The commands will be applied to all actuators it represents.
  The "get" methods are not available.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>...</em></code>:  A set of motor Device objects or numeric IDs</li>
+        <li><span class="parameter">...</span>
+         A set of motor Device objects or numeric IDs</li>
     </ul>
-
 
     <h3>Returns:</h3>
     <ol>
+
         a sync_motor object
     </ol>
+
+
 
 
 </dd>
@@ -233,40 +243,43 @@
     <strong>has_errors&nbsp;(code)</strong>
     </dt>
     <dd>
-    Decodes dynamixel error codes. 
+    Decodes dynamixel error codes.
 
     <h3>Parameters:</h3>
     <ul>
-       <li><code><em>code</em></code>:  A dynamixel error code as returned by the different motor methods.</li>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">local errorset = dynamixel.has_errors(0x10+0x08)
-print ("has errors:" #errorset>0 )
-print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
+        <li><span class="parameter">code</span>
+         A dynamixel error code as returned by the different motor methods.</li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
-        A set of error strings. The possible error strings are 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
+
+         A set of error strings. The possible error strings are 'ERROR_INPUT_VOLTAGE', 'ERROR_ANGLE_LIMIT',
  'ERROR_OVERHEATING', 'ERROR_RANGE', 'ERROR_CHECKSUM', 'ERROR_OVERLOAD', 'ERROR_INSTRUCTION'. <br/>
  The table is double-indexed by entry number to allow array-like traversal.
     </ol>
 
 
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"> <span class="keyword">local</span> errorset = dynamixel.has_errors(<span class="number">0x10</span>+<span class="number">0x08</span>)
+<span class="global">print</span> (<span class="string">"has errors:"</span> #errorset&gt;<span class="number">0</span> )
+<span class="global">print</span> (<span class="string">"has range error:"</span>, errorset[<span class="string">'ERROR_RANGE'</span>]==<span class="keyword">true</span> )</pre>
+    </ul>
+
 </dd>
 </dl>
     <h2><a name="Tables"></a>Tables</h2>
-    
     <dl class="function">
     <dt>
     <a name = "motors"></a>
     <strong>motors</strong>
     </dt>
     <dd>
-    Motors connected to the bus. 
+    Motors connected to the bus.
  The keys are device numbers, the values are Motor objects.
+
 
 
 
@@ -278,12 +291,14 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>events</strong>
     </dt>
     <dd>
-    Signals emitted by this device. 
+    Signals emitted by this device.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>discovery_end</em></code>:  The discovery of attached motors has finished.</li>
+        <li><span class="parameter">discovery_end</span>
+         The discovery of attached motors has finished.</li>
     </ul>
+
 
 
 
@@ -294,18 +309,24 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>conf</strong>
     </dt>
     <dd>
-    Configuration Table. 
- When the start is done automatically (trough configuration), 
+    Configuration Table.
+ When the start is done automatically (trough configuration),
  this table points to the modules section in the global configuration table loaded from the configuration file.
 
     <h3>Fields:</h3>
     <ul>
-       <li><code><em>load</em></code>:  whether toribio should start this module automatically at startup.</li>
-       <li><code><em>filename</em></code>:  the device file for the serial bus (defaults to '/dev/ttyUSB0').</li>
-       <li><code><em>serialtimeout</em></code>:  the timeout when waiting for a response from an actuator (defaults to 0.05s)</li>
-       <li><code><em>stty_flags</em></code>:  parameters to pass to stty for configuring the serial bus.</li>
-       <li><code><em>serialspeed</em></code>:  serial bus speed in bps (defaults to 1000000).</li>
+        <li><span class="parameter">load</span>
+         whether toribio should start this module automatically at startup.</li>
+        <li><span class="parameter">filename</span>
+         the device file for the serial bus (defaults to '/dev/ttyUSB0').</li>
+        <li><span class="parameter">serialtimeout</span>
+         the timeout when waiting for a response from an actuator (defaults to 0.05s)</li>
+        <li><span class="parameter">stty_flags</span>
+         parameters to pass to stty for configuring the serial bus.</li>
+        <li><span class="parameter">serialspeed</span>
+         serial bus speed in bps (defaults to 1000000).</li>
     </ul>
+
 
 
 
@@ -313,15 +334,15 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
 </dd>
 </dl>
     <h2><a name="Fields"></a>Fields</h2>
-    
     <dl class="function">
     <dt>
     <a name = "name"></a>
     <strong>name</strong>
     </dt>
     <dd>
-    Name of the device. 
+    Name of the device.
  Of the form <em>'dynamixel:/dev/ttyUSB0'</em>
+
 
 
 
@@ -333,7 +354,8 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>module</strong>
     </dt>
     <dd>
-    Module name (in this case, <em>'dynamixel'</em>). 
+    Module name (in this case, <em>'dynamixel'</em>).
+
 
 
 
@@ -345,8 +367,9 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>filename</strong>
     </dt>
     <dd>
-    Device file of the bus. 
+    Device file of the bus.
  For example, '/dev/ttyUSB0'
+
 
 
 
@@ -358,8 +381,9 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>discovery_finished</strong>
     </dt>
     <dd>
-    The bus scannning status. 
- This flag will be set to true once the bus has been scanned and all motors discovered..
+    The bus scannning status.
+ This flag will be set to true once the bus has been scanned and all motors discovered.
+
 
 
 
@@ -371,7 +395,8 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
     <strong>task</strong>
     </dt>
     <dd>
-    Task that will emit signals associated to this device. 
+    Task that will emit signals associated to this device.
+
 
 
 
@@ -384,7 +409,7 @@ print ("has range error:", errorset['ERROR_RANGE']==true )</pre>
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

@@ -103,8 +103,8 @@ om uevent dump
 		-- but  it is possible to for example use an external battery power
 		-- the USB bus so that the phone can be  in  host  mode  and  still
 		-- charge itself over USB. Also see usb.mode
-		-- @param direction optional. Either 'charge-battery' or 'power-usb'
-		-- @return The direction as set.
+		-- @param chargermode optional. Either 'charge-battery' or 'power-usb'
+		-- @return The mode as set.
 		usb_charger_mode = function(chargermode)
 			if chargermode then
 				assert(chargermode=='charge-battery' or chargermode=='power-usb', 
@@ -244,7 +244,6 @@ om uevent dump
 		
 		--- Keep de wifi bus powered on suspend.
 		-- Needed for wake on wlan.
-		-- @param iface network interface (usually "eth1")
 		-- @param on true to power on, false to power down, nil to keep as is.
 		-- @return the mode as set
 		wifi_keep_bus_on_in_suspend = function(on)

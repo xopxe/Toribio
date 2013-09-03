@@ -42,11 +42,21 @@ M.new_bus = function (conf)
 	os.execute(init_tty_string)
 	filehandler.fd:sync() --flush()
 	
+  local id_signals = setmetatable({}, {__index = function(t,k)
+    local v = {}
+    t[k] = v
+    return v
+  })
+  local id_waitds = setmetatable({}, {__index = function(t,k)
+    local v = sched.new_waitd({id_signals[k], timeout = conf.serialtimeout or 0.05})
+    t[k] = v
+    return v
+  })
+  
 	local taskf_protocol = function()
 		local waitd_traffic = sched.new_waitd({
-			emitter=selector.task,
-			events={filehandler.events.data},
-			buff_len=-1
+			filehandler.events.data,
+			--buff_len=-1
 		})
 		local packet=''
 		local insync=false
@@ -72,7 +82,7 @@ M.new_bus = function (conf)
 		end
 
 		while true do
-			local _, _, fragment, err_read = sched.wait(waitd_traffic)
+			local _, fragment, err_read = sched.wait(waitd_traffic)
 			
 			if not fragment then
 				--if err_read=='closed' then
@@ -107,7 +117,7 @@ M.new_bus = function (conf)
 					local id, errcode, payload=parseAx12Packet(packet)
 					if id then
 						--print('dynamixel message parsed (fast):',id:byte(), errcode,':', payload:byte(1,#payload))
-						sched.signal(id, errcode, payload)
+						sched.signal(id_signals[id], errcode, payload)
 					end
 					packet = ''
 					packlen = nil
@@ -117,33 +127,27 @@ M.new_bus = function (conf)
 					--assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
 					if id then
 						--print('dynamixel message parsed (slow):',id:byte(), errcode,':', payload:byte(1,#payload))
-						sched.signal(id, errcode, payload)
+						sched.signal(id_signals[id], errcode, payload)
 					end
 
 					local packet_remainder = packet:sub(packlen+5, -1 )
 					packet = packet_remainder
-					packlen =  packet:byte(4)
+					packlen = packet:byte(4)
 				end
 				insync = false
 			end
 		end
 	end
 	local task_protocol = sched.run(taskf_protocol)
-	local waitd_protocol = sched.new_waitd({
-		emitter=task_protocol,
-		events='*',
-		timeout = conf.serialtimeout or 0.05,
-		buff_len=1
-	})
 	
 	local bus = {}
 	
 	bus.sendAX12packet = mx:synchronize(function (s, id, get_response)
 		filehandler:send_sync(s)
 		if get_response then
-			local emitter, ev, err, data = sched.wait(waitd_protocol)
-			if emitter then
-				if id==ev then return err, data end
+			local ev, err, data = sched.wait(id_waitds[id])
+      if id==ev then return err, data end
+			if ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
 			end
 		end

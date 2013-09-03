@@ -39,19 +39,19 @@ M.init = function(masks_to_watch)
 		--print('+++++++++INOTIFY:', command)
 		local watcherfd=selector.grab_stdout (command, 'line', nil)
 
-		local waitd_inotify={emitter=selector.task, events={watcherfd.events.data}, buff_len=100}
+		local waitd_inotify={watcherfd.events.data}
 		
 		--generate events for already existing files
 		for _, devmask in ipairs(masks_to_watch) do
 			for devfile in nixio.fs.glob(devmask) do
 				print('existing file', devfile)
-				sched.signal('FILE+', devfile, devmask)
+				sched.schedule_signal(M.events.file_add, devfile, devmask)
 			end
 		end
 
 		--monitor files
 		while true do
-			local _, _,line=sched.wait(waitd_inotify)
+			local _,line=sched.wait(waitd_inotify)
 			if line then 
 				local path, action, file = string.match(line, '^([^,]+),(.+),([^,]+)$')
 				local fullpath=path..file
@@ -61,7 +61,7 @@ M.init = function(masks_to_watch)
 						for devfile in nixio.fs.glob(mask) do
 							if devfile==fullpath then
 								print('FILE+', fullpath, mask)
-								sched.signal(M.events.file_add, fullpath, mask)
+								sched.schedule_signal(M.events.file_add, fullpath, mask)
 							end
 							--print('confline starting', devfile, modulename)
 							--local devmodule = require ('../drivers/filedev/'..modulename)
@@ -70,7 +70,7 @@ M.init = function(masks_to_watch)
 					end
 				elseif action=='DELETE' then
 					print('FILE-', fullpath)
-					sched.signal(M.events.file_del, fullpath)
+					sched.schedule_signal(M.events.file_del, fullpath)
 				end
 			end
 		end

@@ -32,10 +32,10 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Device_Loaders">Device Loaders</a></li>
-<li><a href="#Accessing_devices">Accessing devices</a></li>
-<li><a href="#Using_devices">Using devices</a></li>
-<li><a href="#Creating_your_own_devices">Creating your own devices</a></li>
+<li><a href="#Device_Loaders">Device Loaders </a></li>
+<li><a href="#Accessing_devices">Accessing devices </a></li>
+<li><a href="#Using_devices">Using devices </a></li>
+<li><a href="#Creating_your_own_devices">Creating your own devices </a></li>
 </ul>
 
 
@@ -74,10 +74,10 @@
 
 <h1>Topic <code>4-Devices.md</code></h1>
 
-    
+
 <h1>Devices.</h1>
 
-<p>A device object represent some piece of hardware or service. 
+<p>A device object represent some piece of hardware or service.
 Devices have a unique "name" field, and a "module" field, which
 is Device's type.</p>
 
@@ -92,7 +92,7 @@ in the toribio-go.conf configuration file.</p>
 
 <h3>accelxo</h3>
 
-<p>Supports the accelerometer installed in the OLPC XO-1.75 laptops. 
+<p>Supports the accelerometer installed in the OLPC XO-1.75 laptops.
 The device is name <em>'accelxo'</em>, and the module is also <em>'accelxo'</em>.</p>
 
 <h3>bobot</h3>
@@ -119,8 +119,8 @@ and module is defined by bobot. Sample configuration:</p>
  deviceloaders.dynamixel.filename = <span class="string">'/dev/ttyUSB0'</span>
 </pre>
 
-<p>It will create a device for the dynamixel bus (named <em>'dynamixel:/dev/ttyUSB0'</em> 
-in the example and module <em>'dynamixel'</em>), plus a device for each motor (named like 
+<p>It will create a device for the dynamixel bus (named <em>'dynamixel:/dev/ttyUSB0'</em>
+in the example and module <em>'dynamixel'</em>), plus a device for each motor (named like
 <em>'ax12:5'</em> and module <em>'ax'</em>)</p>
 
 <h3>mice</h3>
@@ -141,8 +141,8 @@ loader when a file appears. When a file disappears, it will remove all depending
  deviceloaders.filedev.<span class="global">module</span>.accelxo = <span class="string">'/sys/devices/platform/lis3lv02d'</span>
 </pre>
 
-<p>When a file described by the mask appears, filedev will set the "filename" configuration 
-parameters for the corresponding task, and start it. Additional parameters for the 
+<p>When a file described by the mask appears, filedev will set the "filename" configuration
+parameters for the corresponding task, and start it. Additional parameters for the
 auto-started task can be provided in it's own section, tough the load attribute for it must
 not be set.</p>
 
@@ -154,7 +154,7 @@ attribute.</p>
 <p><a name="Accessing_devices"></a></p>
 <h2>Accessing devices</h2>
 
-<p>Devices are available trough the toribio.devices table, or using the 
+<p>Devices are available trough the toribio.devices table, or using the
 <code>toribio.wait_for_device(name|filter)</code> method.</p>
 
 <p>To iterate all devices, you can do:</p>
@@ -166,14 +166,14 @@ attribute.</p>
  <span class="keyword">end</span>
 </pre>
 
-<p>This will print out all the devices, with their name and what 
+<p>This will print out all the devices, with their name and what
 type (module) are they.</p>
 
 <p>If you know the name of the object, you can retrieve it directly.
 Some devices can be detected after your task started,
-so instead of going directly to the table you can use the 
-<code>toribio.wait_for_device(name)</code> method. If the given device exists, 
-it will be returned immediately. Otherwise the call will block 
+so instead of going directly to the table you can use the
+<code>toribio.wait_for_device(name)</code> method. If the given device exists,
+it will be returned immediately. Otherwise the call will block
 until said device appears.</p>
 
 
@@ -181,8 +181,8 @@ until said device appears.</p>
  <span class="keyword">local</span> mice = toribio.wait_for_device(<span class="string">'mice:/dev/input/mice'</span>)
 </pre>
 
-<p>You can also retrieve devices providing a table containing a filter the 
-device must match. For example, if you are interested in a dynamixel 
+<p>You can also retrieve devices providing a table containing a filter the
+device must match. For example, if you are interested in a dynamixel
 motor connected to a particular serial bus, you can do:</p>
 
 
@@ -193,18 +193,14 @@ motor connected to a particular serial bus, you can do:</p>
  })
 </pre>
 
-<p>Some devices can connect and disconnect at runtime. If you're 
+<p>Some devices can connect and disconnect at runtime. If you're
 interested in these events, you can listen for the <em>'new_device'</em> and
 <em>'removed_device'</em> events. For example:</p>
 
 
 <pre>
- sched.sigrun(
-     {
-         emitter=toribio.task, 
-         signals={toribio.signals.new_device}
-     }, 
-     <span class="keyword">function</span>(device) 
+ sched.sigrun({toribio.signals.new_device},
+     <span class="keyword">function</span>(device)
          <span class="global">print</span>(<span class="string">'new device!'</span>, device.name)
      <span class="keyword">end</span>
  )
@@ -213,7 +209,7 @@ interested in these events, you can listen for the <em>'new_device'</em> and
 <p><a name="Using_devices"></a></p>
 <h2>Using devices</h2>
 
-<p>Devices have a set of common methods and fields, plus methods specific 
+<p>Devices have a set of common methods and fields, plus methods specific
 to the instance.</p>
 
 <h3>Common fields</h3>
@@ -228,14 +224,14 @@ to the instance.</p>
     <li>device.module</li>
 </ul>
 
-<p>Device's type. For example it can be "mice" for a mouse or "bb-dist" 
+<p>Device's type. For example it can be "mice" for a mouse or "bb-dist"
 for a distance sensor.</p>
 
 <ul>
     <li>device.task</li>
 </ul>
 
-<p>If the device has a long-running task associated, it will be 
+<p>If the device has a long-running task associated, it will be
 available here. This is also the task that emits device's events.</p>
 
 <ul>
@@ -259,25 +255,25 @@ name of the signal.</p>
 
 <h3>device-dependant fields</h3>
 
-<p>Each device will have a set of methods that allow to manipulate 
-the device. Usually all devices with equal module will have the 
+<p>Each device will have a set of methods that allow to manipulate
+the device. Usually all devices with equal module will have the
 same methods. For example a device with module "bb-dist" could
 have a <code>device.get_distance()</code> method.</p>
 
 <p><a name="Creating_your_own_devices_"></a></p>
 <h2>Creating your own devices.</h2>
 
-<p>Besides representing pieces of hardware, a Device can represent an 
+<p>Besides representing pieces of hardware, a Device can represent an
 abstract service. The user can define his own device modules. For that
-it must instantiate a table with the appropriate structure, and feed it to 
+it must instantiate a table with the appropriate structure, and feed it to
 Toribio using <code>toribio.add_device(device)</code>. This will allow other tasks
 to easily request it (using <code>toribio.wait_for_device()</code>), and register callbacks
 (using <code>toribio.register_callback()</code>).</p>
 
-<p>The following code creates devices that are attached to distance-sensor devices, 
+<p>The following code creates devices that are attached to distance-sensor devices,
 and trigger signals when the sensed distance below a configurable threshold.
 The file bellow (deviceloaders/distrigger.lua) initializes device objects, one for
-each distance sensor specified in configuration. Each device will contain a task that 
+each distance sensor specified in configuration. Each device will contain a task that
 periodically checks the reading from the sensor, and if needed triggers a signal.</p>
 
 
@@ -298,15 +294,15 @@ periodically checks the reading from the sensor, and if needed triggers a signal
              too_close=too_close_event
          }
          device.task = sched.run(<span class="keyword">function</span>()
-         <span class="keyword">local</span> too_close = <span class="keyword">false</span>
+             <span class="keyword">local</span> too_close = <span class="keyword">false</span>
              <span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
                  <span class="keyword">if</span> sensor.getValue() &lt; sconf.min_threshold <span class="keyword">then</span>
-                     <span class="keyword">if</span> <span class="keyword">not</span> too_close <span class="keyword">then</span> 
+                     <span class="keyword">if</span> <span class="keyword">not</span> too_close <span class="keyword">then</span>
                          sched.signal( device.signals.too_close() )
                          too_close=<span class="keyword">true</span>
                      <span class="keyword">end</span>
                  <span class="keyword">else</span> too_close=<span class="keyword">false</span> <span class="keyword">end</span>
-                 sched.sleep( sconf.rate )
+                   sched.sleep( sconf.rate )
              <span class="keyword">end</span>
          <span class="keyword">end</span>)
          device.set_pause = <span class="keyword">function</span> ( pause )
@@ -321,7 +317,7 @@ periodically checks the reading from the sensor, and if needed triggers a signal
  <span class="keyword">return</span> M
 </pre>
 
-<p>The device publishes the signal it emits in the <code>signals</code> table. It also provides a <code>set_pause</code> 
+<p>The device publishes the signal it emits in the <code>signals</code> table. It also provides a <code>set_pause</code>
 function to stop the polling to save resources when not needed.</p>
 
 <p>To enable these devices, a configuration must be provided as follows:</p>
@@ -351,7 +347,7 @@ function to stop the polling to save resources when not needed.</p>
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.2</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

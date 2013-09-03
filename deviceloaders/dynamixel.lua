@@ -219,7 +219,7 @@ M.init = function (conf)
 	}
 	
 	--- The bus scannning status.
-	-- This flag will be set to true once the bus has been scanned and all motors discovered..
+	-- This flag will be set to true once the bus has been scanned and all motors discovered.
 	busdevice.discovery_finished = false
 	
 	--- Task that will emit signals associated to this device.

@@ -38,7 +38,7 @@ local function getopt( arg, options )
     if string.sub( v, 1, 2) == "--" then
       local x = string.find( v, "=", 1, true )
       if x then tab[ string.sub( v, 3, x-1 ) ] = string.sub( v, x+1 )
-      else      tab[ string.sub( v, 3 ) ] = true
+      else tab[ string.sub( v, 3 ) ] = true
       end
     elseif string.sub( v, 1, 1 ) == "-" then
       local y = 2
@@ -72,8 +72,8 @@ end
 local opts = getopt( _G.arg, "cd" )
 
 --watches for task die events and prints out
-sched.sigrun({emitter='*', events={sched.EVENT_DIE}}, function(task, _, normal)
-	log ('TORIBIOGO', 'DETAIL', 'Task %s died, a natural death: %s', tostring(task), tostring(normal))
+sched.sigrun({sched.EVENT_DIE}, function(task, msg)
+	log ('TORIBIOGO', 'DETAIL', 'Task %s died: %s', tostring(task), tostring(msg))
 end)
 
 --loads from a configuration file

@@ -24,11 +24,11 @@ M.init = function( conf )
 		masks_to_watch[#masks_to_watch+1] = devmask
 	end
 
-	sched.run(function()
+	M.task = sched.run(function()
 		local inotifier_task = require 'catalog'.get_catalog('tasks'):waitfor(masks_to_watch)
-		local waitd_fileevent = {emitter=inotifier_task, events={'*'}, buff_len=100}
+		local waitd_fileevent = {inotifier_task.events.file_add, inotifier_task.events.file_del}
 		while true do
-			local _, action, devfile, onmask = sched.wait(waitd_fileevent)
+			local action, devfile, onmask = sched.wait(waitd_fileevent)
 			if action==inotifier_task.events.file_add then
 				local modulename = masks_to_watch[onmask]
 				log('FILEDEV','INFO', 'starting module %s on %s', tostring(modulename), tostring(devfile))
