@@ -135,7 +135,11 @@ end
 -- @return The callback task, or _nil, error_ on failure
 M.register_callback = function(device, event, f, timeout)
 	assert(sched.running_task, 'Must run in a task')
-	if not device.events or not device.events[event] then return nil, "Device has no such event" end
+	if not device.events or not device.events[event] then 
+    log ('TORIBIO', 'WARN', 'Event not found for device %s: "%s"', tostring(device), tostring(event))
+    return nil, "Device has no such event" 
+  end
+  log ('TORIBIO', 'INFO', 'Registering callback on device %s: "%s"', tostring(device), tostring(event))
 
 	local waitd = {
 		device.events[event],
@@ -157,7 +161,8 @@ M.add_device = function (device)
 	local devicename=get_device_name(device.name)
 	log ('TORIBIO', 'INFO', 'Adding device "%s" (module "%s")', device.name, device.module)
 	if device.name~=devicename then 
-		log ('TORIBIO', 'WARN', 'device renamed from "%s" to "%s" (module "%s")', device.name, devicename, device.module)
+		log ('TORIBIO', 'WARN', 'device renamed from "%s" to "%s" (module "%s")', 
+      device.name, devicename, device.module)
 		device.name=devicename
 	end
 	devices[devicename] = device
