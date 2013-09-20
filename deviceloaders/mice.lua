@@ -76,7 +76,8 @@ M.init = function(conf)
 	-- @field leftbutton Left button click.
 	-- @field rightbutton Right button click.
 	-- @field middlebutton Middle button click.
-	-- @field move Mouse moved, first parameter x, second parameter y coordinates.
+	-- @field move Mouse moved. Parameters are _x, y, dx, dy_, where x, y is the coordinate and
+  -- dx, dy the coordinate increments from last event.
 	-- @table events
 	device.events={
 		leftbutton=leftbutton,
