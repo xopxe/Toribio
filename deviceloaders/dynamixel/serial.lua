@@ -13,17 +13,117 @@ local mx = mutex.new()
 local NULL_CHAR = string.char(0x00)
 local PACKET_START = string.char(0xFF,0xFF)
 
+local function parseAx12Packet(s)
+  local function generate_checksum(data)
+    local checksum = 0
+    for i=1, #data do
+      checksum = checksum + data:byte(i)
+    end
+    return 255 - (checksum%256)
+  end
+  --print('parseAx12Packet parsing', s:byte(1, #s))
+  local id = s:sub(3,3)
+  --local data_length = s:byte(4)
+  local data = s:sub(5, -1)
+  if generate_checksum(s:sub(3,-1))~=0 then return nil,'READ_CHECKSUM_ERROR' end
+  local errinpacket= data:byte(1,1)
+  local payload = data:sub(2,-2)
+  --print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket,':', payload:byte(1, #payload))
+  return id, errinpacket, payload
+end
+
+
+
+local id_signals = setmetatable({}, {__index = function(t,k)
+  local v = {}
+  t[k] = v
+  return v
+})
+
+local id_waitds = setmetatable({}, {__index = function(t,k)
+  local v = sched.new_waitd({id_signals[k], timeout = conf.serialtimeout or 0.05})
+  t[k] = v
+  return v
+})
+
 M.new_bus = function (conf)
 	local filename = conf.filename or '/dev/ttyUSB0'
 	log('AX', 'INFO', 'usb device file: %s', tostring(filename))
 
-	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)
+
+  local packet=''
+  local insync=false
+  local packlen=nil -- -1
+  
+  --while true do
+  --	local _, fragment, err_read = sched.wait(waitd_traffic)
+  ---------------------
+  local protocol_handler = function (_, fragment, err_read)
+    if not fragment then
+      --if err_read=='closed' then
+      --	print('dynamixel file closed:', filename)
+      --	return
+      --end
+      log('AX', 'ERROR', 'Read from dynamixel device file failed with %s', tostring(err_read))
+      return
+    end
+    if fragment==NULL_CHAR  then
+      error('No power on serial?')
+    end
+
+    packet=packet..fragment
+
+    ---[[
+    while (not insync) and (#packet>2) and (packet:sub(1,2) ~= PACKET_START) do
+      log('AX', 'DEBUG', 'resync on "%s"', packet:byte(1,10))
+      packet=packet:sub(2, -1) --=packet:sub(packet:find(PACKET_START) or -1, -1)
+    end
+    --]]
+    
+    if not insync and #packet>=4 then
+      insync = true
+      packlen = packet:byte(4)
+    end
+    
+    --print('++++++++++++++++', #packet, packlen)
+    while packlen and #packet>=packlen+4 do --#packet >3 and packlen <= #packet - 3 do
+      if #packet == packlen+4 then  --fast lane
+        local id, errcode, payload=parseAx12Packet(packet)
+        if id then
+          --print('dynamixel message parsed (fast):',id:byte(), errcode,':', payload:byte(1,#payload))
+          sched.signal(id_signals[id], errcode, payload)
+        end
+        packet = ''
+        packlen = nil
+      else --slow lane
+        local packet_pre = packet:sub( 1, packlen+4 )
+        local id, errcode, payload=parseAx12Packet(packet_pre)
+        --assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
+        if id then
+          --print('dynamixel message parsed (slow):',id:byte(), errcode,':', payload:byte(1,#payload))
+          sched.signal(id_signals[id], errcode, payload)
+        end
+
+        local packet_remainder = packet:sub(packlen+5, -1 )
+        packet = packet_remainder
+        packlen = packet:byte(4)
+      end
+      insync = false
+    end      
+    return true
+  end
+  --sched.sigrun({filehandler.events.data}, protocol_handler):set_as_attached()
+  ---------------------
+  
+  
+	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1, protocol_handler)
 	
 	local opencount=60
 	while not filehandler and opencount>0 do
 		print('retrying open...', opencount)
+		log('AX', 'WARNING', 'Retrying open on %s, countdown %s', tostring(filename), tostring(opencount))
 		sched.sleep(1)
-		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1)
+		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1, protocol_handler)
 		opencount=opencount-1
 	end
 	if not filehandler then
@@ -40,108 +140,10 @@ M.new_bus = function (conf)
 	local init_tty_string ='stty -F ' .. filename .. ' ' .. speed .. ' ' .. tty_flags
 
 	os.execute(init_tty_string)
-	filehandler.fd:sync() --flush()
-	
-  local id_signals = setmetatable({}, {__index = function(t,k)
-    local v = {}
-    t[k] = v
-    return v
-  })
-  local id_waitds = setmetatable({}, {__index = function(t,k)
-    local v = sched.new_waitd({id_signals[k], timeout = conf.serialtimeout or 0.05})
-    t[k] = v
-    return v
-  })
+	filehandler.fd:sync() --flush()  
   
-	local taskf_protocol = function()
-		local waitd_traffic = sched.new_waitd({
-			filehandler.events.data,
-			--buff_len=-1
-		})
-		local packet=''
-		local insync=false
-		local packlen=nil -- -1
-
-		local function parseAx12Packet(s)
-			local function generate_checksum(data)
-				local checksum = 0
-				for i=1, #data do
-					checksum = checksum + data:byte(i)
-				end
-				return 255 - (checksum%256)
-			end
-			--print('parseAx12Packet parsing', s:byte(1, #s))
-			local id = s:sub(3,3)
-			--local data_length = s:byte(4)
-			local data = s:sub(5, -1)
-			if generate_checksum(s:sub(3,-1))~=0 then return nil,'READ_CHECKSUM_ERROR' end
-			local errinpacket= data:byte(1,1)
-			local payload = data:sub(2,-2)
-			--print('parseAx12Packet parsed', id:byte(1, #id),'$', errinpacket,':', payload:byte(1, #payload))
-			return id, errinpacket, payload
-		end
-
-		while true do
-			local _, fragment, err_read = sched.wait(waitd_traffic)
-			
-			if not fragment then
-				--if err_read=='closed' then
-				--	print('dynamixel file closed:', filename)
-				--	return
-				--end
-				log('AX', 'ERROR', 'Read from dynamixel device file failed with %s', tostring(err_read))
-				return
-			end
-			if fragment==NULL_CHAR  then
-				error('No power on serial?')
-			end
-
-			packet=packet..fragment
-
-			---[[
-			while (not insync) and (#packet>2) and (packet:sub(1,2) ~= PACKET_START) do
-				log('AX', 'DEBUG', 'resync on "%s"', packet:byte(1,10))
-				packet=packet:sub(2, -1) --=packet:sub(packet:find(PACKET_START) or -1, -1)
-
-			end
-			--]]
-			
-			if not insync and #packet>=4 then
-				insync = true
-				packlen = packet:byte(4)
-			end
-			
-			--print('++++++++++++++++', #packet, packlen)
-			while packlen and #packet>=packlen+4 do --#packet >3 and packlen <= #packet - 3 do
-				if #packet == packlen+4 then  --fast lane
-					local id, errcode, payload=parseAx12Packet(packet)
-					if id then
-						--print('dynamixel message parsed (fast):',id:byte(), errcode,':', payload:byte(1,#payload))
-						sched.signal(id_signals[id], errcode, payload)
-					end
-					packet = ''
-					packlen = nil
-				else --slow lane
-					local packet_pre = packet:sub( 1, packlen+4 )
-					local id, errcode, payload=parseAx12Packet(packet_pre)
-					--assert(handler, 'failed parsing (slow)'..packet:byte(1,#packet))
-					if id then
-						--print('dynamixel message parsed (slow):',id:byte(), errcode,':', payload:byte(1,#payload))
-						sched.signal(id_signals[id], errcode, payload)
-					end
-
-					local packet_remainder = packet:sub(packlen+5, -1 )
-					packet = packet_remainder
-					packlen = packet:byte(4)
-				end
-				insync = false
-			end
-		end
-	end
-	local task_protocol = sched.run(taskf_protocol)
 	
 	local bus = {}
-	
 	bus.sendAX12packet = mx:synchronize(function (s, id, get_response)
 		filehandler:send_sync(s)
 		if get_response then
