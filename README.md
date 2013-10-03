@@ -6,6 +6,9 @@ scheduler, and allows to write coroutine, signal and callback based applications
 Toribio provides a mechanism for easily accessing hardware, and is geared towards
 low end hardware, such as Single-Board Computers.
 
+Notice that this uses the Lumen v2.0 API. If you come from the past and are interested 
+in the old Lumen, check the "v1.0" branch.
+
 ## Description
 
 Using Toribio consists of writing Toribio tasks. These tasks are started automatically.
