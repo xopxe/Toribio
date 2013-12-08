@@ -162,6 +162,6 @@ end)
 
 --print('Toribio go!')
 log ('TORIBIOGO', 'INFO', 'Ready')
-sched.go()
+sched.loop()
 
 
