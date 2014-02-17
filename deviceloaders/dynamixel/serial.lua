@@ -36,21 +36,21 @@ end
 
 local id_signals = setmetatable({}, {__index = function(t,k)
   local v = {}
-  t[k] = v
+  rawset(t, k, v)
   return v
 end })
 
 local serial_timeout
 local id_waitds = setmetatable({}, {__index = function(t,k)
   local v = sched.new_waitd({id_signals[k], timeout = serial_timeout})
-  t[k] = v
+  rawset(t, k, v)
   return v
 end })
 
 M.new_bus = function (conf)
 	local filename = conf.filename or '/dev/ttyUSB0'
   serial_timeout = conf.serialtimeout or 0.05
-	log('AX', 'INFO', 'usb device file: %s', tostring(filename))
+	log('AX', 'INFO', 'usb device file: %s with timeout %s', tostring(filename), tostring(serial_timeout))
 
 
   local packet=''
@@ -150,7 +150,7 @@ M.new_bus = function (conf)
 		filehandler:send_sync(s)
 		if get_response then
 			local ev, err, data = sched.wait(id_waitds[id])
-      if id==ev then return err, data end
+      if ev==id_signals[id] then return err, data end
 			if ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
 			end
