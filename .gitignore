@@ -3,3 +3,7 @@
 
 #vim swap
 *.swp
+
+*.BAK
+*.bak
+
