@@ -4,7 +4,7 @@
 -- @alias device
 
 local M = {}
-local log = require 'log'
+local log = require 'lumen.log'
 
 --- Initialize and starts the module.
 -- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to

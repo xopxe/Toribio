@@ -1,10 +1,10 @@
 local M = {}
 
 M.init = function(conf)
-	local http_server = require "tasks/http-server"
+	local http_server = require 'tasks/http-server'
 	local slt2 = require 'tasks/wbctrl/slt2'
 	local tohtml = require 'tasks/wbctrl/tohtml'
-	local stream = require 'stream'
+	local stream = require 'lumen.stream'
 	
 	--http_server.serve_static_content_from_ram('/', '../tasks/http-server/www')
 	--http_server.serve_static_content_from_stream('/docs/', '../docs')

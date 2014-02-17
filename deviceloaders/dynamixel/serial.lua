@@ -1,9 +1,9 @@
 local M = {}
 
-local sched = require 'sched'
-local log = require 'log'
-local mutex = require 'mutex'
-local selector = require 'tasks/selector'
+local sched = require 'lumen.sched'
+local log = require 'lumen.log'
+local mutex = require 'lumen.mutex'
+local selector = require 'lumen.tasks.selector'
 
 local mx = mutex.new()
 
@@ -38,16 +38,18 @@ local id_signals = setmetatable({}, {__index = function(t,k)
   local v = {}
   t[k] = v
   return v
-})
+end })
 
+local serial_timeout
 local id_waitds = setmetatable({}, {__index = function(t,k)
-  local v = sched.new_waitd({id_signals[k], timeout = conf.serialtimeout or 0.05})
+  local v = sched.new_waitd({id_signals[k], timeout = serial_timeout})
   t[k] = v
   return v
-})
+end })
 
 M.new_bus = function (conf)
 	local filename = conf.filename or '/dev/ttyUSB0'
+  serial_timeout = conf.serialtimeout or 0.05
 	log('AX', 'INFO', 'usb device file: %s', tostring(filename))
 
 

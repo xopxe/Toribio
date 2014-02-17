@@ -3,7 +3,7 @@ local M = {}
 local toribio = require 'toribio'
 local devices = toribio.devices
 local bobot = nil --require('comms/bobot').bobot
-local log = require 'log'
+local log = require 'lumen.log'
 
 table.pack=table.pack or function (...)
 	return {n=select('#',...),...}

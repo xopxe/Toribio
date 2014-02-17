@@ -22,7 +22,7 @@
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
-local log = require 'log'
+local log = require 'lumen.log'
 
 local string_char = string.char
 local math_floor = math.floor

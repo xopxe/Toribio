@@ -8,7 +8,7 @@ the configuration file, and copied in the tasks/ folder.
 The skeleton of a task file (called say taskname.lua) is as follows:
 
     local M = {}
-    local sched=require 'sched'
+    local sched=require 'lumen.sched'
     
     function M.init (conf)
     	-- initialize stuff
@@ -38,7 +38,7 @@ For example, a task that will print "tick" at a regulable intervals of time
 can be as follows:
 
     local M = {}
-    local sched=require 'sched'
+    local sched=require 'lumen.sched'
 
     local interval = 1
 

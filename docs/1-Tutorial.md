@@ -19,7 +19,7 @@ We start by editing the configuration file. We must configure two things: enable
 Then we place the task's code in the tasks/ folder. The tasks/axlogger.lua file:
 
     local M = {}
-    local sched=require 'sched'
+    local sched=require 'lumen.sched'
     local toribio = require 'toribio'
 
     M.init = function(conf)
@@ -69,8 +69,8 @@ The rcp_bot.lua file to place in the tasks/ folder is the following:
 
     local M = {}
     local toribio = require 'toribio'
-    local sched = require 'sched'
-    local proxy = require 'tasks/proxy'
+    local sched = require 'lumen.sched'
+    local proxy = require 'lumen.tasks.proxy'
     
     M.init = function(conf)
     	local waitd = proxy.new_remote_waitd(conf.rc_ip, conf.rc_port, {
@@ -102,7 +102,7 @@ The remote control will behave as follows: it tracks mouse's movements, generate
 
     local M = {}
     local toribio = require 'toribio'
-    local sched = require 'sched'
+    local sched = require 'lumen.sched'
     
     M.init = function(conf)
     
@@ -165,7 +165,7 @@ And the tasks/rc\_bot.lua skeleton:
 
     local M = {}
     local toribio = require 'toribio'
-    local sched = require 'sched'
+    local sched = require 'lumen.sched'
     
     M.init = function(conf)
     
@@ -224,7 +224,7 @@ In this example, we will use a usb4butia IO board. Our task will be called booti
 The code for the tasks/bootia.lua might be as follows:
 
     local M = {}
-    local sched = require 'sched'
+    local sched = require 'lumen.sched'
     local toribio = require 'toribio'
     
     M.init = function()

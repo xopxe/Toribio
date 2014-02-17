@@ -12,7 +12,7 @@ M.init = function(conf)
 		motor_right.init_mode_wheel()
 
 		--initialize socket
-		local selector = require "tasks/selector"
+		local selector = require 'lumen.tasks.selector'
 		local udp = selector.new_udp(nil, nil, conf.ip, conf.port, -1)
 
 		--listen for messages

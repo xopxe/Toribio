@@ -44,7 +44,7 @@ end
 
 
 --- Signals that toribio can emit.
--- @usage local sched = require 'sched'
+-- @usage local sched = require 'lumen.sched'
 --sched.sigrun_task(
 --    {toribio.events.new_device}, 
 --    print

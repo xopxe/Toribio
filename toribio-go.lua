@@ -15,6 +15,7 @@ package.path = package.path .. ";;;lumen/?.lua;?/init.lua"
 local sched = require 'lumen.sched'
 local log = require 'lumen.log'
 require "lumen.tasks.selector".init({service='nixio'})
+--print ('>>>>>>>>>>>', )
 
 local toribio = require 'toribio'
 

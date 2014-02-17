@@ -15,7 +15,7 @@
 -- @alias device
 
 local M = {}
-local log = require 'log'
+local log = require 'lumen.log'
 
 local run_shell = function(s)
 	local f = io.popen(s) -- runs command

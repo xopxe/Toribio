@@ -164,7 +164,7 @@ periodically checks the reading from the sensor, and if needed triggers a signal
 
     local M = {}
     local toribio = require 'toribio'
-    local sched = require 'sched'
+    local sched = require 'lumen.sched'
     
     M.init = function(conf)
     	local too_close_event={}
