@@ -82,12 +82,9 @@ M.get_motor= function (busdevice, motor_id)
 		write_method='sync_write'
 	end
 
-
 	--Check wether the motor with id actually exists. If not, return nil.
-	if motor_type == 'single' then 
-		if not busdevice.ping(idb) then
-			return nil
-		end
+	if motor_type == 'single' and not busdevice.ping(idb) then
+    return nil
 	end
 	
 	-- It exists, let's start building the object.

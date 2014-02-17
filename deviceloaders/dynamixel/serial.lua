@@ -150,9 +150,13 @@ M.new_bus = function (conf)
 		filehandler:send_sync(s)
 		if get_response then
 			local ev, err, data = sched.wait(id_waitds[id])
-      if ev==id_signals[id] then return err, data end
-			if ev then
+      if ev==id_signals[id] then 
+        return err, data -- all OK
+      elseif ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
+      else
+        id_waitds[id] = nil
+        id_signals[id] = nil
 			end
 		end
 	end)
