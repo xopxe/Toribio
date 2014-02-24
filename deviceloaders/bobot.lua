@@ -21,7 +21,7 @@ local devices_attached = {}
 
 local function check_open_device(d, ep1, ep2)
 	if not d then return end
-	if d.handler or not d.open or d.name=='pnp' then return true end --FIXME bug in usb4butia pnp module
+	if d.handler or d.name=='pnp' then return true end --FIXME bug in usb4butia pnp module
 
         -- if the device is not open, then open the device
 	log('BOBOT', 'INFO', 'Opening %s on %s', tostring(d.name), tostring(d.handler))
@@ -56,28 +56,32 @@ local function read_devices_list()
 		end
 		bfound = true
 	end
+
 	for regname, d in pairs(devices_attached) do
 		if not devices_attached_now[regname] then
 			toribio.remove_devices({name=d.name})
 			devices_attached[regname]=nil
 		end
 	end
-	for regname, d in pairs(devices_attached_now) do
+
+
+	for regname, dv in pairs(devices_attached_now) do
 		if not devices_attached[regname] then
-			if check_open_device(d, nil, nil) then
+		--	if check_open_device(d, nil, nil) then
 				local device ={
 					--- Name of the device.
 					-- Starts with 'bb-' and then the name provided
 					-- by bobot. For example, "bb-dist:1".
-					name='bb-'..d.name,
+					name='bb-'..dv.name,
 
 					--- Module of the device.
 					-- Starts with 'bb-' and then the module provided
 					-- by bobot. For example, "bb-dist".
-					module="bb-"..d.module,
+					module="bb-"..dv.module,
 				}
 				device.bobot_metadata = {}
-				for fn, ff in pairs(d.api or {}) do 
+				for fn, ff in pairs(dv.api or {}) do 
+					device.dev = dv
 					device[fn]=ff.call 
 					device.bobot_metadata[ff.call] = {
 						parameters = ff.parameters,
@@ -86,23 +90,33 @@ local function read_devices_list()
 				end
 				toribio.add_device(device)
 				devices_attached[regname]=device
-			else
-				print ('Error opening', d.name)
-			end
+			--else
+				--print ('Error opening', d.name)
+			--end
 		end
 	end
 	
-	if not bfound then log('BOBOT', 'WARNING', ' No Baseboard found') end
+	if not bfound then log('BOBOT', 'WARNING', 'No Baseboard found') end
 end
 
 M.refresh = function ()
 	print ('bobot refreshing!')
-	for i, bb in ipairs(bobot.baseboards) do
-		if not bb:refresh() then
-			bobot.baseboards[i]=nil
+	if #bobot.baseboards==0 then 
+		sched.sleep(0.5)
+		bobot.init(M.bobot_params)
+		read_devices_list()
+	else
+		local refreshed
+		for i, bb in ipairs(bobot.baseboards) do
+			if bb.refresh and bb.hotplug then 
+				if not bb:refresh() then
+					bobot.baseboards[i]=nil
+				end
+				refreshed=true
+			end
 		end
-	end
-	read_devices_list()
+		if refreshed then read_devices_list() end
+	end	
 end
 
 --- Initialize and starts the module.
@@ -122,7 +136,7 @@ M.init = function (conf)
 	end
 	
 	bobot  = require 'bobot'
-
+	M.bobot_params = conf.comms
 	bobot.init(conf.comms)
 	local count = 60
 	while #bobot.baseboards == 0 and count > 0 do
@@ -134,6 +148,10 @@ M.init = function (conf)
 	end
 	read_devices_list()
 	M.refresh()
+	sched.sigrun({
+		'do_bobot_refresh',
+		timeout=timeout_refresh, 
+	}, M.refresh)
 end
 
 return M

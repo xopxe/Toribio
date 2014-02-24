@@ -131,12 +131,15 @@ process["CALL"] = function (parameters)
 	
 	local api_call=device[call];
 	if not api_call then return "missing call" end
-	
+	local is_open = device.dev.handler or device.dev.name =='pnp'
+	if not is_open then 
+		device.dev:open(1, 1)
+	end
+
 	--local tini=socket.gettime()
 	--local ok, ret = pcall (api_call.call, unpack(parameters,4))
 	--if not ok then print ("Error calling", ret) end
-	
-	local ret = table.pack(pcall (api_call, unpack(parameters,4)))
+	local ret = table.pack(pcall(device.dev.api[call].call, unpack(parameters,4)))
 	local ok = ret[1]
 	if ok then 
 		return table.concat(ret, ',', 2)
