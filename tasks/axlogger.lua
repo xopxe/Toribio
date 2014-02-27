@@ -1,5 +1,5 @@
 local M = {}
-local sched=require 'sched'
+local sched=require 'lumen.sched'
 local toribio = require 'toribio'
 M.init = function(conf)
 	sched.run(function()

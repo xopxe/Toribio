@@ -10,9 +10,9 @@
 local M = {}
 
 local toribio = require 'toribio'
-local sched = require 'sched'
-local ax = require 'deviceloaders/dynamixel/motor'
-local log = require 'log'
+local sched = require 'lumen.sched'
+local ax = require 'deviceloaders.dynamixel.motor'
+local log = require 'lumen.log'
 
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 

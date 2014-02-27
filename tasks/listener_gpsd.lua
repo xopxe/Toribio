@@ -1,7 +1,7 @@
 local M = {}
 
 M.init = function()
-	local sched = require 'sched'
+	local sched = require 'lumen.sched'
 	
 	return sched.run(function()
 		local toribio = require 'toribio'

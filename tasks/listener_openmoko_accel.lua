@@ -3,7 +3,7 @@ local M = {}
 local toribio = require 'toribio'
 
 M.init = function(conf)
-	local sched = require 'sched'
+	local sched = require 'lumen.sched'
 	
 	--[[
 	return sched.run(function()

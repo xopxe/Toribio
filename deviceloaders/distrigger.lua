@@ -1,6 +1,6 @@
 local M = {}
 local toribio = require 'toribio'
-local sched = require 'sched'
+local sched = require 'lumen.sched'
 
 M.init = function(conf)
 	local too_close_event={}

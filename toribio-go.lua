@@ -8,13 +8,13 @@
 --		-d NONE|ERROR|WARNING|INFO|DETAIL|DEBUG|ALL
 -- @script toribio-go
 
-package.path = package.path .. ";;;Lumen/?.lua"
+package.path = package.path .. ";;;lumen/?.lua;?/init.lua"
 
 --require 'strict'
 
-local sched = require 'sched'
-local log = require 'log'
-require "tasks/selector".init({service='nixio'})
+local sched = require 'lumen.sched'
+local log = require 'lumen.log'
+require "lumen.tasks.selector".init({service='nixio'})
 
 local toribio = require 'toribio'
 

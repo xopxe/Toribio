@@ -3,7 +3,7 @@ local M = {}
 local toribio = require 'toribio'
 
 M.init = function()
-	local sched = require 'sched'
+	local sched = require 'lumen.sched'
 	
 	return sched.run(function(conf)
 		local xo_accel = toribio.wait_for_device('xo_accel')

@@ -6,10 +6,10 @@
 local M = {}
 
 local toribio = require 'toribio'
-local sched = require 'sched'
-local log = require 'log'
-local messages = require 'tasks/ran/messages'
-local ran_util= require 'tasks/ran/util'
+local sched = require 'lumen.sched'
+local log = require 'lumen.log'
+local messages = require 'tasks.ran.messages'
+local ran_util= require 'tasks.ran.util'
 
 local configuration --holds conf after init()
 local rnr --holds rnr connection after init()

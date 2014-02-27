@@ -13,8 +13,8 @@ local M = {}
 -- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
-	local selector = require 'tasks/selector'
-	local sched = require 'sched'
+	local selector = require 'lumen.tasks.selector'
+	local sched = require 'lumen.sched'
 	local floor = math.floor
 
 	local filename = conf.filename or '/dev/input/mice'

@@ -12,10 +12,10 @@ local M = {}
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 --package.path = package.path .. ";"..my_path.."../../bobot/?.lua"
 
-local sched=require 'sched'
+local sched=require 'lumen.sched'
 local toribio = require 'toribio'
 local bobot  -- = require 'bobot'
-local log = require 'log'
+local log = require 'lumen.log'
 
 local devices_attached = {}
 

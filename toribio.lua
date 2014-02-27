@@ -9,10 +9,10 @@
 
 local M ={}
 
-local sched = require 'sched'
+local sched = require 'lumen.sched'
 
-local log= require 'log'
-local mutex = require 'mutex'
+local log= require 'lumen.log'
+local mutex = require 'lumen.mutex'
 --require "log".setlevel('ALL')
 
 --- Available devices.

@@ -1,7 +1,7 @@
 local M = {}
 
 M.init =  function(conf)
-	local sched = require 'sched'
+	local sched = require 'lumen.sched'
 	local toribio = require 'toribio' 
 
 	local mice = toribio.wait_for_device({module='mice'})

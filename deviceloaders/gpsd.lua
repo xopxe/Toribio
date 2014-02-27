@@ -13,10 +13,10 @@ local M = {}
 -- @param conf the configuration table (see @{conf}).
 M.init = function(conf)
 	local toribio = require 'toribio'
-	local selector = require 'tasks/selector'
-	local sched = require 'sched'
-	local json = require 'lib/dkjson'
-	local log = require 'log'
+	local selector = require 'lumen.tasks.selector'
+	local sched = require 'lumen.sched'
+	local json = require 'lumen.lib.dkjson'
+	local log = require 'lumen.log'
 	
 	local ip = conf.ip or '127.0.0.1'
 	local port = conf.port or 2947

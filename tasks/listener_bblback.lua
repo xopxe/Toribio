@@ -1,4 +1,4 @@
-local sched = require 'sched'
+local sched = require 'lumen.sched'
 local toribio = require 'toribio'
 
 local M = {}

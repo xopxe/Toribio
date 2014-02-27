@@ -1,6 +1,6 @@
 local M = {}
 
-local sched = require 'sched'
+local sched = require 'lumen.sched'
 
 --Provides a counter function
 local function newCounter ()

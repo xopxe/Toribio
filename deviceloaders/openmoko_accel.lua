@@ -20,7 +20,7 @@
 -- @alias device
 
 local M = {}
-local log = require 'log'
+local log = require 'lumen.log'
 
 --- Initialize and starts the module.
 -- This is called automatically by toribio if the _load_ attribute for the module in the configuration file is set to
@@ -29,7 +29,7 @@ local log = require 'log'
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local nixio = require 'nixio'
-	local sched = require 'sched'
+	local sched = require 'lumen.sched'
 
 	--local sysfs1 = '/sys/devices/platform/lis302dl.1'
 	local sysfs1 = '/sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.1'

@@ -1,7 +1,7 @@
 local M = {}
 
 M.init = function(conf)
-	local sched=require 'sched'
+	local sched=require 'lumen.sched'
 	sched.run(function()
 		print('xy starting')
 		local toribio = require 'toribio' 

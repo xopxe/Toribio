@@ -1,7 +1,7 @@
 local M = {}
 local toribio = require 'toribio'
-local sched = require 'sched'
-local proxy = require 'tasks/proxy'
+local sched = require 'lumen.sched'
+local proxy = require 'lumen.tasks.proxy'
 
 M.init = function(conf)
 

@@ -1,7 +1,7 @@
 local M = {}
 
-local sched=require 'sched'
-local selector = require "tasks/selector"
+local sched=require 'lumen.sched'
+local selector = require "lumen.tasks.selector"
 local nixio = require 'nixio'
 
 --executes s on the console and returns the output
