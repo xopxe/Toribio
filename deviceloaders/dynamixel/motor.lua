@@ -24,6 +24,15 @@
 
 local log = require 'log'
 
+local string_char = string.char
+local math_floor = math.floor
+local math_log = math.log
+
+local ipairs, type = ipairs, type
+
+local CHAR0x00 = string_char(0x00)
+local CHAR0x01 = string_char(0x01)
+
 local M = {}
 
 local function getunsigned_2bytes(s)
@@ -32,18 +41,18 @@ end
 local function get2bytes_unsigned(n)
 	if n<0 then n=0
 	elseif n>1023 then n=1023 end
-	local lowb, highb = n%256, math.floor(n/256)
+	local lowb, highb = n%256, math_floor(n/256)
 	return lowb, highb
 end
 local function get2bytes_signed(n)
 	if n<-1023 then n=-1023
 	elseif n>1023 then n=1023 end
 	if n < 0 then n = 1024 - n end
-	local lowb, highb = n%256, math.floor(n/256)
+	local lowb, highb = n%256, math_floor(n/256)
 	return lowb, highb
 end
 local function log2( x ) 
-	return  math.log( x ) / math.log( 2 )
+	return  math_log( x ) / math_log( 2 )
 end
 
 M.get_motor= function (busdevice, motor_id)
@@ -63,12 +72,12 @@ M.get_motor= function (busdevice, motor_id)
 	end
 	
 	if motor_type~='sync'  then 
-		idb = string.char(motor_id)
+		idb = string_char(motor_id)
 		write_method='write_data'
 	else
 		idb = {}
 		for i, anid in ipairs(motor_id) do
-			idb[i] = string.char(anid)
+			idb[i] = string_char(anid)
 		end
 		write_method='sync_write'
 	end
@@ -136,7 +145,7 @@ M.get_motor= function (busdevice, motor_id)
 	local control_getters = {
 		rotation_mode = function()
 			local ret, err = read_data(idb,0x06,4,status_return_level)
-			if ret==string.char(0x00,0x00,0x00,0x00) then
+			if ret==string_char(0x00,0x00,0x00,0x00) then
 				motor_mode = 'wheel'
 			else
 				motor_mode = 'joint'
@@ -156,7 +165,7 @@ M.get_motor= function (busdevice, motor_id)
 		end,
 		baud_rate = function()
 			local ret, err = read_data(idb,0x04,1, status_return_level)
-			if ret then return math.floor(2000000/(ret+1)), err end --baud
+			if ret then return math_floor(2000000/(ret+1)), err end --baud
 		end,
 		return_delay_time = function()
 			local ret, err = read_data(idb,0x05,1, status_return_level)
@@ -308,37 +317,37 @@ M.get_motor= function (busdevice, motor_id)
 		rotation_mode = function (mode)
 			local ret 
 			if mode == 'wheel' then
-				ret = busdevice[write_method](idb,0x06,string.char(0, 0, 0, 0),status_return_level)
+				ret = busdevice[write_method](idb,0x06,string_char(0, 0, 0, 0),status_return_level)
 			else
 				local max=1023
 				local maxlowb, maxhighb = get2bytes_unsigned(max)
-				ret = busdevice[write_method](idb,0x06,string.char(0, 0, maxlowb, maxhighb),status_return_level)
+				ret = busdevice[write_method](idb,0x06,string_char(0, 0, maxlowb, maxhighb),status_return_level)
 			end
 			motor_mode = mode
 			return ret
 		end,
 		id = function(newid)
 			assert(newid>=0 and newid<=0xFD, 'Invalid ID: '.. tostring(newid))
-			motor_id, idb = newid, string.char(newid)
-			return busdevice[write_method](idb,0x3,string.char(newid),status_return_level)
+			motor_id, idb = newid, string_char(newid)
+			return busdevice[write_method](idb,0x3,string_char(newid),status_return_level)
 		end,
 		baud_rate = function(baud)
-			local n = math.floor(2000000/baud)-1
+			local n = math_floor(2000000/baud)-1
 			assert(n>=1 and n<=207, "Attempt to set serial speed: "..n)
 			return busdevice[write_method](idb,0x04,n,status_return_level)
 		end,
 		return_delay_time = function(sec)
-			local parameter = math.floor(sec * 1000000 / 2)
-			return busdevice[write_method](idb,0x05,string.char(parameter),status_return_level)
+			local parameter = math_floor(sec * 1000000 / 2)
+			return busdevice[write_method](idb,0x05,string_char(parameter),status_return_level)
 		end,
 		angle_limit = function(cw, ccw)
-			if cw then cw=math.floor(cw/0.29)
+			if cw then cw=math_floor(cw/0.29)
 			else cw=0 end
-			if ccw then ccw=math.floor(ccw/0.29)
+			if ccw then ccw=math_floor(ccw/0.29)
 			else ccw=1023 end
 			local minlowb, maxhighb = get2bytes_unsigned(cw)
 			local maxlowb, maxnhighb = get2bytes_unsigned(ccw)
-			local ret = busdevice[write_method](idb,0x06,string.char(minlowb, maxhighb, maxlowb, maxnhighb),status_return_level)
+			local ret = busdevice[write_method](idb,0x06,string_char(minlowb, maxhighb, maxlowb, maxnhighb),status_return_level)
 			if cw==0 and ccw==0 then 
 				motor_mode='wheel' 
 			else
@@ -352,14 +361,14 @@ M.get_motor= function (busdevice, motor_id)
 		limit_voltage = function(min, max)
 			local min, max = min*10, max*10
 			if min<=255 and min>0 and max<=255 and max>0 then 
-				return busdevice[write_method](idb,0x0C,string.char(min, max),status_return_level)
+				return busdevice[write_method](idb,0x0C,string_char(min, max),status_return_level)
 			end
 		end,
 		max_torque = function(value)
 			-- 0% ..  100% max torque
-			local torque=math.floor(value * 10.23)
+			local torque=math_floor(value * 10.23)
 			local lowb, highb = get2bytes_unsigned(torque)
-			return busdevice[write_method](idb,0x0E,string.char(lowb,highb),status_return_level)
+			return busdevice[write_method](idb,0x0E,string_char(lowb,highb),status_return_level)
 		end,
 		status_return_level = function(level)
 			local level_codes= {
@@ -369,89 +378,89 @@ M.get_motor= function (busdevice, motor_id)
 			}
 			local code = level_codes[level or 'ALL']
 			status_return_level = code
-			return busdevice[write_method](idb,0x10,string.char(code),status_return_level or 2)
+			return busdevice[write_method](idb,0x10,string_char(code),status_return_level or 2)
 		end,
 		alarm_led = function(errors)
 			local code = 0
 			for _, err in ipairs(errors) do
 				code = code + (busdevice.ax_errors[err] or 0)
 			end
-			return busdevice[write_method](idb,0x11,string.char(code),status_return_level)
+			return busdevice[write_method](idb,0x11,string_char(code),status_return_level)
 		end,
 		alarm_shutdown = function(errors)
 			local code = 0
 			for _, err in ipairs(errors) do
 				code = code + (busdevice.ax_errors[err] or 0)
 			end
-			return busdevice[write_method](idb,0x12,string.char(code),status_return_level)
+			return busdevice[write_method](idb,0x12,string_char(code),status_return_level)
 		end,
 		torque_enable = function (value)
 			--boolean
 			local parameter
 			if value then 
-				parameter=string.char(0x01)
+				parameter=CHAR0x01
 			else
-				parameter=string.char(0x00)
+				parameter=CHAR0x00
 			end
 			return busdevice[write_method](idb,0x18,parameter,status_return_level)
 		end,
 		led = function (value)
 			local parameter
 			if value then 
-				parameter=string.char(0x01)
+				parameter=CHAR0x01
 			else
-				parameter=string.char(0x00)
+				parameter=CHAR0x00
 			end
 			assert(status_return_level, debug.traceback())
 			return busdevice[write_method](idb,0x19,parameter,status_return_level)
 		end,
 		compliance_margin = function(angle)
-			local ang=math.floor(angle/0.29)
+			local ang=math_floor(angle/0.29)
 			local lowb, highb = get2bytes_unsigned(ang)
-			return busdevice[write_method](idb,0x1A,string.char(lowb,highb),status_return_level)
+			return busdevice[write_method](idb,0x1A,string_char(lowb,highb),status_return_level)
 		end,
 		compliance_slope = function(cw, ccw)
-			cw, ccw = math.floor(2^cw), math.floor(2^ccw)
-			return busdevice[write_method](idb,0x1C,string.char(cw,ccw),status_return_level)
+			cw, ccw = math_floor(2^cw), math_floor(2^ccw)
+			return busdevice[write_method](idb,0x1C,string_char(cw,ccw),status_return_level)
 		end,
 		goal_position = function(angle)
-			local ang=math.floor(angle/0.29)
+			local ang=math_floor(angle/0.29)
 			local lowb, highb = get2bytes_unsigned(ang)
-			return busdevice[write_method](idb,0x1E,string.char(lowb,highb),status_return_level)
+			return busdevice[write_method](idb,0x1E,string_char(lowb,highb),status_return_level)
 		end,
 		moving_speed = function(value)
 			if motor_mode=='joint' then
 				-- 0 .. 684 deg/sec
-				local vel=math.floor(value * 1.496)
+				local vel=math_floor(value * 1.496)
 				local lowb, highb = get2bytes_unsigned(vel)
-				return busdevice[write_method](idb,0x20,string.char(lowb,highb),status_return_level)
+				return busdevice[write_method](idb,0x20,string_char(lowb,highb),status_return_level)
 			elseif motor_mode=='wheel' then
 				-- -100% ..  +100% max torque
-				local vel=math.floor(value * 10.23)
+				local vel=math_floor(value * 10.23)
 				local lowb, highb = get2bytes_signed(vel)
-				return busdevice[write_method](idb,0x20,string.char(lowb,highb),status_return_level)
+				return busdevice[write_method](idb,0x20,string_char(lowb,highb),status_return_level)
 			end
 		end,
 		torque_limit = function(value)
 			-- 0% ..  100% max torque
-			local torque=math.floor(value * 10.23)
+			local torque=math_floor(value * 10.23)
 			local lowb, highb = get2bytes_unsigned(torque)
-			return busdevice[write_method](idb,0x22,string.char(lowb,highb),status_return_level)
+			return busdevice[write_method](idb,0x22,string_char(lowb,highb),status_return_level)
 		end,
 		lock = function(enable)
 			local parameter
 			if enable then 
-				parameter=string.char(0x01)
+				parameter=CHAR0x01
 			else
-				parameter=string.char(0x00)
+				parameter=CHAR0x00
 			end
 			return busdevice[write_method](idb,0x2F,parameter,status_return_level)
 		end,
 		punch = function(value)
 			-- 0% ..  100% max torque
-			local torque=math.floor(value * 10.23)
+			local torque=math_floor(value * 10.23)
 			local lowb, highb = get2bytes_unsigned(torque)
-			return busdevice[write_method](idb,0x30,string.char(lowb,highb),status_return_level)
+			return busdevice[write_method](idb,0x30,string_char(lowb,highb),status_return_level)
 		end
 	}
 	
