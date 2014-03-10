@@ -14,18 +14,20 @@ local sched = require 'lumen.sched'
 local ax = require 'deviceloaders.dynamixel.motor'
 local log = require 'lumen.log'
 
+local string_char = string.char
+
 --local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
 
-local BROADCAST_ID = string.char(0xFE)
-local PACKET_START = string.char(0xFF,0xFF)
+local BROADCAST_ID = string_char(0xFE)
+local PACKET_START = string_char(0xFF,0xFF)
 
-local INSTRUCTION_PING = string.char(0x01)
-local INSTRUCTION_READ_DATA = string.char(0x02)
-local INSTRUCTION_WRITE_DATA = string.char(0x03)
-local INSTRUCTION_REG_WRITE = string.char(0x04)
-local INSTRUCTION_ACTION = string.char(0x05)
-local INSTRUCTION_RESET = string.char(0x06)
-local INSTRUCTION_SYNC_WRITE = string.char(0x83)
+local INSTRUCTION_PING = string_char(0x01)
+local INSTRUCTION_READ_DATA = string_char(0x02)
+local INSTRUCTION_WRITE_DATA = string_char(0x03)
+local INSTRUCTION_REG_WRITE = string_char(0x04)
+local INSTRUCTION_ACTION = string_char(0x05)
+local INSTRUCTION_RESET = string_char(0x06)
+local INSTRUCTION_SYNC_WRITE = string_char(0x83)
 
 local ax_errors = {
 	--[0x00] = 'NO_ERROR',
@@ -54,9 +56,9 @@ M.init = function (conf)
 	local ax_bus = require 'deviceloaders/dynamixel/serial'.new_bus(conf)
 	
 	local function buildAX12packet(id, payload)
-		local data = id..string.char(#payload+1)..payload
+		local data = id..string_char(#payload+1)..payload
 		local checksum = generate_checksum(data)
-		local packet = PACKET_START..data..string.char(checksum)
+		local packet = PACKET_START..data..string_char(checksum)
 		return packet
 	end
 	
@@ -70,13 +72,13 @@ M.init = function (conf)
 	local write_data_now = function(id,address,data, return_level)
 		id = id or BROADCAST_ID
 		local packet_write = buildAX12packet(id,
-			INSTRUCTION_WRITE_DATA..string.char(address)..data)
+			INSTRUCTION_WRITE_DATA..string_char(address)..data)
 		return sendAX12packet(packet_write, id, return_level>=2 and id ~= BROADCAST_ID)
 	end
 	local read_data = function(id,startAddress,length, return_level)
 		if id==BROADCAST_ID then return nil, 'read from broadcast' end
 		local packet_read = buildAX12packet(id,
-			INSTRUCTION_READ_DATA..string.char(startAddress)..string.char(length))
+			INSTRUCTION_READ_DATA..string_char(startAddress)..string_char(length))
 		local err, data = sendAX12packet(packet_read, id, return_level>=1)
 		if data and #data ~= length then return nil, 'read error' end
 		assert(data~=nil or err~=nil, debug.traceback())
@@ -85,7 +87,7 @@ M.init = function (conf)
 	local reg_write_data = function(id,address,data, return_level)
 		id = id or BROADCAST_ID
 		local packet_reg_write = buildAX12packet(id,
-			INSTRUCTION_REG_WRITE..string.char(address)..data)
+			INSTRUCTION_REG_WRITE..string_char(address)..data)
 		return sendAX12packet(packet_reg_write, id, return_level>=2 and id ~= BROADCAST_ID)
 	end
 	local action = function(id, return_level)
@@ -99,7 +101,7 @@ M.init = function (conf)
 		return sendAX12packet(packet_reset, id, return_level>=2 and id ~= BROADCAST_ID)
 	end
 	local sync_write = function(ids, address,data)
-		local dataout = string.char(address)..string.char(#data)
+		local dataout = string_char(address)..string_char(#data)
 		for i=1, #ids do
 			local sid = ids[i]
 			dataout=dataout..sid..data
@@ -143,7 +145,7 @@ M.init = function (conf)
 	-- @param newid ID number to set.
 	busdevice.set_id = function(newid)
 		assert(newid>=0 and newid<=0xFD, 'Invalid ID: '.. tostring(newid))
-		local idb=string.char(id)
+		local idb=string_char(newid)
 		busdevice.write_data(BROADCAST_ID,0x03,idb)
 	end
 
@@ -229,7 +231,7 @@ M.init = function (conf)
 			local motor = busdevice.get_motor(i)
 			--print('XXXXXXXX',i, (motor or {}).name)
 			if motor then
-				--busdevice.events[i] = string.char(i)
+				--busdevice.events[i] = string_char(i)
 				log('AX', 'INFO', 'Device %s created: %s', motor.module, motor.name)
 				toribio.add_device(motor)
 			end
