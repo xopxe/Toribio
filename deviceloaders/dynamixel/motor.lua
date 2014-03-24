@@ -97,7 +97,7 @@ M.get_motor= function (busdevice, motor_id)
 		--- Bus device.
 		-- The dynamixel bus Device to which the motor is connected
 		busdevice = busdevice,
-		
+   
 		--- Dynamixel ID number.
 		motor_id = motor_id,
 	}
@@ -117,7 +117,6 @@ M.get_motor= function (busdevice, motor_id)
 		-- Use with care, as it also resets the ID number and baud rate. 
 		-- For factory defaults, check Dynamixal documentation.
 		-- This command only works for single motors (not sync nor broadcast).  
-		-- For defaut values, check the Dynamixel documentation.
 		-- @return a dynamixel error code
 		Motor.reset_factory_default = function()
 			return busdevice.reset(idb, status_return_level)
