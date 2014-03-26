@@ -1,0 +1,164 @@
+<html>
+<head>
+ <title>DM1 Remote Control</title>
+</head>
+
+<body>
+<h1>DM1 Remote Control</h1>
+
+<table>
+	<tr><td id=wslm_statustd align=center><div id=wslm_status>Not initialized</div></td></tr>
+	<tr><td align=center style="border:1px solid black"><div id="wslm_drawing">	</div></td></tr>
+</table>
+
+<script>
+function get_appropriate_ws_url()
+{
+	var u = new String(document.URL);
+
+	/*
+	 * We open the websocket encrypted if this page came on an
+	 * https:// url itself, otherwise unencrypted
+	 */
+
+	if (u.substring(0, 5) == "https") {
+		//return "wss://localhost:12345";
+		u = u.replace('https://','');
+		u = u.substring(0, u.indexOf('/'));
+		return "wss://" + u;
+	} else {
+		//return "ws://localhost:12345";
+		u = u.replace('http://','');
+		u = u.substring(0, u.indexOf('/'));
+		return "ws://" + u;
+	}
+}
+
+
+
+
+/* lws-mirror protocol */
+
+	var down = 0;
+	var no_last = 1;
+	var ctx;
+	var socket_lm;
+	var color = "#000000";
+
+	if (typeof MozWebSocket != "undefined") {
+		socket_lm = new MozWebSocket(get_appropriate_ws_url(),
+				   "dm1-rc-protocol");
+	} else {
+		socket_lm = new WebSocket(get_appropriate_ws_url(),
+				   "dm1-rc-protocol");
+	}
+
+
+	try {
+		socket_lm.onopen = function() {
+			document.getElementById("wslm_statustd").style.backgroundColor = "#40ff40";
+			document.getElementById("wslm_status").textContent = " websocket connection opened ";
+		} 
+
+		socket_lm.onmessage =function got_packet(msg) {
+			j = msg.data.split(';');
+			f = 0;
+			while (f < j.length - 1) {
+				i = j[f].split(' ');
+				if (i[0] == 'd') {
+					ctx.strokeStyle = i[1];
+					ctx.beginPath();
+					ctx.moveTo(+(i[2]), +(i[3]));
+					ctx.lineTo(+(i[4]), +(i[5]));
+					ctx.stroke();
+				}
+				if (i[0] == 'c') {
+					ctx.strokeStyle = i[1];
+					ctx.beginPath();
+					ctx.arc(+(i[2]), +(i[3]), +(i[4]), 0, Math.PI*2, true); 
+					ctx.stroke();
+				}
+
+				f++;
+			}
+		}
+
+		socket_lm.onclose = function(){
+			document.getElementById("wslm_statustd").style.backgroundColor = "#ff4040";
+			document.getElementById("wslm_status").textContent = " websocket connection CLOSED ";
+		}
+	} catch(exception) {
+		alert('<p>Error' + exception);  
+	}
+
+	var canvas = document.createElement('canvas');
+	canvas.height = 500;
+	canvas.width = 500;
+	ctx = canvas.getContext("2d");
+	ctx.fillStyle = 'green';
+   ctx.lineWidth = 2;
+   ctx.strokeStyle = '#003300';
+
+	document.getElementById('wslm_drawing').appendChild(canvas);
+
+	canvas.addEventListener('mousemove', ev_mousemove, false);
+	canvas.addEventListener('mousedown', ev_mousedown, false);
+	canvas.addEventListener('mouseup', ev_mouseup, false);
+
+	offsetX = offsetY = 0;
+	element = canvas;
+      if (element.offsetParent) {
+        do {
+          offsetX += element.offsetLeft;
+          offsetY += element.offsetTop;
+        } while ((element = element.offsetParent));
+      }
+
+function output_position (x,y) {
+	ctx.beginPath();
+	ctx.clearRect(0,0,canvas.width,canvas.height)
+	ctx.arc(+x, +y, 10, 0, Math.PI*2, true);
+	ctx.fill();
+	ctx.stroke();	
+	
+	//socket_lm.send("d " + color + " " + last_x + " " + last_y + " " + x + ' ' + y + ';');
+	var left, right
+	left = -(y+x-500)/2	
+	right = -(y-x)/2	
+	
+	socket_lm.send('' + left + ',' + right);
+}
+
+function ev_mousedown (ev) {
+	down = 1;
+}
+
+function ev_mouseup(ev) {
+	down = 0;
+	output_position(250,250);
+}
+
+function ev_mousemove (ev) {
+	var x, y;
+
+	if (ev.offsetX) {
+		x = ev.offsetX;
+		y = ev.offsetY;
+	} else {
+		x = ev.layerX - offsetX;
+		y = ev.layerY - offsetY;
+
+	}
+
+	if (!down)
+		return;
+	
+	output_position(x,y);
+}
+
+output_position(250,250);
+	
+</script>
+
+</body>
+</html>
