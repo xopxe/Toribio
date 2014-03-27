@@ -18,12 +18,12 @@ M.init = function(conf)
 		local mice = toribio.wait_for_device('mice:/dev/input/mice')
 		local lastx, lasty = 0, 0
 		mice:register_callback('move', function (x, y)
-			if not x then 
-				-- timeout with no mouse movements
-				generate_output(lastx, lasty)
-			else
+			if x and y then 
 				generate_output(x, y)
 				lastx, lasty = x, y
+			else
+				-- timeout with no mouse movements
+				generate_output(lastx, lasty)
 			end
 		end, 0.5)
 		
