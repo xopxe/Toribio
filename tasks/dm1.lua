@@ -13,8 +13,8 @@ M.init = function(conf)
   --local filepot = '/sys/devices/ocp.3/44e0d000.tscadc/tiadc/iio:device0/in_voltage1_raw'
   log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
   
-  os.execute('echo cape-bone-iio > /sys/devices/bone_capemgr.*/slots')
-  sched.sleep(0.5) -- give time to mount device files
+  --os.execute('echo cape-bone-iio > /sys/devices/bone_capemgr.*/slots')
+  --sched.sleep(0.5) -- give time to mount device files
   
   local calibrationpot = conf.calibrationpot or {{0,-90}, {2048, 0}, {4096, 90}}
   log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
@@ -24,14 +24,15 @@ M.init = function(conf)
   local calibrator = require 'tasks.dm1.calibrator'(calibrationpot)
 
   local function read_pote()
-    local fdpot = assert(io.open(filepot, 'rb'))
+    --[[local fdpot = assert(io.open(filepot, 'rb'))
     local data, err = fdpot:read('*l')
     fdpot:close()
-    return data, err
+    return data, err--]]
+    return 1
   end
-  assert(read_pote())
+  --assert(read_pote())
   ----------------------------
-  
+  --[[
   sched.run(function()
     while true do
       sched.sleep(2)
@@ -39,7 +40,7 @@ M.init = function(conf)
       print ('POT', type(data), #(data or ''), data, err, '>>>', calibrator(tonumber(data)))
     end
   end)
-  
+  --]]
   --drive first pair
   sched.run(function()
     local motor_left = toribio.wait_for_device(conf.motor_id[1].left)
