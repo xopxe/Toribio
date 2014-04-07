@@ -157,7 +157,8 @@ M.get_motor= function (busdevice, motor_id)
 			return read_data(idb,0x02,1, status_return_level)
 		end,
 		id = function()
-			return read_data(idb,0x03,1, status_return_level)
+			local ret, err = read_data(idb,0x03,1, status_return_level)
+			if ret then return ret:byte(), err end
 		end,
 		baud_rate = function()
 			local ret, err = read_data(idb,0x04,1, status_return_level)
@@ -324,8 +325,9 @@ M.get_motor= function (busdevice, motor_id)
 		end,
 		id = function(newid)
 			assert(newid>=0 and newid<=0xFD, 'Invalid ID: '.. tostring(newid))
+      local err, data = busdevice[write_method](idb,0x3,string_char(newid),status_return_level)
 			motor_id, idb = newid, string_char(newid)
-			return busdevice[write_method](idb,0x3,string_char(newid),status_return_level)
+			return err, data
 		end,
 		baud_rate = function(baud)
 			local n = math_floor(2000000/baud)-1
@@ -407,7 +409,6 @@ M.get_motor= function (busdevice, motor_id)
 			else
 				parameter=CHAR0x00
 			end
-			assert(status_return_level, debug.traceback())
 			return busdevice[write_method](idb,0x19,parameter,status_return_level)
 		end,
 		compliance_margin = function(angle)
@@ -507,7 +508,9 @@ M.get_motor= function (busdevice, motor_id)
 		
 		--initialize local state
 		_, _ = control_getters.status_return_level() 
+    assert(status_return_level, 'Failed to read status return level')
 		_, _ = control_getters.rotation_mode()
+    assert(motor_mode, 'Failed to read rotation mode')
 		
 		Motor.module = 'ax'
 		Motor.name = 'ax'..((control_getters.model_number()) or '??')..':'..motor_id
