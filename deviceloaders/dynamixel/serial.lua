@@ -155,6 +155,7 @@ M.new_bus = function (conf)
       elseif ev then
 				log('AX', 'WARN', 'out of order messages in bus, increase serialtimeout')
       else
+				--log('AX', 'WARN', 'no response message in bus, increase serialtimeout')
         id_waitds[id] = nil
         id_signals[id] = nil
 			end
