@@ -48,39 +48,38 @@ M.init = function(conf)
 	}
   
   device.start = function ()
-    if device.fd then device.fd:close()
+    if device.fd then device.fd:close() end
       
     device.fd = assert(selector.new_fd(filename, {'rdonly', 'sync'}, 8, function(_, data)
-    local value = data:byte(5) + 256*data:byte(6)--2 bytes
-    if value>32768 then value=value-0xFFFF end
-    
-    local vtype = data:byte(7)
-    local vaxis = data:byte(8)
-    
-    if vtype == 0x02 then --#define JS_EVENT_AXIS    /* joystick moved */
-      axes[vaxis] = value
-      --print('AXES', unpack(axes, 0))
-      sched.signal(evmove, unpack(axes, 0))
-    elseif vtype == 0x01 then --#define JS_EVENT_BUTTON    /* button pressed/released */
-      sched.signal(evbutton, vaxis, value == 1 )
-    elseif vtype > 0x80 then --#define JS_EVENT_INIT    /* initial state of device */
-      vtype = vtype - 0x80
-      if vtype == 0x02 then
+      local value = data:byte(5) + 256*data:byte(6)--2 bytes
+      if value>32768 then value=value-0xFFFF end
+      
+      local vtype = data:byte(7)
+      local vaxis = data:byte(8)
+      
+      if vtype == 0x02 then --#define JS_EVENT_AXIS    /* joystick moved */
         axes[vaxis] = value
-      elseif vtype == 0x01 then
+        --print('AXES', unpack(axes, 0))
+        sched.signal(evmove, unpack(axes, 0))
+      elseif vtype == 0x01 then --#define JS_EVENT_BUTTON    /* button pressed/released */
         sched.signal(evbutton, vaxis, value == 1 )
+      elseif vtype > 0x80 then --#define JS_EVENT_INIT    /* initial state of device */
+        vtype = vtype - 0x80
+        if vtype == 0x02 then
+          axes[vaxis] = value
+        elseif vtype == 0x01 then
+          sched.signal(evbutton, vaxis, value == 1 )
+        end
       end
-    end
-    
-		return true
-	end))
+      
+      return true
+    end))
   end
   
   device.stop = function ()
     device.fd:close()
     device.fd = nil
   end
-  
 
 	toribio.add_device(device)
 end
