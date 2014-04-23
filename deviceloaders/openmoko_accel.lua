@@ -33,13 +33,13 @@ M.init = function(conf)
 
 	--local sysfs1 = '/sys/devices/platform/lis302dl.1'
 	local sysfs1 = '/sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.1'
-	local stream1=assert(io.open('/dev/input/event2', 'rb'))
+	local stream1=assert(io.open('/dev/input/js0', 'rb'))
 	--local stream1 = assert(nixio.open('/dev/input/event2', nixio.open_flags('rdonly', 'nonblock')))
 
 
 	--local sysfs2 = '/sys/devices/platform/lis302dl.2'
 	local sysfs2 = '/sys/class/i2c-adapter/i2c-0/0-0073/lis302dl.2'
-	local stream2=assert(io.open('/dev/input/event3', 'rb'))
+	local stream2=assert(io.open('/dev/input/js1', 'rb'))
 	--local stream2 = assert(nixio.open('/dev/input/event3', nixio.open_flags('rdonly', 'nonblock')))
 
 	
@@ -65,36 +65,36 @@ M.init = function(conf)
 		
 		local delay_read = conf.delay or 1
 		local task_read = sched.new_task(function()
-				local monitor_accel = function(x, y, z)
-					for _=1,10 do
-						local event = assert(stream:read(16))
-						--local time=message:sub(1, 4)
-						local etype = event:byte(9) -- only last byte
-						local ecode = event:byte(11) -- only last byte
-						if etype==3 or etype==2 then
-							local value = event:byte(13) + 256*event:byte(14)--2 bytes (~65.5 g)
-							if value>32768 then value=value-0xFFFF end
-							if ecode==0 then x=value 
-							elseif ecode==1 then y=value 
-							elseif ecode==2 then z=value end
-						elseif etype==0 and ecode==0 then
-							return x, y, z
-						end
-					end
-					error('Accelerator sensor fails to sync: '..name)
-				end
-				local x, y, z
-				
-				repeat
-					x,y,z = monitor_accel(x, y, z)
-				until x and y and z
-				while true do
-					x,y,z = monitor_accel(x, y, z)
-					sched.signal(event_accel,x,y,z)
-					sched.sleep(delay_read)
-				end
+      local monitor_accel = function(x, y, z)
+        for _=1,10 do
+          local event = assert(stream:read(16))
+          --local time=message:sub(1, 4)
+          local etype = event:byte(9) -- only last byte
+          local ecode = event:byte(11) -- only last byte
+          if etype==3 or etype==2 then
+            local value = event:byte(13) + 256*event:byte(14)--2 bytes (~65.5 g)
+            if value>32768 then value=value-0xFFFF end
+            if ecode==0 then x=value 
+            elseif ecode==1 then y=value 
+            elseif ecode==2 then z=value end
+          elseif etype==0 and ecode==0 then
+            return x, y, z
+          end
+        end
+        error('Accelerator sensor fails to sync: '..name)
+      end
+      local x, y, z
+      
+      repeat
+        x,y,z = monitor_accel(x, y, z)
+      until x and y and z
+      while true do
+        x,y,z = monitor_accel(x, y, z)
+        sched.signal(event_accel,x,y,z)
+        sched.sleep(delay_read)
+      end
 
-			end)
+    end)
 
 		local device={
 			--- Name of the device.
