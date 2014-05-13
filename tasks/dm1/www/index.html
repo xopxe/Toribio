@@ -126,7 +126,8 @@ function output_position (x,y) {
 	left = -(y+x-500)/2	
 	right = -(y-x)/2	
 	
-	socket_lm.send('' + left + ',' + right);
+	//socket_lm.send('' + left + ',' + right);
+	socket_lm.send('{ "action":"drive", "left":' + left + ', "right":' + right + ' }');
 }
 
 function ev_mousedown (ev) {
