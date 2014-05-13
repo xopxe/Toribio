@@ -4,8 +4,11 @@ local sched = require 'lumen.sched'
 local log = require 'lumen.log'
 local selector = require 'lumen.tasks.selector'
 
+local assert, tonumber, io_open = assert, tonumber, io.open
 local cos, sin, tan = math.cos, math.sin, math.tan
-local p, d = 0.182, 0.190
+
+local p, d = 0.182, 0.190 --dimensions
+
 local sig_drive = {}
 
 M.init = function(conf)
@@ -26,13 +29,10 @@ M.init = function(conf)
   local calibrator = require 'tasks.dm1.calibrator'(calibrationpot)
 
   local function read_pote()
-    ---[[
-    local fdpot = assert(io.open(filepot, 'rb'))
+    local fdpot = assert(io_open(filepot, 'rb'))
     local data, err = fdpot:read('*l')
     fdpot:close()
     return data, err
-    --]]
-    --return 1
   end
   --assert(read_pote())
   ----------------------------
@@ -45,6 +45,7 @@ M.init = function(conf)
     end
   end)
   --]]
+  
   --drive first pair
   sched.run(function()
     local motor_left = toribio.wait_for_device(conf.motor_id[1].left)
@@ -65,26 +66,37 @@ M.init = function(conf)
     local motor_right = toribio.wait_for_device(conf.motor_id[2].right)
     motor_left.set.rotation_mode('wheel')
     motor_right.set.rotation_mode('wheel')
+    
+    local left, right, angle = 0, 0, 0
+    local sig_angle = {}
+
+    --task for poll the pot
+    sched.run(function()
+      while true do
+        local data = assert(read_pote())
+        local a = calibrator(tonumber(data))
+        if a~=angle then
+          angle = a
+          sched.signal()
+        end
+        sched.sleep(conf.potrate)
+      end
+    end):set_as_attached()
+    
     log('DM1', 'INFO', 'Chassis 2 initialized')
     --sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-    local waitd = {sig_drive, timeout=0.2}
-    local left, right = 0, 0
+    local waitd = {sig_drive, sig_angle, buff_mode='keep_last') --, timeout=0.2}
     while true do
-      -- TODO compute left right to follow
       local sig,nleft,nright = sched.wait(waitd)
-      --print ('xxxx', left, right)
-      if sig then left, right = nleft, nright end
-      
-      local data, err = read_pote()
-      local a = calibrator(tonumber(data))
-    
-      local r2 = 0.5*( (2*cos(a) + sin(a)*(d*d+p*p)/(d*p))*left
-               + sin(a)*right*(d*d-p*p)/(d*p) )
+      if sig==sig_drive then left, right = nleft, nright end
+
+      local r2 = 0.5*( (2*cos(angle) + sin(angle)*(d*d+p*p)/(d*p))*left
+               + sin(angle)*right*(d*d-p*p)/(d*p) )
              
-      local l2 = 0.5*(sin(a)*left*(p*p-d*d)/(d*p)
-               + (2*cos(a) - sin(a)*(d*d+p*p)/(d*p))*right)
+      local l2 = 0.5*(sin(angle)*left*(p*p-d*d)/(d*p)
+               + (2*cos(angle) - sin(angle)*(d*d+p*p)/(d*p))*right)
              
-      print("!U2", l2, r2, a) 
+      print("!U2", l2, r2, angle) 
       
       motor_left.set.moving_speed(-l2)
       motor_right.set.moving_speed(r2)
@@ -92,17 +104,15 @@ M.init = function(conf)
   end)
 
   -- HTTP RC
-
+  
   local http_server = require "lumen.tasks.http-server"  
-  http_server.serve_static_content_from_stream('/docs/', './docs')
+  --http_server.serve_static_content_from_stream('/docs/', './docs')
   http_server.serve_static_content_from_ram('/', './tasks/dm1/www')
   
   http_server.set_websocket_protocol('dm1-rc-protocol', function(ws)
     sched.run(function()
       while true do
-        --print('WS?', ws)
         local message,opcode = ws:receive()
-        --print('WS', message,opcode == ws.TEXT)
         if not message then
           sched.signal(sig_drive, 0, 0)
           ws:close()
