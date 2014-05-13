@@ -27,14 +27,14 @@ M.init = function(conf)
 		end
 	)
 	sched.sigrun(
-		{events={accel2.events.data},
+		{accel2.events.data},
 		function(_,x,y,z)
 			print ('','','','',"",x,y,z)
 		end
 	)
 
-	accel1.run(true,0.01)
-	accel2.run(true,0.5)
+	accel1.run(true,conf.accelerometer1.step or 0.1)
+	accel2.run(true,conf.accelerometer2.step or 0.5)
 
 
 end
