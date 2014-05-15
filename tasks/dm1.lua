@@ -4,6 +4,10 @@ local sched = require 'lumen.sched'
 local log = require 'lumen.log'
 local selector = require 'lumen.tasks.selector'
 
+local encoder_lib = require ('lumen.lib.dkjson')
+local encode_f = encoder_lib.encode
+local decode_f = encoder_lib.decode
+
 local assert, tonumber, io_open = assert, tonumber, io.open
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
@@ -54,7 +58,7 @@ M.init = function(conf)
     motor_right.set.rotation_mode('wheel')
     log('DM1', 'INFO', 'Chassis 1 initialized')
     sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-      print("!U1", left, right) 
+      --print("!U1", left, right) 
       motor_left.set.moving_speed(-left)
       motor_right.set.moving_speed(right)
     end)
@@ -86,7 +90,7 @@ M.init = function(conf)
     
     log('DM1', 'INFO', 'Chassis 2 initialized')
     --sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-    local waitd = {sig_drive, sig_angle, buff_mode='keep_last') --, timeout=0.2}
+    local waitd = {sig_drive, sig_angle, buff_mode='keep_last'} --, timeout=0.2}
     while true do
       local sig,nleft,nright = sched.wait(waitd)
       if sig==sig_drive then left, right = nleft, nright end
@@ -97,7 +101,7 @@ M.init = function(conf)
       local l2 = 0.5*(sin(angle)*left*(p*p-d*d)/(d*p)
                + (2*cos(angle) - sin(angle)*(d*d+p*p)/(d*p))*right)
              
-      print("!U2", l2, r2, angle) 
+      --print("!U2", l2, r2, angle) 
       
       motor_left.set.moving_speed(-l2)
       motor_right.set.moving_speed(r2)
@@ -119,10 +123,22 @@ M.init = function(conf)
           ws:close()
           return
         end
-        if opcode == ws.TEXT then
-          local left, right = message:match('^([^,]+),([^,]+)$')
+        if opcode == ws.TEXT then        
+          local decoded, index, e = decode_f(message)
+          if decoded then 
+            if decoded.action == 'drive' then 
+              sched.signal(sig_drive, decoded.left, decoded.right)
+            end
+          else
+            log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
+              tostring(#message), tostring(index).." "..tostring(e))
+          end
+          
+          --local left, right = message:match('^([^,]+),([^,]+)$')
           --print('SIG', sig_drive, left, right)
-          sched.signal(sig_drive, left, right)
+          --if left and right then 
+          --  sched.signal(sig_drive, tonumber(left), tonumber(right))
+          --end
         end
       end
     end) --:set_as_attached()
