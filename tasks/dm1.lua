@@ -5,7 +5,7 @@ local log = require 'lumen.log'
 local selector = require 'lumen.tasks.selector'
 
 local assert, tonumber, io_open = assert, tonumber, io.open
-local cos, sin, tan = math.cos, math.sin, math.tan
+local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
 local p, d = 0.182, 0.190 --dimensions
 
@@ -21,12 +21,12 @@ M.init = function(conf)
   --os.execute('echo cape-bone-iio > /sys/devices/bone_capemgr.*/slots')
   --sched.sleep(0.5) -- give time to mount device files
   
-  local calibrationpot = conf.calibrationpot or {{0,-90}, {2048, 0}, {4096, 90}}
+  local pot_calibration = conf.pot.calibration or {{0,-90}, {2048, 0}, {4096, 90}}
   log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
-    tostring(calibrationpot[1][1]), tostring(calibrationpot[1][2]),
-    tostring(calibrationpot[2][1]), tostring(calibrationpot[2][2]),
-    tostring(calibrationpot[3][1]), tostring(calibrationpot[3][2]))
-  local calibrator = require 'tasks.dm1.calibrator'(calibrationpot)
+    tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
+    tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
+    tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
+  local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
 
   local function read_pote()
     local fdpot = assert(io_open(filepot, 'rb'))
@@ -45,7 +45,7 @@ M.init = function(conf)
     end
   end)
   --]]
-  
+  ca
   --drive first pair
   sched.run(function()
     local motor_left = toribio.wait_for_device(conf.motor_id[1].left)
@@ -72,14 +72,15 @@ M.init = function(conf)
 
     --task for poll the pot
     sched.run(function()
+      local rate, threshold = conf.pot.rate, conf.pot.threshold
       while true do
         local data = assert(read_pote())
         local a = calibrator(tonumber(data))
-        if a~=angle then
+        if abs(a-angle) < threshold then
           angle = a
           sched.signal()
         end
-        sched.sleep(conf.potrate)
+        sched.sleep(rate)
       end
     end):set_as_attached()
     
