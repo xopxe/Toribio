@@ -107,57 +107,59 @@ M.init = function(conf)
 
   -- HTTP RC
   
-  local http_server = require "lumen.tasks.http-server"  
-  --http_server.serve_static_content_from_stream('/docs/', './docs')
-  http_server.serve_static_content_from_ram('/', './tasks/dm1/www')
-  
-  http_server.set_websocket_protocol('dm1-rc-protocol', function(ws)
-    sched.run(function()
-      while true do
-        local message,opcode = ws:receive()
-        if not message then
-          sched.signal(sig_drive, 0, 0)
-          ws:close()
-          return
-        end
-        if opcode == ws.TEXT then        
-          local decoded, index, e = decode_f(message)
-          if decoded then 
-            if decoded.action == 'drive' then 
-              sched.signal(sig_drive, decoded.left, decoded.right)
+  if conf.http_server then 
+    local http_server = require "lumen.tasks.http-server"  
+    --http_server.serve_static_content_from_stream('/docs/', './docs')
+    http_server.serve_static_content_from_ram('/', './tasks/dm1/www')
+    
+    http_server.set_websocket_protocol('dm1-rc-protocol', function(ws)
+      sched.run(function()
+        while true do
+          local message,opcode = ws:receive()
+          if not message then
+            sched.signal(sig_drive, 0, 0)
+            ws:close()
+            return
+          end
+          if opcode == ws.TEXT then        
+            local decoded, index, e = decode_f(message)
+            if decoded then 
+              if decoded.action == 'drive' then 
+                sched.signal(sig_drive, decoded.left, decoded.right)
+              end
+            else
+              log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
+                tostring(#message), tostring(index).." "..tostring(e))
             end
-          else
-            log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
-              tostring(#message), tostring(index).." "..tostring(e))
           end
         end
-      end
-    end) --:set_as_attached()
-  end)
-
-
-  if conf.http_server then conf.http_server.ws_enable = true end
-  http_server.init(conf.http_server)
+      end) --:set_as_attached()
+    end)
+    
+    conf.http_server.ws_enable = true
+    http_server.init(conf.http_server)
+  end
 
   -- /HTTP RC
 
 
   -- UDP RC
   
-  --initialize socket
-  local udp = selector.new_udp(nil, nil, conf.ip, conf.port, -1)
+  if conf.udp then 
+    local udp = selector.new_udp(nil, nil, conf.udp.ip, conf.udp.port, -1)
 
-  --listen for messages
-  sched.sigrun({udp.events.data, buff_mode='keep_last'}, function(_, msg) 
-    local left, right
-    if msg then
-      left, right = msg:match('^([^,]+),([^,]+)$')
-      --print("!U", left, right) 
-    else
-      left, right = 0, 0
-    end
-    sched.signal(sig_drive, left, right)
-  end)
+    --listen for messages
+    sched.sigrun({udp.events.data, buff_mode='keep_last'}, function(_, msg) 
+      local left, right
+      if msg then
+        left, right = msg:match('^([^,]+),([^,]+)$')
+        --print("!U", left, right) 
+      else
+        left, right = 0, 0
+      end
+      sched.signal(sig_drive, left, right)
+    end)
+  end
 
   -- /UDP RC
 
