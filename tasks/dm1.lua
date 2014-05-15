@@ -89,10 +89,7 @@ M.init = function(conf)
     end):set_as_attached()
     
     log('DM1', 'INFO', 'Chassis 2 initialized')
-    --sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-    local waitd = {sig_drive, sig_angle, buff_mode='keep_last'} --, timeout=0.2}
-    while true do
-      local sig,nleft,nright = sched.wait(waitd)
+    sched.sigrun( {sig_drive, sig_angle, buff_mode='keep_last'}, function(sig,nleft,nright)
       if sig==sig_drive then left, right = nleft, nright end
 
       local r2 = 0.5*( (2*cos(angle) + sin(angle)*(d*d+p*p)/(d*p))*left
@@ -105,7 +102,7 @@ M.init = function(conf)
       
       motor_left.set.moving_speed(-l2)
       motor_right.set.moving_speed(r2)
-    end
+    end)
   end)
 
   -- HTTP RC
@@ -133,12 +130,6 @@ M.init = function(conf)
             log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
               tostring(#message), tostring(index).." "..tostring(e))
           end
-          
-          --local left, right = message:match('^([^,]+),([^,]+)$')
-          --print('SIG', sig_drive, left, right)
-          --if left and right then 
-          --  sched.signal(sig_drive, tonumber(left), tonumber(right))
-          --end
         end
       end
     end) --:set_as_attached()
