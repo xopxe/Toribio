@@ -71,18 +71,17 @@ M.init = function(conf)
     motor_left.set.rotation_mode('wheel')
     motor_right.set.rotation_mode('wheel')
     
-    local left, right, angle = 0, 0, 0
+    local left, right, angle, last_pot = 0, 0, 0, -1000000
     local sig_angle = {}
 
     --task for poll the pot
     sched.run(function()
       local rate, threshold = conf.pot.rate, conf.pot.threshold
       while true do
-        local data = assert(read_pote())
-        local a = calibrator(tonumber(data))
-        if abs(a-angle) < threshold then
-          angle = a
-          sched.signal()
+        local pot_reading = tonumber( assert(read_pote()) )
+        if abs(pot_reading-last_pot) > threshold then
+          last_pot, angle = pot_reading, calibrator(tonumber(pot_reading))
+          sched.signal(sig_angle)
         end
         sched.sleep(rate)
       end
