@@ -12,97 +12,84 @@ local assert, tonumber, io_open = assert, tonumber, io.open
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
 local p, d = 0.182, 0.190 --dimensions
+local d_p = d/p
 
-local sig_drive = {}
+local sig_drive_control = {}
+local sigs_drive = {
+  [0] = sig_drive_control
+}
+
+local function read_pote(filepot)
+  local fdpot = assert(io_open(filepot, 'rb'))
+  local data, err = fdpot:read('*l')
+  fdpot:close()
+return data, err
 
 M.init = function(conf)
   
-  ----------------------------
-  local filepot = conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
-  --local filepot = '/sys/devices/ocp.3/44e0d000.tscadc/tiadc/iio:device0/in_voltage1_raw'
-  log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
-  
-  --os.execute('echo cape-bone-iio > /sys/devices/bone_capemgr.*/slots')
-  --sched.sleep(0.5) -- give time to mount device files
-  
-  local pot_calibration = conf.pot.calibration or {{0,-90}, {2048, 0}, {4096, 90}}
-  log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
+  for i, chassis in ipairs(conf.motors) do
+    log('DM1', 'INFO', 'Initializing chassis %i', i)
+    
+    local pot_calibration = conf.pots[i].calibration or conf.pot.calibration{{0,-90}, {2048, 0}, {4096, 90}}
+    log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
     tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
     tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
     tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
-  local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
-
-  local function read_pote()
-    local fdpot = assert(io_open(filepot, 'rb'))
-    local data, err = fdpot:read('*l')
-    fdpot:close()
-    return data, err
-  end
-  --assert(read_pote())
-  ----------------------------
-  --[[
-  sched.run(function()
-    while true do
-      sched.sleep(2)
-      local data, err = read_pote()
-      print ('POT', type(data), #(data or ''), data, err, '>>>', calibrator(tonumber(data)))
-    end
-  end)
-  --]]
-
-  --drive first pair
-  sched.run(function()
-    local motor_left = toribio.wait_for_device(conf.motor_id[1].left)
-    local motor_right = toribio.wait_for_device(conf.motor_id[1].right)
-    motor_left.set.rotation_mode('wheel')
-    motor_right.set.rotation_mode('wheel')
-    log('DM1', 'INFO', 'Chassis 1 initialized')
-    sched.sigrun({sig_drive, buff_mode='keep_last'}, function(_, left, right)
-      --print("!U1", left, right) 
-      motor_left.set.moving_speed(-left)
-      motor_right.set.moving_speed(right)
-    end)
-  end)
-
-  --drive second pair
-  sched.run(function()
-    local motor_left = toribio.wait_for_device(conf.motor_id[2].left)
-    local motor_right = toribio.wait_for_device(conf.motor_id[2].right)
-    motor_left.set.rotation_mode('wheel')
-    motor_right.set.rotation_mode('wheel')
+    local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
     
-    local left, right, angle, last_pot = 0, 0, 0, -1000000
     local sig_angle = {}
-
-    --task for poll the pot
-    sched.run(function()
-      local rate, threshold = conf.pot.rate, conf.pot.threshold
-      while true do
-        local pot_reading = tonumber( assert(read_pote()) )
-        if abs(pot_reading-last_pot) > threshold then
-          last_pot, angle = pot_reading, calibrator(tonumber(pot_reading))
-          sched.signal(sig_angle)
-        end
-        sched.sleep(rate)
-      end
-    end):set_as_attached()
+    sigs_drive[i] = {}
     
-    log('DM1', 'INFO', 'Chassis 2 initialized')
-    sched.sigrun( {sig_drive, sig_angle, buff_mode='keep_last'}, function(sig,nleft,nright)
-      if sig==sig_drive then left, right = nleft, nright end
-
-      local r2 = 0.5*( (2*cos(angle) + sin(angle)*(d*d+p*p)/(d*p))*left
-               + sin(angle)*right*(d*d-p*p)/(d*p) )
-             
-      local l2 = 0.5*(sin(angle)*left*(p*p-d*d)/(d*p)
-               + (2*cos(angle) - sin(angle)*(d*d+p*p)/(d*p))*right)
-             
-      --print("!U2", l2, r2, angle) 
+    local angle, last_pot, fmodule, fangle = 0, -1000000, 0, 0
+    
+    if i>1 then 
+      local ipot=i-1
+      local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
+      log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
+     
+      --task to poll the pot
+      sched.run(function()
+        local rate, threshold = conf.pot.rate, conf.pot.threshold
+        while true do
+          local pot_reading = tonumber( assert(read_pote(filepot)) )
+          if abs(pot_reading-last_pot) > threshold then
+            last_pot, angle = pot_reading, calibrator(tonumber(pot_reading))
+            sched.signal(sig_angle)
+          end
+          sched.sleep(rate)
+        end
+      end):set_as_attached()
       
-      motor_left.set.moving_speed(-l2)
-      motor_right.set.moving_speed(r2)
+    else
+      --TODO
+    end
+    
+    sched.run(function()
+      log('DM1', 'INFO', 'Motors: left %s, right %s', chassis.left, chassis.right)
+      local motor_left = toribio.wait_for_device(chassis.left)
+      local motor_right = toribio.wait_for_device(chassis.right)
+      motor_left.set.rotation_mode('wheel')
+      motor_right.set.rotation_mode('wheel')
+      local sig_drive = sigs_drive[i]
+      sched.sigrun( {sig_drive, sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
+        if sig==sig_drive then fmodule, fangle = in_fmodule, in_fangle end
+        
+        local fx = fmodule * cos(fangle)
+        local fy = fmodule * cos(fangle)
+        
+        local out_r = 0.5*(fx + d_p*fy)
+        local out_l = 0.5*(fx - d_p*fy)
+                     
+        --print("!U2", l2, r2, angle) 
+        if math.abs(out_r) > 100 then print ('!!!! R', out_r) end
+        if math.abs(out_l) > 100 then print ('!!!! R', out_r) end
+        
+        motor_left.set.moving_speed(out_r)
+        motor_right.set.moving_speed(-out_l)
+      end)
     end)
-  end)
+    
+  end
 
   -- HTTP RC
   
@@ -116,7 +103,7 @@ M.init = function(conf)
         while true do
           local message,opcode = ws:receive()
           if not message then
-            sched.signal(sig_drive, 0, 0)
+            sched.signal(sig_drive_control, 0, 0)
             ws:close()
             return
           end
@@ -124,7 +111,7 @@ M.init = function(conf)
             local decoded, index, e = decode_f(message)
             if decoded then 
               if decoded.action == 'drive' then 
-                sched.signal(sig_drive, decoded.left, decoded.right)
+                sched.signal(sig_drive_control, decoded.module, decoded.angle)
               end
             else
               log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
@@ -149,14 +136,14 @@ M.init = function(conf)
 
     --listen for messages
     sched.sigrun({udp.events.data, buff_mode='keep_last'}, function(_, msg) 
-      local left, right
+      local fmodule, fangle
       if msg then
-        left, right = msg:match('^([^,]+),([^,]+)$')
+        fmodule, fangle = msg:match('^([^,]+),([^,]+)$')
         --print("!U", left, right) 
       else
-        left, right = 0, 0
+        fmodule, fangle = 0, 0
       end
-      sched.signal(sig_drive, left, right)
+      sched.signal(sig_drive_control, fmodule, fangle)
     end)
   end
 
