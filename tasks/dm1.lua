@@ -72,26 +72,25 @@ M.init = function(conf)
       local motor_right = toribio.wait_for_device(chassis.right)
       motor_left.set.rotation_mode('wheel')
       motor_right.set.rotation_mode('wheel')
-      local sig_drive = sigs_drive[i]
-      sched.sigrun( {sigs_drive[i-1], sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
-        if sig==sigs_drive[i-1] then fmodule, fangle = in_fmodule, in_fangle end
+      
+      local sig_drive_in = sigs_drive[i-1]
+      local sig_drive_out = sigs_drive[i]
+      sched.sigrun( {sig_drive_in, sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
+        if sig==sig_drive_in then fmodule, fangle = in_fmodule, in_fangle end
         log('DM1', 'DEBUG', 'Drive: module %s, angle %s', tostring(fmodule), tostring(fangle))
 
         local fx = fmodule * cos(fangle)
         local fy = fmodule * sin(fangle)
         
-        local out_r = (fx - d_p*fy)
-        local out_l = (fx + d_p*fy)
-                     
-        --print("!U2", l2, r2, angle) 
-        if math.abs(out_r) > 100 then print ('!!!! R', out_r) end
-        if math.abs(out_l) > 100 then print ('!!!! R', out_r) end
-        
+        local out_r = fx - d_p*fy
+        local out_l = fx + d_p*fy
         
         log('DM1', 'DEBUG', 'Out: left %s, right %s', tostring(out_l), tostring(out_r))
 
         motor_left.set.moving_speed(-out_r)
         motor_right.set.moving_speed(out_l)
+        
+        sched.signal(sig_drive_out, fmodule, fangle)
       end)
       log('DM1', 'INFO', 'Motors left %s and right %s ready', chassis.left, chassis.right)
 
