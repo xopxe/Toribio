@@ -8,7 +8,7 @@ local encoder_lib = require ('lumen.lib.dkjson')
 local encode_f = encoder_lib.encode
 local decode_f = encoder_lib.decode
 
-local assert, tonumber, io_open = assert, tonumber, io.open
+local assert, tonumber, io_open, tostring = assert, tonumber, io.open, tostring
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
 local p, d = 0.182, 0.190 --dimensions
@@ -34,36 +34,33 @@ M.init = function(conf)
     local sig_angle = {}
     sigs_drive[i] = {}
     
-    local angle, last_pot, fmodule, fangle = 0, -1000000, 0, 0
-    
     if i>1 then 
       local ipot=i-1
       
-      local pot_calibration = conf.pots[ipot].calibration or conf.pot.calibration or {{0,-90}, {2048, 0}, {4096, 90}}
+      local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
+      log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
+      
+      local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
+        'Missing calibration for '..filepot  )
       log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
       tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
       tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
       tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
       local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
-    
-      local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
-      log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
      
       --task to poll the pot
       sched.run(function()
+        local last_pot = -1000000
         local rate, threshold = conf.pot.rate, conf.pot.threshold
         while true do
           local pot_reading = tonumber( assert(read_pote(filepot)) )
           if abs(pot_reading-last_pot) > threshold then
-            last_pot, angle = pot_reading, calibrator(tonumber(pot_reading))
-            sched.signal(sig_angle)
+            last_pot = pot_reading
+            sched.signal(sig_angle, calibrator(tonumber(pot_reading)))
           end
           sched.sleep(rate)
         end
       end):set_as_attached()
-      
-    else
-      --TODO
     end
     
     sched.run(function()
@@ -75,12 +72,20 @@ M.init = function(conf)
       
       local sig_drive_in = sigs_drive[i-1]
       local sig_drive_out = sigs_drive[i]
-      sched.sigrun( {sig_drive_in, sig_angle, buff_mode='keep_last'}, function(sig,in_fmodule,in_fangle)
-        if sig==sig_drive_in then fmodule, fangle = in_fmodule, in_fangle end
-        log('DM1', 'DEBUG', 'Drive: module %s, angle %s', tostring(fmodule), tostring(fangle))
-
-        local fx = fmodule * cos(fangle)
-        local fy = fmodule * sin(fangle)
+      local pangle, fmodule, fangle = 0, 0, 0
+      
+      sched.sigrun( {sig_drive_in, sig_angle, buff_mode='keep_last'}, function(sig,par1,par2)
+        if sig==sig_drive_in then 
+          fmodule, fangle = par1, par2 
+        elseif sig==sig_angle then 
+          pangle = par1 
+        end
+        
+        log('DM1', 'DEBUG', 'Drive: module %s, angle %s, pot %s', 
+          tostring(fmodule), tostring(fangle), tostring(pangle))
+      
+        local fx = fmodule * cos(fangle+pangle)
+        local fy = fmodule * sin(fangle+pangle)
         
         local out_r = fx - d_p*fy
         local out_l = fx + d_p*fy
