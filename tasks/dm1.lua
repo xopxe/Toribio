@@ -62,6 +62,15 @@ M.init = function(conf)
           sched.sleep(rate)
         end
       end)--:set_as_attached()
+        
+      if conf.calibration_dump then
+        while true do
+          local pot_reading = assert(read_pote(filepot))
+          log('DM1', 'INFO', 'Pot %s (%s) reading: %s', tostring(ipot), filepot, tostring(pot_reading))
+          sched.sleep(1)
+        end
+      end
+      
     end
     
     sched.run(function()
