@@ -54,6 +54,11 @@ end
 -- @param conf the configuration table (see @{conf}).
 M.init = function (conf)
 	local ax_bus = require 'deviceloaders/dynamixel/serial'.new_bus(conf)
+  
+  if not ax_bus then
+    log('AX', 'WARN', 'Failed to load serial bus')
+    return
+  end
 	
 	local function buildAX12packet(id, payload)
 		local data = id..string_char(#payload+1)..payload

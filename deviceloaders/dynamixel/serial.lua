@@ -52,7 +52,6 @@ M.new_bus = function (conf)
   serial_timeout = conf.serialtimeout or 0.05
 	log('AX', 'INFO', 'usb device file: %s with timeout %s', tostring(filename), tostring(serial_timeout))
 
-
   local packet=''
   local insync=false
   local packlen=nil -- -1
@@ -120,13 +119,12 @@ M.new_bus = function (conf)
   
 	local filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1, protocol_handler)
 	
-	local opencount=60
-	while not filehandler and opencount>0 do
-		print('retrying open...', opencount)
+	local opencount = tonumber(conf.opencount)
+	while not filehandler and (not opencount or opencount>0) do
 		log('AX', 'WARNING', 'Retrying open on %s, countdown %s', tostring(filename), tostring(opencount))
 		sched.sleep(1)
 		filehandler, erropen = selector.new_fd(filename, {'rdwr', 'nonblock'}, -1, protocol_handler)
-		opencount=opencount-1
+		if opencount then opencount=opencount-1 end
 	end
 	if not filehandler then
 		log('AX', 'ERROR', 'usb %s failed to open with %s', tostring(filename), tostring(erropen))
@@ -138,7 +136,7 @@ M.new_bus = function (conf)
 	..'-ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -iuclc -ixany -imaxbel '
 	..'-opost -olcuc -ocrnl -onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0 -isig -icanon '
 	..'-iexten -echo -echoe -echok -echonl -noflsh -xcase -tostop -echoprt -echoctl -echoke'
-	local speed = conf.serialspeed or 1000000
+	local speed = tonumber(conf.serialspeed) or 1000000
 	local init_tty_string ='stty -F ' .. filename .. ' ' .. speed .. ' ' .. tty_flags
 
 	os.execute(init_tty_string)

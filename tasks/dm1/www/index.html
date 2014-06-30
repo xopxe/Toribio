@@ -7,8 +7,23 @@
 <h1>DM1 Remote Control</h1>
 
 <table>
-	<tr><td id=wslm_statustd align=center><div id=wslm_status>Not initialized</div></td></tr>
-	<tr><td align=center style="border:1px solid black"><div id="wslm_drawing">	</div></td></tr>
+	<tr><td id=wslm_statustd align=center colspan=2><div id=wslm_status>Not initialized</div></td></tr>
+	<tr>
+		<td align=center style="border:1px solid black"><div id="wslm_drawing">	</div></td>
+		<td align=center style="border:1px solid black">
+			<table height="100%">
+			<tr><td align=right>M: <INPUT TYPE=TEXT NAME="rc_modulo" id="rc_modulo" size="10"></td></tr>
+			<tr><td align=right>a: <INPUT TYPE=TEXT NAME="rc_angle" id="rc_angle" size="10"></td></tr>
+			<tr><td align=center><INPUT TYPE="Button" Value="Apply" onClick="output_vector(this.form)"></td></tr>
+			<tr><td></td></tr>
+			<tr height="100%"><td>&nbsp;</td></tr>
+			<tr><td>CPU utilization</td></tr>
+			<tr><td id=statcpu align=right><div id=statcpu>n/a</div></td></tr>
+			<tr><td>Memory utilization</td></tr>
+			<tr><td id=statmem align=right><div id=statmem>n/a</div></td></tr>
+			</table>
+		</td>
+	</tr>
 </table>
 
 <script>
@@ -61,6 +76,14 @@ function get_appropriate_ws_url()
 		} 
 
 		socket_lm.onmessage =function got_packet(msg) {
+			obj = JSON.parse(msg.data);
+			//alert(obj.action);
+			if (obj.action == 'stats') {
+				document.getElementById("statmem").textContent = obj.mem + " bytes";
+				document.getElementById("statcpu").textContent = (obj.cpu*100).toFixed(2) + "%";
+			}		
+		
+			/*
 			j = msg.data.split(';');
 			f = 0;
 			while (f < j.length - 1) {
@@ -81,6 +104,7 @@ function get_appropriate_ws_url()
 
 				f++;
 			}
+			*/
 		}
 
 		socket_lm.onclose = function(){
@@ -125,19 +149,39 @@ function output_position (x,y) {
 	var vel, angle, xc, yc; 
 	xc = x-250;
 	yc = 250-y;
-	if (yc==0 && xc>=0) {
-		angle = 3.141592654 / 2.0;
-	} else if (yc==0 && xc<0) {
-		angle = -3.141592654 / 2.0;
+	
+	if (yc==0) {
+		if (xc==0) {
+			angle = 0.0;
+		} else if (xc>0) {
+			angle = 3.141592654 / 2.0;
+		} else {
+			angle = -3.141592654 / 2.0;	
+		}
 	} else {
 		angle = Math.atan2(xc, yc); //(xc/yc);
 	}
 	vel = Math.sqrt(yc*yc+xc*xc) / 2.5;
 	if (vel>100) vel=100;
 
+	document.getElementById('rc_modulo').value = vel.toFixed(2);
+	document.getElementById('rc_angle').value = angle.toFixed(2);
 
 	//socket_lm.send('' + left + ',' + right);
-	socket_lm.send('{ "action":"drive", "module":' + vel + ', "angle":' + angle + ' }');
+	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
+}
+
+function output_vector (module,angle) {
+	var vel = document.getElementById('rc_modulo').value;
+	var angle = document.getElementById('rc_angle').value;
+
+	if (vel>100) {
+		vel=100;
+		document.getElementById('rc_modulo').value = vel.toFixed(2);
+	}
+
+	//socket_lm.send('' + left + ',' + right);
+	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
 }
 
 function ev_mousedown (ev) {
