@@ -15,7 +15,7 @@
 			<tr><td align=right>M: <INPUT TYPE=TEXT NAME="rc_modulo" id="rc_modulo" size="10"></td></tr>
 			<tr><td align=right>a: <INPUT TYPE=TEXT NAME="rc_angle" id="rc_angle" size="10"></td></tr>
 			<tr><td align=center><INPUT TYPE="Button" Value="Apply" onClick="output_vector(this.form)"></td></tr>
-			<tr><td></td></tr>
+			<tr><td><label><input type="checkbox" id="rc_torque" checked="checked">Torque enable</label></td></tr>
 			<tr height="100%"><td>&nbsp;</td></tr>
 			<tr><td>CPU utilization</td></tr>
 			<tr><td id=statcpu align=right><div id=statcpu>n/a</div></td></tr>
@@ -171,7 +171,7 @@ function output_position (x,y) {
 	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
 }
 
-function output_vector (module,angle) {
+function output_vector () {
 	var vel = document.getElementById('rc_modulo').value;
 	var angle = document.getElementById('rc_angle').value;
 
@@ -182,6 +182,14 @@ function output_vector (module,angle) {
 
 	//socket_lm.send('' + left + ',' + right);
 	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
+}
+
+function torque_enable (module,angle) {
+	if (document.getElementById("rc_torque").checked) {
+		socket_lm.send('{ "action":"torque", "enable": true }');	
+	} else {
+		socket_lm.send('{ "action":"torque", "enable": false }');	
+	}
 }
 
 function ev_mousedown (ev) {

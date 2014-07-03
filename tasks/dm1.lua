@@ -11,9 +11,6 @@ local decode_f = encoder_lib.decode
 local assert, tonumber, io_open, tostring = assert, tonumber, io.open, tostring
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
-local p, d = 0.182, 0.190 --dimensions
-local d_p = d/p
-
 local sig_drive_control = {}
 local sigs_drive = {
   [0] = sig_drive_control
@@ -27,6 +24,10 @@ local function read_pote(filepot)
 end
 
 M.init = function(conf)
+  
+  assert(tonumber(conf.size.width) and tonumber(conf.size.length), 
+    'No valid size.width / size.length found in conf')
+  local d_p = conf.size.width / conf.size.length
   
   for i, chassis in ipairs(conf.motors) do
     log('DM1', 'INFO', 'Initializing chassis %i', i)
@@ -116,6 +117,16 @@ M.init = function(conf)
   end)
   --]]
   
+  local torque_enable = function (e)
+    for i, chassis in ipairs(conf.motors) do
+      local motor_left = toribio.wait_for_device(chassis.left)
+      local motor_right = toribio.wait_for_device(chassis.right)
+      motor_left.set.torque_enable(e)
+      motor_right.set.torque_enable(e)
+    end
+  end
+  
+  
   if conf.http_server then 
     local http_server = require "lumen.tasks.http-server"  
     --http_server.serve_static_content_from_stream('/docs/', './docs')
@@ -150,6 +161,9 @@ M.init = function(conf)
               if decoded.action == 'drive' then 
                 sched.signal(sig_drive_control, decoded.modulo, decoded.angle)
               end
+              if decoded.action == 'torque' then
+                torque_enable(decoded.enable)
+              end            
             else
               log('DM1', 'ERROR', 'failed to decode message with length %s with error "%s"', 
                 tostring(#message), tostring(index).." "..tostring(e))
