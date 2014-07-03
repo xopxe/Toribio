@@ -34,30 +34,38 @@ M.init = function(conf)
       
     local sig_angle = {}
     sigs_drive[i] = {}
+    local pot_angle_reader --will be assigned if needed (when i>1)
+    local pot_angle_calibrator --will be assigned if needed (when i>1)
     
-    if i>1 then 
-      local ipot=i-1
-      
-      local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
-      log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
-      
-      local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
-        'Missing calibration for '..filepot  )
-      log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
-      tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
-      tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
-      tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
-      local calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
-     
+    if i>1 then  
       --task to poll the pot
       sched.run(function()
+        local ipot=i-1
+        
+        local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
+        log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
+        pot_angle_reader = function()
+          local fdpot = assert(io_open(filepot, 'rb'))
+          local data, err = fdpot:read('*l')
+          fdpot:close()
+          local pot_reading = assert(tonumber(data), err)
+        end
+        
+        local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
+          'Missing calibration for '..filepot  )
+        log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
+        tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
+        tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
+        tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
+        pot_angle_calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
+        
         local rate, threshold = conf.pot.rate, conf.pot.threshold
         local last_pot = -1000000
         while true do
-          local pot_reading = tonumber( assert(read_pote(filepot)) )
+          local pot_reading = pot_angle_reader()
           if abs(pot_reading-last_pot) > threshold then
             last_pot = pot_reading
-            sched.signal(sig_angle, calibrator(tonumber(pot_reading)))
+            sched.signal(sig_angle, pot_angle_calibrator(pot_reading))
           end
           sched.sleep(rate)
         end
@@ -76,6 +84,9 @@ M.init = function(conf)
       local sig_drive_in = sigs_drive[i-1]
       local sig_drive_out = sigs_drive[i]
       local pangle, fmodulo, fangle = 0, 0, 0
+      if pot_angle_reader then 
+        pangle = pot_angle_calibrator(pot_angle_reader())
+      end
       
       sched.sigrun( {sig_drive_in, sig_angle, buff_mode='keep_last'}, function(sig,par1,par2)
         if sig==sig_drive_in then 
