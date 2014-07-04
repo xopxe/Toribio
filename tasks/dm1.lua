@@ -129,6 +129,7 @@ M.init = function(conf)
   --]]
   
   local torque_enable = function (e)
+    log('DM1', 'INFO', 'Torque enable: %s', tostring(e))
     for i, chassis in ipairs(conf.motors) do
       local motor_left = toribio.wait_for_device(chassis.left)
       local motor_right = toribio.wait_for_device(chassis.right)
