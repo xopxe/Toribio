@@ -8,6 +8,9 @@ local encoder_lib = require ('lumen.lib.dkjson')
 local encode_f = encoder_lib.encode
 local decode_f = encoder_lib.decode
 
+local start_date = tostring(os.date('%d-%m-%y_%H:%M:%S'))
+local start_ts = sched.get_time()
+
 local assert, tonumber, io_open, tostring = assert, tonumber, io.open, tostring
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
@@ -120,14 +123,26 @@ M.init = function(conf)
  
   end
 
-  -- HTTP RC
   --[[
   sched.run(function()
       sched.sleep(3)
       sched.signal(sig_drive_control, 20, 0)
   end)
   --]]
-  
+  if conf.script then 
+    local i = 1
+    local last_ts = start_ts
+    local accum_ts = 0
+    sched.run(function ()
+      for _, reg in ipairs(conf.script) do
+        local t, modulo, angle = reg[1], reg[2], reg[2]
+        accum_ts = accum_ts + t
+        sched.sleep( (accum_ts+start_ts)-sched.get_time() )
+        sched.signal( sig_drive_control, modulo, angle )
+      end
+    end)
+  end
+
   local torque_enable = function (e)
     log('DM1', 'INFO', 'Torque enable: %s', tostring(e))
     for i, chassis in ipairs(conf.motors) do
@@ -138,9 +153,10 @@ M.init = function(conf)
     end
   end
   
-  
-  if conf.http_server then 
-    local http_server = require "lumen.tasks.http-server"  
+
+  -- HTTP RC
+  if conf.http_server then
+    local http_server = require "lumen.tasks.http-server"
     --http_server.serve_static_content_from_stream('/docs/', './docs')
     http_server.serve_static_content_from_ram('/', './tasks/dm1/www')
     
