@@ -32,6 +32,30 @@ M.init = function(conf)
     'No valid size.width / size.length found in conf')
   local d_p = conf.size.width / conf.size.length
   
+  if conf.data_dump.motor_load.enable then
+    log('DM1', 'INFO', 'Motor data dump enabled with rate %s, writing to %s',
+      tostring(conf.data_dump.motor_load.rate), tostring(conf.data_dump.path))
+    sched.run( function()
+      local log_file_motor_load = io.open( (conf.data_dump.path or './') .. start_date .. '_motor_load.log', 'w')
+      local motors = {}
+      for _, chassis in ipairs(conf.motors) do
+        motors[#motors+1] = toribio.wait_for_device(chassis.left)
+        motors[#motors+1] = toribio.wait_for_device(chassis.right)
+      end
+      local rate = tonumber(conf.data_dump.motor_load.rate) or 0.1
+      while true do
+        local l = sched.get_time() - start_ts
+        for i = 1, #motors do
+          l = l .. '\t' .. tostring(assert(motors[i].get.present_load()))
+        end
+        log_file_motor_load:write(l, '\n')
+        log_file_motor_load:flush()
+        sched.sleep(rate)
+      end
+    end )
+  end
+  
+  
   for i, chassis in ipairs(conf.motors) do
     log('DM1', 'INFO', 'Initializing chassis %i', i)
       
