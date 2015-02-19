@@ -27,7 +27,9 @@ end
 
 local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots') or ''
 local modules = os_capture('cat '..bone_capemgr)
-
+if not string.find(modules, "cape-bone-iio") then
+  write_file(bone_capemgr, 'cape-bone-iio')
+end
 -- i2c
 local i2cdetect = os_capture('i2cdetect -y -r 1', 'raw')
 log('DM3', 'INFO', 'i2cdetect: %s', tostring(i2cdetect))

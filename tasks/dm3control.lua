@@ -21,6 +21,20 @@ local sigs_drive = {
   [0] = sig_drive_control
 }
 
+local function os_capture(cmd, raw)
+  --print ('????', cmd)
+  --do return end
+  local f = assert(io.popen(cmd, 'r'))
+  local s = assert(f:read('*a'))
+  f:close()
+  if raw then return s end
+  s = s:gsub('^%s+', '')
+  s = s:gsub('%s+$', '')
+  s = s:gsub('[\n\r]+', ' ')
+  s = s:gsub('[\n]+', ' ')
+  return s
+end
+
 local function read_pote(filepot)
   local fdpot = assert(io_open(filepot, 'rb'))
   local data, err = fdpot:read('*l')
@@ -74,7 +88,8 @@ M.init = function(conf)
         
         conf.pots = conf.pots or {}; conf.pots[ipot] = conf.pots[ipot] or {}
         conf.pot = conf.pot or {}
-        local filepot = conf.pots[ipot].file or conf.pot.file
+        local filepotmask = conf.pots[ipot].filemask or conf.pot.filemask
+	local filepot = os_capture('ls -d '..filepotmask)
         log('DM3', 'INFO', 'Using %s as potentiometer input', tostring(filepot))
         if filepot then
           pot_angle_reader = function()
