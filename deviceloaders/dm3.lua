@@ -27,9 +27,12 @@ end
 local PERIOD = 2000
 
 local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots')
+local modules = os_capture('cat '..bone_capemgr, raw)
 -- pwm module
 --write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
-write_file(bone_capemgr, 'am33xx_pwm')
+if modules:find('am33xx_pwm', 1, true) == nil then
+   write_file(bone_capemgr, 'am33xx_pwm')
+end
 
 local motor_ports = {
   'bone_pwm_P9_21',
