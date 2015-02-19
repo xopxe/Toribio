@@ -1,0 +1,68 @@
+#! /bin/bash
+# /etc/init.d/toribio
+
+# The following part always gets executed.
+cd /opt/Toribio
+
+DESC="Toribio service"
+NAME="toribio"
+DAEMON="lua toribio-go.lua -c sample-confs/dm3.conf -d INFO"
+SCRIPTNAME=/etc/init.d/$NAME
+
+#
+#       Function that starts the daemon/service.
+#
+d_start() {
+  $DAEMON && return 0 &
+}
+
+#
+#       Function that stops the daemon/service.
+#
+d_stop() {
+	pkill -f "lua toribio-go.lua"
+}
+
+#
+#       Function that reload the config file for the daemon/service.
+#
+d_reload() {
+  d_stop
+  d_start
+}
+
+#
+#       Function that check the status of the daemon/service.
+#
+d_status() {
+	pgrep -f "lua toribio-go.lua" >/dev/null && echo "$DESC is running" || echo "$DESC is not running"
+}
+
+# The following part carries out specific functions depending on arguments.
+case "$1" in
+  start)
+    #log_daemon_msg "Starting $DESC" "$NAME"
+    d_start
+    #log_end_msg $?
+    ;;
+  stop)
+    #log_daemon_msg "Stopping $DESC" "$NAME"
+    d_stop
+    #log_end_msg $?
+    ;;
+  restart)
+    #log_daemon_msg "Restarting $DESC" "$NAME"
+    d_stop
+    d_start
+    #log_end_msg $?
+    ;;
+  status)
+    d_status
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -41,7 +41,7 @@ M.init = function(conf)
     gpsd = toribio.wait_for_device('gpsd')
     log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
     
-    if not conf.data_dump_gps.enable then return end
+    if not conf.data_dump_gps then return end
     
     local gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
     gps_file:setvbuf ('line')

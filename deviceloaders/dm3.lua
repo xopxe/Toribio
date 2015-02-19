@@ -32,11 +32,12 @@ local modules = os_capture('cat '..bone_capemgr)
 local i2cdetect = os_capture('i2cdetect -y -r 1', 'raw')
 log('DM3', 'INFO', 'i2cdetect: %s', tostring(i2cdetect))
 
+-- 48 -- -- -- 4c -- 4e 4f 
 local motor_i2c = {
   ['motor:1'] = '0x48',
-  ['motor:2'] = '0x49',
-  ['motor:3'] = '0x50',
-  ['motor:4'] = '0x51',
+  ['motor:2'] = '0x4c',
+  ['motor:3'] = '0x4f',
+  ['motor:4'] = '0x4e',
 }
 
 

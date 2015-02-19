@@ -54,7 +54,7 @@ M.init = function(conf)
 	local function get_incomming_handler()
 		local buff = ''
 		return function(sktd, data, err) 
-			--print ('', data)
+			--print ('gpsd', data)
 			if not data then return end
 			buff = buff .. data
 			--print ('incomming', buff)
