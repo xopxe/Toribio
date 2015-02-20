@@ -208,16 +208,13 @@ M.init = function(conf)
         local gps_mode
         local gps_speed
         toribio.register_callback(gpsd, 'TPV', function(v)
-          print('gpsd:', v.mode, v.speed )
           local mode = v.mode
           local speed = v.speed 
           if mode ~= gps_mode then
-            print ('%%', '{ "action":"gps", "mode":' .. tostring(mode) ..'}')
             assert(ws:send('{ "action":"gps", "mode":' .. tostring(mode) ..'}'))
             gps_mode = mode
           end
           if speed ~= gps_speed then 
-            print ('%%', '{ "action":"gps", "speed":' .. tostring(speed) ..'}')
             assert(ws:send('{ "action":"gps", "speed":' .. tostring(speed) ..'}'))
             gps_speed = speed
           end

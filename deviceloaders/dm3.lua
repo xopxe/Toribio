@@ -4,8 +4,8 @@
 
 local log = require 'lumen.log'
 local function os_capture(cmd, raw)
-  print ('????', cmd)
-  do return end
+  --print ('????', cmd)
+  --do return end
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -17,8 +17,8 @@ local function os_capture(cmd, raw)
   return s
 end
 local function write_file(f, v)
-  print ('!!!!', f, v)
-  do return end
+  --print ('!!!!', f, v)
+  --do return end
   local fd = assert(io.open(f, 'w'))
   fd:write(v..'\n')
   fd:close()
