@@ -277,44 +277,6 @@ M.init = function(conf)
     end)
     
     
-    http_server.set_websocket_protocol('dm3-log-protocol', function(ws)
-      local log_sender = sched.run(function()
-          local lastclock = os.clock()
-          while true do
-            local mem = collectgarbage('count')*1024
-            local clock = os.clock()
-            local cpu = clock - lastclock
-            lastclock = clock
-            assert(ws:send('{ "action":"stats", "mem":' .. tostring(mem) .. 
-                ', "cpu":' .. tostring(cpu) ..'}'))
-            sched.sleep(1)
-          end
-      end)        
-      sched.run(function()
-        while true do
-          local message,opcode = ws:receive()
-          log('DM3', 'DEBUG', 'websocket traffic "%s"', tostring(message))
-          if not message then
-            sched.signal(sig_drive_control, 0, 0)
-            log_sender:kill()
-            ws:close()
-            return
-          end
-          if opcode == ws.TEXT then        
-            local decoded, index, e = decode_f(message)
-            if decoded then 
-              if decoded.action == 'drive' then 
-                sched.signal(sig_drive_control, decoded.modulo, decoded.angle)
-              end
-            else
-              log('DM3', 'ERROR', 'failed to decode message with length %s with error "%s"', 
-                tostring(#message), tostring(index).." "..tostring(e))
-            end
-          end
-        end
-      end) --:set_as_attached()
-    end)
-    
     
     conf.http_server.ws_enable = true
     http_server.init(conf.http_server)
