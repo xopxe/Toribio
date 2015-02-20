@@ -168,18 +168,20 @@ M.init = function(conf)
   end)
   --]]
   if conf.script then 
-    local i = 1
     local last_ts = start_ts
     local accum_ts = 0
     sched.run(function ()
+      log('DM3', 'INFO', 'Script started with %i steps', #conf.script)
       dm3.set.power(true)
-      for _, reg in ipairs(conf.script) do
+      for i, reg in ipairs(conf.script) do
         local t, modulo, angle = reg[1], reg[2], reg[2]
         accum_ts = accum_ts + t
         sched.sleep( (accum_ts+start_ts)-sched.get_time() )
+        log('DM3', 'INFO', 'Scripted action #%i mod=%d ang=%d', i, modulo, angle)
         sched.signal( sig_drive_control, modulo, angle )
       end
       dm3.set.power(false)
+      log('DM3', 'INFO', 'Script finished')
     end)
   end
 
