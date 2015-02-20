@@ -36,30 +36,6 @@ M.init = function(conf)
     'No valid size.width / size.length found in conf')
   local d_p = conf.size.width / conf.size.length
   
-  if conf.data_dump.motor_load.enable then
-    log('DM3', 'INFO', 'Motor data dump enabled with rate %s, writing to %s',
-      tostring(conf.data_dump.motor_load.rate), tostring(conf.data_dump.path))
-    sched.run( function()
-      local log_file_motor_load = io.open( (conf.data_dump.path or './') .. start_date .. '_motor_load.log', 'w')
-      local motors = {}
-      for _, chassis in ipairs(conf.motors) do
-        motors[#motors+1] = toribio.wait_for_device(chassis.left)
-        motors[#motors+1] = toribio.wait_for_device(chassis.right)
-      end
-      local rate = tonumber(conf.data_dump.motor_load.rate) or 0.1
-      while true do
-        local l = sched.get_time() - start_ts
-        for i = 1, #motors do
-          l = l .. '\t' .. tostring(assert(motors[i].get.present_load()))
-        end
-        log_file_motor_load:write(l, '\n')
-        log_file_motor_load:flush()
-        sched.sleep(rate)
-      end
-    end )
-  end
-  
-  
   for i, chassis in ipairs(conf.motors) do
     log('DM', 'INFO', 'Initializing chassis %i', i)
       
@@ -107,12 +83,18 @@ M.init = function(conf)
       end)--:set_as_attached()
     end
     
+    local chassis_out_file
+    if conf.data_dump.chassis.enable and (i==1 or conf.articulated) then
+      chassis_out_file = io.open((conf.data_dump.path or './') .. start_date..'_chassis_'..i..'.log', 'w')
+      chassis_out_file:setvbuf ('line')
+    end
+    
     sched.run(function()
-      log('DM3', 'INFO', 'Motors: left %s, right %s', chassis.left, chassis.right)
+      log('DM3', 'INFO', 'Chassis %i Motors: left %s, right %s', i, chassis.left, chassis.right)
       local motor_left = toribio.wait_for_device(chassis.left)
       local motor_right = toribio.wait_for_device(chassis.right)
       local left_mult, right_mult = chassis.left_mult or 1, chassis.right_mult or 1
-      log('DM3', 'INFO', 'Motors multipliers: left %s, right %s', left_mult, right_mult)
+      log('DM3', 'INFO', 'Chassis %i Motors multipliers: left %s, right %s', i, left_mult, right_mult)
       motor_left.set.rotation_mode('wheel')
       motor_right.set.rotation_mode('wheel')
       
@@ -154,6 +136,12 @@ M.init = function(conf)
         
         motor_left.set.moving_speed( left_mult*out_l )
         motor_right.set.moving_speed( right_mult*out_r )
+        
+        if chassis_out_file then 
+          local s = (sched.get_time()-start_ts)..' '
+            ..fmodulo..' '..fangle_local..' '..pangle..' '..out_l..' '..out_r..'\n'
+          chassis_out_file:write(s)
+        end
         
         sched.signal(sig_drive_out, fmodulo, -fangle_local)
       end)
@@ -209,11 +197,15 @@ M.init = function(conf)
       local gpsd_sender = sched.run(function()
         gpsd = toribio.wait_for_device('gpsd')
         log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
+        local gps_file
+        if conf.data_dump.gps.enable then
+          gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
+          gps_file:setvbuf ('line')
+        end
         local gps_mode
         local gps_speed
         toribio.register_callback(gpsd, 'TPV', function(v)
-          local mode = v.mode
-          local speed = v.speed 
+          local mode, speed, lat, lon, track = v.mode, v.speed, v.lat, v.lon, v.track 
           if mode ~= gps_mode then
             assert(ws:send('{ "action":"gps", "mode":' .. tostring(mode) ..'}'))
             gps_mode = mode
@@ -221,6 +213,11 @@ M.init = function(conf)
           if speed ~= gps_speed then 
             assert(ws:send('{ "action":"gps", "speed":' .. tostring(speed) ..'}'))
             gps_speed = speed
+          end
+          if gps_file and mode and speed and lat and lon and track then
+            local s = (sched.get_time()-start_ts)
+              ..' '..mode..' '..speed..' '..lat..' '..lon..' '..track..'\n'
+            gps_file:write(s)
           end
         end)
         sched.sleep(1)
