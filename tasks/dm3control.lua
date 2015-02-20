@@ -158,9 +158,7 @@ M.init = function(conf)
         sched.signal(sig_drive_out, fmodulo, -fangle_local)
       end)
       log('DM3', 'INFO', 'Motors left %s and right %s ready', chassis.left, chassis.right)
-
     end)
- 
   end
 
   --[[
@@ -189,6 +187,7 @@ M.init = function(conf)
     --http_server.serve_static_content_from_stream('/docs/', './docs')
     http_server.serve_static_content_from_ram('/', './tasks/dm3control/www')
     local watchdog
+    local gpsd
     
     http_server.set_websocket_protocol('dm3-rc-protocol', function(ws)
       local stat_sender = sched.run(function()
@@ -203,6 +202,29 @@ M.init = function(conf)
             sched.sleep(1)
           end
       end)
+      local gpsd_sender = sched.run(function()
+        gpsd = toribio.wait_for_device('gpsd')
+        log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
+        local gps_mode
+        local gps_speed
+        toribio.register_callback(gpsd, 'TPV', function(v)
+          print('gpsd:', v.mode, v.speed )
+          local mode = v.mode
+          local speed = v.speed 
+          if mode ~= gps_mode then
+            print ('%%', '{ "action":"gps", "mode":' .. tostring(mode) ..'}')
+            assert(ws:send('{ "action":"gps", "mode":' .. tostring(mode) ..'}'))
+            gps_mode = mode
+          end
+          if speed ~= gps_speed then 
+            print ('%%', '{ "action":"gps", "speed":' .. tostring(speed) ..'}')
+            assert(ws:send('{ "action":"gps", "speed":' .. tostring(speed) ..'}'))
+            gps_speed = speed
+          end
+        end)
+        sched.sleep(1)
+        gpsd.set_watch(true)
+      end)
       sched.run(function()
         while true do
           local message,opcode = ws:receive()
@@ -211,6 +233,7 @@ M.init = function(conf)
             sched.signal(sig_drive_control, 0, 0)
             log('DM3', 'INFO', 'Connection closed, Powering down')
             dm3.set.power(false)
+            gpsd_sender:kill(); if gpsd then gpsd.set_watch(false) end
             stat_sender:kill()
             watchdog:kill()
             ws:close()
@@ -241,12 +264,14 @@ M.init = function(conf)
         end
       end) --:set_as_attached()
       watchdog = watchdog or sched.run(function()
-        local waitd = {event_client_keeplive, timeout=6}
-        repeat 
-          local ev = sched.wait(waitd)
-        until ev==nil
-        log('DM3', 'WARN', 'Keepalive missed, Powering down')
-        dm3.set.power(false)
+        local waitd = {event_client_keeplive, timeout=3}
+        while true do
+          repeat 
+            local ev = sched.wait(waitd)
+          until ev==nil
+          log('DM3', 'WARN', 'HTTP RC Keepalive missed, Powering down')
+          dm3.set.power(false)
+        end
       end)
     end)
     

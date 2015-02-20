@@ -76,7 +76,7 @@ M.init = function(conf)
 			return true
 		end
 	end
-	local sktd_gpsd = selector.new_tcp_client(ip, port, nil, nil, 'line', get_incomming_handler())
+	local sktd_gpsd = assert(selector.new_tcp_client(ip, port, nil, nil, 'line', get_incomming_handler()))
 	
 	--- Start and Stop gpsd watching.
 	-- @param enable true to start, false to stop

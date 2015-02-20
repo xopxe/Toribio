@@ -4,8 +4,8 @@
 
 local log = require 'lumen.log'
 local function os_capture(cmd, raw)
-  --print ('????', cmd)
-  --do return end
+  print ('????', cmd)
+  do return end
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -17,20 +17,20 @@ local function os_capture(cmd, raw)
   return s
 end
 local function write_file(f, v)
-  --print ('!!!!', f, v)
-  --do return end
+  print ('!!!!', f, v)
+  do return end
   local fd = assert(io.open(f, 'w'))
   fd:write(v..'\n')
   fd:close()
 end
 ----------------------------------------------------------------
 
-local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots')
+local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots') or ''
 local modules = os_capture('cat '..bone_capemgr)
 
 -- i2c
 local i2cdetect = os_capture('i2cdetect -y -r 1', 'raw')
-log('DM3', 'INFO', 'i2cdetect: %s', i2cdetect)
+log('DM3', 'INFO', 'i2cdetect: %s', tostring(i2cdetect))
 
 local motor_i2c = {
   ['motor:1'] = '0x48',

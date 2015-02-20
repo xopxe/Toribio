@@ -1,6 +1,6 @@
 <html>
 <head>
- <title>DM1 Remote Control</title>
+ <title>DM3 Remote Control</title>
 </head>
 
 <body>
@@ -22,9 +22,10 @@
 			</table>
 		</td>
 	</tr>
-	<tr><td id=stats colspan=2><table width="100%"><tr>
-		<td width="50%">CPU: <div id=statcpu>n/a</div></td>
-		<td width="50%">RAM: <div id=statmem>n/a</div></td>
+	<tr><td id=stats colspan=2><table width="100%"1><tr>
+		<td width="33%">CPU: <div id=statcpu>n/a</div></td>
+		<td width="33%">RAM: <div id=statmem>n/a</div></td>
+		<td width="33%">GPS: <div id=gpsmode>n/a</div><div id=gpsspeed>n/a</div></td>
 	</tr></table></td></tr>
 </table>
 
@@ -84,6 +85,12 @@ function get_appropriate_ws_url()
 				document.getElementById("statmem").textContent = (obj.mem/1000).toFixed(1) + " kB";
 				document.getElementById("statcpu").textContent = (obj.cpu*100).toFixed(2) + "%";
 			}		
+			if (obj.action == 'gps' && 'mode' in obj) {
+				document.getElementById("gpsmode").textContent = obj.mode;
+			}		
+			if (obj.action == 'gps' && 'speed' in obj) {
+				document.getElementById("gpsspeed").textContent = (obj.speed).toFixed(2) + " m/s";
+			}		
 		
 			/*
 			j = msg.data.split(';');
@@ -114,6 +121,8 @@ function get_appropriate_ws_url()
 			document.getElementById("wslm_status").textContent = " websocket connection CLOSED ";
 			document.getElementById("statmem").textContent = "n/a";
 			document.getElementById("statcpu").textContent = "n/a";
+			document.getElementById("gpsmode").textContent = "n/a";
+			document.getElementById("gpsspeed").textContent = "n/a";
 		}
 	} catch(exception) {
 		alert('<p>Error' + exception);  
@@ -241,7 +250,7 @@ function ev_mousemove (ev) {
 
 setInterval(function () {
   socket_lm.send('{ "action":"keepalive" }');
-}, 3000);
+}, 1500);
 
 
 output_position(250,250);
