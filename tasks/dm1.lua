@@ -19,13 +19,6 @@ local sigs_drive = {
   [0] = sig_drive_control
 }
 
-local function read_pote(filepot)
-  local fdpot = assert(io_open(filepot, 'rb'))
-  local data, err = fdpot:read('*l')
-  fdpot:close()
-  return data, err
-end
-
 M.init = function(conf)
   
   assert(tonumber(conf.size.width) and tonumber(conf.size.length), 
@@ -112,7 +105,16 @@ M.init = function(conf)
       motor_left.set.rotation_mode('wheel')
       motor_right.set.rotation_mode('wheel')
       
-      local sig_drive_in = sigs_drive[i-1]
+      local sig_drive_in
+      
+      -- when articulated, read drive commands from previous trains, input commands otherwise
+      if conf.articulated then
+        sig_drive_in = sigs_drive[i-1]
+      else
+        sig_drive_in = sigs_drive[0]
+      end
+      
+      
       local sig_drive_out = sigs_drive[i]
       local pangle, fmodulo, fangle = 0, 0, 0
       if pot_angle_reader then 
