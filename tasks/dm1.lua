@@ -69,32 +69,36 @@ M.init = function(conf)
       sched.run(function()
         local ipot=i-1
         
-        local filepot = conf.pots[ipot].file or conf.pot.file or '/sys/devices/ocp.3/helper.15/AIN1'
-        log('DM1', 'INFO', 'Using %s as potentiometer input', filepot)
-        pot_angle_reader = function()
-          local fdpot = assert(io_open(filepot, 'rb'))
-          local data, err = fdpot:read('*l')
-          fdpot:close()
-          local pot_reading = assert(tonumber(data), err)
-        end
-        
-        local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
-          'Missing calibration for '..filepot  )
-        log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
-        tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
-        tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
-        tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
-        pot_angle_calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
-        
-        local rate, threshold = conf.pot.rate, conf.pot.threshold
-        local last_pot = -1000000
-        while true do
-          local pot_reading = pot_angle_reader()
-          if abs(pot_reading-last_pot) > threshold then
-            last_pot = pot_reading
-            sched.signal(sig_angle, pot_angle_calibrator(pot_reading))
+        conf.pots = conf.pots or {}; conf.pots[ipot] = conf.pots[ipot] or {}
+        conf.pot = conf.pot or {}
+        local filepot = conf.pots[ipot].file or conf.pot.file
+        log('DM1', 'INFO', 'Using %s as potentiometer input', tostring(filepot))
+        if filepot then
+          pot_angle_reader = function()
+            local fdpot = assert(io_open(filepot, 'rb'))
+            local data, err = fdpot:read('*l')
+            fdpot:close()
+            local pot_reading = assert(tonumber(data), err)
           end
-          sched.sleep(rate)
+          
+          local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
+            'Missing calibration for '..filepot  )
+          log('DM1', 'INFO', 'Calibrating potentiometer as %s -> %s, %s -> %s, %s -> %s', 
+          tostring(pot_calibration[1][1]), tostring(pot_calibration[1][2]),
+          tostring(pot_calibration[2][1]), tostring(pot_calibration[2][2]),
+          tostring(pot_calibration[3][1]), tostring(pot_calibration[3][2]))
+          pot_angle_calibrator = require 'tasks.dm1.calibrator'(pot_calibration)
+          
+          local rate, threshold = conf.pot.rate, conf.pot.threshold
+          local last_pot = -1000000
+          while true do
+            local pot_reading = pot_angle_reader()
+            if abs(pot_reading-last_pot) > threshold then
+              last_pot = pot_reading
+              sched.signal(sig_angle, pot_angle_calibrator(pot_reading))
+            end
+            sched.sleep(rate)
+          end
         end
       end)--:set_as_attached()
     end
