@@ -114,7 +114,6 @@ M.init = function(conf)
         sig_drive_in = sigs_drive[0]
       end
       
-      
       local sig_drive_out = sigs_drive[i]
       local pangle, fmodulo, fangle = 0, 0, 0
       if pot_angle_reader then 
