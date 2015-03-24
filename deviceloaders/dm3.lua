@@ -11,10 +11,10 @@ local motor_ports = {
 }
 
 local motor_pwm_path = {
-  ['motor:1'] = '/sys/devices/ocp.3/pwm_test_P9_22.16',
-  ['motor:2'] = '/sys/devices/ocp.3/pwm_test_P9_14.15',
-  ['motor:3'] = '',
-  ['motor:4'] = '',
+  ['motor:1'] = 'M1', -- '/sys/devices/ocp.3/pwm_test_P9_22.16',
+  ['motor:2'] = 'M2', --'/sys/devices/ocp.3/pwm_test_P9_14.15',
+  ['motor:3'] = 'M3', --'',
+  ['motor:4'] = 'M4', --'',
 }
 
 -- for gpios, see http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios
@@ -25,17 +25,28 @@ local motor_reverse_gpio = {
   ['motor:3'] = 51,
   ['motor:4'] = 60,
 }
-local motor_enable_gpio = 61
+local motor_power_gpio = 61
 local motor_brake_gpio = 62
+local motor_horn_gpio = 63
 ----------------------------------------------------------------
 
 local M = {}
 local floor = math.floor
 
 local function write_file(f, v)
+  print ('!!!!', f, v)
+  do return end
   local fdpot = assert(io.open(f, 'w'))
   f:write(v..'\n')
   f:close()
+end
+
+local create_out_pin_0 = function (gpio)
+  write_file('/sys/class/gpio/export', gpio)
+  write_file('/sys/devices/virtual/gpio/gpio'..gpio..'/direction', 'out') --'low'?
+  local filename = '/sys/devices/virtual/gpio/gpio'..gpio..'/value'
+  write_file(filename, 0)
+  return filename
 end
 
 --- Initialize and starts the module.
@@ -55,24 +66,6 @@ M.init = function(conf)
   for _, port_name in ipairs(motor_ports) do
     write_file('/sys/devices/bone_capemgr.9/slots', port_name)
   end
-  
-  -- reverser pins
-  for _, reverser_pin in ipairs(motor_reverse_gpio) do
-    write_file('/sys/class/gpio/export', reverser_pin)
-  end
-  
-  -- enable and brake pins
-  write_file('/sys/class/gpio/export', motor_enable_gpio)
-  write_file('/sys/devices/virtual/gpio/gpio'..motor_enable_gpio..'/direction', 'low')
-  local motor_enable_file = '/sys/devices/virtual/gpio/gpio'..motor_enable_gpio..'/value'
-  write_file(motor_enable_file, 0)
-
-  -- enable and brake pins
-  write_file('/sys/class/gpio/export', motor_brake_gpio)
-  write_file('/sys/devices/virtual/gpio/gpio'..motor_brake_gpio..'/direction', 'low')
-  local motor_brake_file = '/sys/devices/virtual/gpio/gpio'..motor_brake_gpio..'/value'
-  write_file(motor_brake_file, 0)
-
   
   for motor_name, motor_file in pairs(motor_pwm_path) do
     local motor_device = {
@@ -94,6 +87,7 @@ M.init = function(conf)
     write_file(motor_file .. '/value', 0)
     
     --configure reverser pins
+    write_file('/sys/class/gpio/export', motor_reverse_gpio[motor_name])
     write_file('/sys/devices/virtual/gpio/gpio' .. motor_reverse_gpio[motor_name] .. '/direction', 'low')    
     write_file(motor_reverse_file, 0)
     
@@ -102,15 +96,9 @@ M.init = function(conf)
     end
     
     motor_device.set.torque_enable = function (value)
-      write_file(motor_enable_file, value and 1 or 0)
       write_file(motor_file .. '/run', value and 1 or 0)
     end
-    
-    motor_device.set.brake = function (value)
-      write_file(motor_brake_file, value and 1 or 0)
-      write_file(motor_file .. '/run', value and 0 or 1) --FIXME neccesary?
-    end
-    
+
     local reversed = false
     motor_device.set.moving_speed = function (speed)
       if speed < 0 then
@@ -130,9 +118,53 @@ M.init = function(conf)
       write_file(motor_duty_file, duty)
     end
     
-    log('DM3MOTOR', 'INFO', 'Device %s created: %s', motor_device.module, motor_device.name)
+    log('DM3', 'INFO', 'Device %s created: %s', motor_device.module, motor_device.name)
     toribio.add_device(motor_device)
-  end  
+  end
+  
+  local dm3platform = {
+    name = 'dm3',
+    module = 'dm3',
+    BEEP_SIGNAL = {},
+    set = {}
+  }
+      
+  -- configure out pins
+  local motor_power_file = create_out_pin_0(motor_power_gpio)
+  local motor_horn_file = create_out_pin_0(motor_horn_gpio)
+  local motor_brake_file = create_out_pin_0(motor_brake_gpio)
+
+  sched.run(function()
+    local waitd = sched.new_waitd({dm3platform.BEEP_SIGNAL})
+    while true do
+      local ev, duration = sched.wait(waitd)
+      write_file(motor_horn_file, 1)
+      sched.sleep(duration or 0.5)
+      write_file(motor_horn_file, 0)
+    end
+  end)
+
+  dm3platform.set.power = function (value)
+    --TODO throttle motors to 0 here?
+    write_file(motor_power_file, value and 1 or 0)
+  end 
+  
+  dm3platform.set.horn = function (value)
+    write_file(motor_horn_file,  value and 1 or 0)
+  end 
+  
+  dm3platform.beep = function ( duration )
+    sched.signal( dm3platform.BEEP_SIGNAL, duration )
+  end
+ 
+  dm3platform.set.brake = function (value)
+    --TODO throttle motors to 0 here?
+    write_file(motor_brake_file, value and 1 or 0)
+  end 
+  
+  log('DM3', 'INFO', 'Device %s created: %s', dm3platform.module, dm3platform.name)
+  toribio.add_device(dm3platform)
+  
 end
 
 return M

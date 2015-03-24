@@ -1,0 +1,256 @@
+<html>
+<head>
+ <title>DM1 Remote Control</title>
+</head>
+
+<body>
+<h1>DM3 Remote Control</h1>
+
+<table>
+	<tr><td id=wslm_statustd align=center colspan=2><div id=wslm_status>Not initialized</div></td></tr>
+	<tr>
+		<td align=center style="border:1px solid black"><div id="wslm_drawing">	</div></td>
+		<td align=center style="border:1px solid black">
+			<table height="100%">
+			<tr><td align=right>M: <INPUT TYPE=TEXT NAME="rc_modulo" id="rc_modulo" size="10"></td></tr>
+			<tr><td align=right>a: <INPUT TYPE=TEXT NAME="rc_angle" id="rc_angle" size="10"></td></tr>
+			<tr><td align=center><INPUT TYPE="Button" Value="Apply" onClick="output_vector(this.form);"></td></tr>
+			<tr><td><label><input type="checkbox" id="rc_torque" onclick='torque_enable(this);' checked="checked">Torque enable</label></td></tr>
+			<tr><td><label><input type="checkbox" id="rc_power" onclick='dm_power(this);'>Power enable</label></td></tr>
+			<tr><td align="center"><input type="button" id="rc_horn" onmousedown='dm_horn(this);' onmouseup='dm_unhorn(this);' value='Bip' style="height:2em;width:10em" /></td></tr>
+			<tr height="100%"><td>&nbsp;</td></tr>
+			<tr><td align="center"><input type="button" id="rc_brake" onmousedown='dm_brake(this);' onmouseup='dm_unbrake(this);' value='BRAKE' style="height:10em;width:10em" /></td></tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td id=stats colspan=2><table width="100%"><tr>
+		<td width="50%">CPU: <div id=statcpu>n/a</div></td>
+		<td width="50%">RAM: <div id=statmem>n/a</div></td>
+	</tr></table></td></tr>
+</table>
+
+<script>
+function get_appropriate_ws_url()
+{
+	var u = new String(document.URL);
+
+	/*
+	 * We open the websocket encrypted if this page came on an
+	 * https:// url itself, otherwise unencrypted
+	 */
+
+	if (u.substring(0, 5) == "https") {
+		//return "wss://localhost:12345";
+		u = u.replace('https://','');
+		u = u.substring(0, u.indexOf('/'));
+		return "wss://" + u;
+	} else {
+		//return "ws://localhost:12345";
+		u = u.replace('http://','');
+		u = u.substring(0, u.indexOf('/'));
+		return "ws://" + u;
+	}
+}
+
+
+
+
+/* lws-mirror protocol */
+
+	var down = 0;
+	var no_last = 1;
+	var ctx;
+	var socket_lm;
+	var color = "#000000";
+
+	if (typeof MozWebSocket != "undefined") {
+		socket_lm = new MozWebSocket(get_appropriate_ws_url(),
+				   "dm3-rc-protocol");
+	} else {
+		socket_lm = new WebSocket(get_appropriate_ws_url(),
+				   "dm3-rc-protocol");
+	}
+
+
+	try {
+		socket_lm.onopen = function() {
+			document.getElementById("wslm_statustd").style.backgroundColor = "#40ff40";
+			document.getElementById("wslm_status").textContent = " websocket connection opened ";
+		} 
+
+		socket_lm.onmessage =function got_packet(msg) {
+			obj = JSON.parse(msg.data);
+			//alert(obj.action);
+			if (obj.action == 'stats') {
+				document.getElementById("statmem").textContent = (obj.mem/1000).toFixed(1) + " kB";
+				document.getElementById("statcpu").textContent = (obj.cpu*100).toFixed(2) + "%";
+			}		
+		
+			/*
+			j = msg.data.split(';');
+			f = 0;
+			while (f < j.length - 1) {
+				i = j[f].split(' ');
+				if (i[0] == 'd') {
+					ctx.strokeStyle = i[1];
+					ctx.beginPath();
+					ctx.moveTo(+(i[2]), +(i[3]));
+					ctx.lineTo(+(i[4]), +(i[5]));
+					ctx.stroke();
+				}
+				if (i[0] == 'c') {
+					ctx.strokeStyle = i[1];
+					ctx.beginPath();
+					ctx.arc(+(i[2]), +(i[3]), +(i[4]), 0, Math.PI*2, true); 
+					ctx.stroke();
+				}
+
+				f++;
+			}
+			*/
+		}
+
+		socket_lm.onclose = function(){
+			document.getElementById("wslm_statustd").style.backgroundColor = "#ff4040";
+			document.getElementById("wslm_status").textContent = " websocket connection CLOSED ";
+			document.getElementById("statmem").textContent = "n/a";
+			document.getElementById("statcpu").textContent = "n/a";
+		}
+	} catch(exception) {
+		alert('<p>Error' + exception);  
+	}
+
+	var canvas = document.createElement('canvas');
+	canvas.height = 500;
+	canvas.width = 500;
+	ctx = canvas.getContext("2d");
+	ctx.fillStyle = 'green';
+   ctx.lineWidth = 2;
+   ctx.strokeStyle = '#003300';
+
+	document.getElementById('wslm_drawing').appendChild(canvas);
+
+	canvas.addEventListener('mousemove', ev_mousemove, false);
+	canvas.addEventListener('mousedown', ev_mousedown, false);
+	canvas.addEventListener('mouseup', ev_mouseup, false);
+
+	offsetX = offsetY = 0;
+	element = canvas;
+      if (element.offsetParent) {
+        do {
+          offsetX += element.offsetLeft;
+          offsetY += element.offsetTop;
+        } while ((element = element.offsetParent));
+      }
+
+function output_position (x,y) {
+	ctx.beginPath();
+	ctx.clearRect(0,0,canvas.width,canvas.height)
+	ctx.arc(+x, +y, 10, 0, Math.PI*2, true);
+	ctx.fill();
+	ctx.stroke();	
+	
+	//socket_lm.send("d " + color + " " + last_x + " " + last_y + " " + x + ' ' + y + ';');
+	var vel, angle, xc, yc; 
+	xc = x-250;
+	yc = 250-y;
+	
+	if (yc==0) {
+		if (xc==0) {
+			angle = 0.0;
+		} else if (xc>0) {
+			angle = 3.141592654 / 2.0;
+		} else {
+			angle = -3.141592654 / 2.0;	
+		}
+	} else {
+		angle = Math.atan2(xc, yc); //(xc/yc);
+	}
+	vel = Math.sqrt(yc*yc+xc*xc) / 2.5;
+	if (vel>100) vel=100;
+
+	document.getElementById('rc_modulo').value = vel.toFixed(2);
+	document.getElementById('rc_angle').value = angle.toFixed(2);
+
+	//socket_lm.send('' + left + ',' + right);
+	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
+}
+
+function output_vector () {
+	var vel = document.getElementById('rc_modulo').value;
+	var angle = document.getElementById('rc_angle').value;
+
+	if (vel>100) {
+		vel=100;
+		document.getElementById('rc_modulo').value = vel.toFixed(2);
+	}
+
+	//socket_lm.send('' + left + ',' + right);
+	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
+}
+
+function torque_enable () {
+	if (document.getElementById("rc_torque").checked) {
+		socket_lm.send('{ "action":"torque", "enable": true }');	
+	} else {
+		socket_lm.send('{ "action":"torque", "enable": false }');	
+	}
+}
+
+function dm_power () {
+	if (document.getElementById("rc_power").checked) {
+		socket_lm.send('{ "action":"power", "enable": true }');	
+	} else {
+		socket_lm.send('{ "action":"power", "enable": false }');	
+	}
+}
+
+function dm_horn () {
+	socket_lm.send('{ "action":"horn", "enable": true }');	
+}
+
+function dm_unhorn () {
+	socket_lm.send('{ "action":"horn", "enable": false }');	
+}
+
+function dm_brake () {
+	socket_lm.send('{ "action":"brake", "enable": true }');	
+}
+
+function dm_unbrake () {
+	socket_lm.send('{ "action":"brake", "enable": false }');	
+}
+
+function ev_mousedown (ev) {
+	down = 1;
+}
+
+function ev_mouseup(ev) {
+	down = 0;
+	output_position(250,250);
+}
+
+function ev_mousemove (ev) {
+	var x, y;
+
+	if (ev.offsetX) {
+		x = ev.offsetX;
+		y = ev.offsetY;
+	} else {
+		x = ev.layerX - offsetX;
+		y = ev.layerY - offsetY;
+
+	}
+
+	if (!down)
+		return;
+	
+	output_position(x,y);
+}
+
+output_position(250,250);
+	
+</script>
+
+</body>
+</html>
