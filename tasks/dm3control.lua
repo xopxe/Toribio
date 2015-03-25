@@ -8,6 +8,8 @@ local encoder_lib = require ('lumen.lib.dkjson')
 local encode_f = encoder_lib.encode
 local decode_f = encoder_lib.decode
 
+local event_client_keeplive = {}
+
 local start_date = tostring(os.date('%d-%m-%y_%H:%M:%S'))
 local start_ts = sched.get_time()
 
@@ -197,6 +199,7 @@ M.init = function(conf)
     local http_server = require "lumen.tasks.http-server"
     --http_server.serve_static_content_from_stream('/docs/', './docs')
     http_server.serve_static_content_from_ram('/', './tasks/dm3control/www')
+    local watchdog
     
     http_server.set_websocket_protocol('dm3-rc-protocol', function(ws)
       local stat_sender = sched.run(function()
@@ -210,14 +213,17 @@ M.init = function(conf)
                 ', "cpu":' .. tostring(cpu) ..'}'))
             sched.sleep(1)
           end
-      end)        
+      end)
       sched.run(function()
         while true do
           local message,opcode = ws:receive()
           log('DM3', 'DEBUG', 'websocket traffic "%s"', tostring(message))
           if not message then
             sched.signal(sig_drive_control, 0, 0)
+            log('DM3', 'INFO', 'Connection closed, Powering down')
+            dm3.set.power(false)
             stat_sender:kill()
+            watchdog:kill()
             ws:close()
             return
           end
@@ -226,6 +232,8 @@ M.init = function(conf)
             if decoded then 
               if decoded.action == 'drive' then 
                 sched.signal(sig_drive_control, decoded.modulo, decoded.angle)
+              elseif decoded.action == 'keepalive' then
+                sched.signal(event_client_keeplive)
               elseif decoded.action == 'horn' then
                 log('DM3', 'INFO', 'Brake enable: %s', tostring(e))
                 dm3.set.brake(decoded.enable)
@@ -245,7 +253,14 @@ M.init = function(conf)
           end
         end
       end) --:set_as_attached()
-    
+      watchdog = watchdog or sched.run(function()
+        local waitd = {event_client_keeplive, timeout=6}
+        repeat 
+          local ev = sched.wait(waitd)
+        until ev==nil
+        log('DM3', 'WARN', 'Keepalive missed, Powering down')
+        dm3.set.power(false)
+      end)
     end)
     
     

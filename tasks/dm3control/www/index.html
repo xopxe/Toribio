@@ -248,8 +248,13 @@ function ev_mousemove (ev) {
 	output_position(x,y);
 }
 
+setInterval(function () {
+  socket_lm.send('{ "action":"keepalive" }');
+}, 3000);
+
+
 output_position(250,250);
-	
+
 </script>
 
 </body>
