@@ -8,7 +8,7 @@
 --		-d NONE|ERROR|WARNING|INFO|DETAIL|DEBUG|ALL
 -- @script toribio-go
 
-package.path = package.path .. ";;;lumen/?.lua;?/init.lua"
+package.path = package.path .. ";;;../lumen/?.lua;?/init.lua;../?.lua;../?/init.lua"
 
 --require 'strict'
 
