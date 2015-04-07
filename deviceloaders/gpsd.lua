@@ -62,7 +62,14 @@ M.init = function(conf)
 			if decoded then 
 				--print ('','',decoded.class)
 				buff = buff:sub(index)
-				sched.signal(events[decoded.class], decoded) 
+        local event = events[decoded.class]
+        
+        if not event then -- new class, never seen before, add to events
+          events[decoded.class] = {}
+          event = events[decoded.class]
+        end
+        
+				sched.signal(event, decoded) 
 			else
 				log('GPSD', 'ERROR', 'failed to jsondecode buff  with length %s with error "%s"', tostring(#buff), tostring(index).." "..tostring(e))
 			end
