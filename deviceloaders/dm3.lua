@@ -2,33 +2,46 @@
 -- @module dm3
 -- @alias dm3
 
+
+local function os_capture(cmd, raw)
+  local f = assert(io.popen(cmd, 'r'))
+  local s = assert(f:read('*a'))
+  f:close()
+  return s
+end
+
 ----------------------------------------------------------------
 local PERIOD = 2000
 
+local bone_capemgr = os_capture('/sys/devices/bone_capemgr.*/slots')
+
 local motor_ports = {
-  'bone_pwm_P9_22',
-  'bone_pwm_P9_14',
+  'bone_pwm_P9_21',
+  'bone_pwm_P9_31',
+  'bone_pwm_P8_34',
+  'bone_pwm_P8_36',
 }
 
 local motor_pwm_path = {
-  ['motor:1'] = 'M1', -- '/sys/devices/ocp.3/pwm_test_P9_22.16',
-  ['motor:2'] = 'M2', --'/sys/devices/ocp.3/pwm_test_P9_14.15',
-  ['motor:3'] = 'M3', --'',
-  ['motor:4'] = 'M4', --'',
+  ['motor:1'] = os_capture('/sys/devices/ocp.3/pwm_test_P9_21.*'),
+  ['motor:2'] = os_capture('/sys/devices/ocp.3/pwm_test_P9_31.*'),
+  ['motor:3'] = os_capture('/sys/devices/ocp.3/pwm_test_P8_34.*'),
+  ['motor:4'] = os_capture('/sys/devices/ocp.3/pwm_test_P8_36.*'),
 }
 
 -- for gpios, see http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios
 -- or, easier, http://beagleboard.org/Support/bone101
 local motor_reverse_gpio = { 
-  ['motor:1'] = 48,
-  ['motor:2'] = 50,
-  ['motor:3'] = 51,
-  ['motor:4'] = 60,
+  ['motor:1'] = 17,
+  ['motor:2'] = 29,
+  ['motor:3'] = 12,
+  ['motor:4'] = 42,
 }
 local motor_power_gpio = 61
-local motor_brake_gpio = 62
-local motor_horn_gpio = 63
+local motor_brake_gpio = 29
+local motor_horn_gpio = 33
 ----------------------------------------------------------------
+
 
 local M = {}
 local floor = math.floor
@@ -60,11 +73,13 @@ M.init = function(conf)
   local log = require 'lumen.log'
 	
   -- pwm module
-  write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
-      
+  --write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
+  write_file(bone_capemgr, 'am33xx_pwm')
+  
   -- enables pwm for servo motor control pins
   for _, port_name in ipairs(motor_ports) do
-    write_file('/sys/devices/bone_capemgr.9/slots', port_name)
+    --write_file('/sys/devices/bone_capemgr.9/slots', port_name)
+    write_file(bone_capemgr, port_name)
   end
   
   for motor_name, motor_file in pairs(motor_pwm_path) do
