@@ -234,7 +234,7 @@ M.init = function(conf)
                 sched.signal(sig_drive_control, decoded.modulo, decoded.angle)
               elseif decoded.action == 'keepalive' then
                 sched.signal(event_client_keeplive)
-              elseif decoded.action == 'horn' then
+              elseif decoded.action == 'brake' then
                 log('DM3', 'INFO', 'Brake enable: %s', tostring(e))
                 dm3.set.brake(decoded.enable)
               elseif decoded.action == 'torque' then

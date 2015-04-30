@@ -32,14 +32,24 @@ local motor_pwm_path = {
 -- for gpios, see http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios
 -- or, easier, http://beagleboard.org/Support/bone101
 local motor_reverse_gpio = { 
-  ['motor:1'] = 17,
-  ['motor:2'] = 29,
-  ['motor:3'] = 12,
-  ['motor:4'] = 42,
+  ['motor:1'] = 5,
+  ['motor:2'] = 111,
+  ['motor:3'] = 44,
+  ['motor:4'] = 75,
 }
-local motor_power_gpio = 61
-local motor_brake_gpio = 29
-local motor_horn_gpio = 33
+--local motor_power_gpio = 61
+local motor_brake_gpio = 87
+local motor_horn_gpio = 9
+
+local motor_digital_ports = { 
+  [5] = 'bspm_P9_17_f',
+  [111] = 'bspm_P9_29_f',
+  [44] = 'bspm_P8_12_f',
+  [75] = 'bspm_P8_42_f',
+  [87] = 'bspm_P8_29_f',
+  [9] = 'bspm_P8_33_f',
+}
+
 ----------------------------------------------------------------
 
 
@@ -55,6 +65,7 @@ local function write_file(f, v)
 end
 
 local create_out_pin_0 = function (gpio)
+  write_file(bone_capemgr, motor_digital_ports[gpio])
   write_file('/sys/class/gpio/export', gpio)
   write_file('/sys/devices/virtual/gpio/gpio'..gpio..'/direction', 'out') --'low'?
   local filename = '/sys/devices/virtual/gpio/gpio'..gpio..'/value'
@@ -92,8 +103,6 @@ M.init = function(conf)
     }
     
     local motor_duty_file = motor_file .. '/duty'
-    --local motor_reverse_file = '/sys/class/gpio/gpio'..motor_reverse_gpio[motor_name]..'/value'
-    local motor_reverse_file = '/sys/devices/virtual/gpio/gpio'..motor_reverse_gpio[motor_name]..'/value'
     
     --configure pwm
     write_file(motor_file .. '/run', 0)
@@ -102,9 +111,7 @@ M.init = function(conf)
     write_file(motor_file .. '/value', 0)
     
     --configure reverser pins
-    write_file('/sys/class/gpio/export', motor_reverse_gpio[motor_name])
-    write_file('/sys/devices/virtual/gpio/gpio' .. motor_reverse_gpio[motor_name] .. '/direction', 'low')    
-    write_file(motor_reverse_file, 0)
+    local motor_reverse_file = create_out_pin_0(motor_reverse_gpio[motor_name])
     
     motor_device.set.rotation_mode = function (mode)
       assert(mode =='wheel')
@@ -145,7 +152,7 @@ M.init = function(conf)
   }
       
   -- configure out pins
-  local motor_power_file = create_out_pin_0(motor_power_gpio)
+  --local motor_power_file = create_out_pin_0(motor_power_gpio)
   local motor_horn_file = create_out_pin_0(motor_horn_gpio)
   local motor_brake_file = create_out_pin_0(motor_brake_gpio)
 
@@ -161,7 +168,7 @@ M.init = function(conf)
 
   dm3platform.set.power = function (value)
     --TODO throttle motors to 0 here?
-    write_file(motor_power_file, value and 1 or 0)
+    --write_file(motor_power_file, value and 1 or 0)
   end 
   
   dm3platform.set.horn = function (value)
