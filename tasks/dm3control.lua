@@ -235,12 +235,12 @@ M.init = function(conf)
               elseif decoded.action == 'keepalive' then
                 sched.signal(event_client_keeplive)
               elseif decoded.action == 'brake' then
-                log('DM3', 'INFO', 'Brake enable: %s', tostring(e))
+                log('DM3', 'INFO', 'Brake enable: %s', tostring(decoded.enable))
                 dm3.set.brake(decoded.enable)
               elseif decoded.action == 'torque' then
                 torque_enable(decoded.enable)
               elseif decoded.action == 'power' then
-                log('DM3', 'INFO', 'Power enable: %s', tostring(e))
+                log('DM3', 'INFO', 'Power enable: %s', tostring(decoded.enable))
                 dm3.set.power(decoded.enable)
               elseif decoded.action == 'horn' then
                 log('DM3', 'INFO', 'Horn enable: %s', tostring(e))
@@ -248,7 +248,7 @@ M.init = function(conf)
               end  
             else
               log('DM3', 'ERROR', 'failed to decode message with length %s with error "%s"', 
-                tostring(#message), tostring(index).." "..tostring(e))
+                tostring(#message), tostring(index).." "..tostring(decoded.enable))
             end
           end
         end

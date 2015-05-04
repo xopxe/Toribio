@@ -9,11 +9,22 @@ local function os_capture(cmd, raw)
   f:close()
   return s
 end
-
+local function write_file(f, v)
+  print ('!!!!', f, v)
+  --do return end
+  local fd = assert(io.open(f, 'w'))
+  fd:write(v..'\n')
+  fd:close()
+end
 ----------------------------------------------------------------
+
+
 local PERIOD = 2000
 
-local bone_capemgr = os_capture('/sys/devices/bone_capemgr.*/slots')
+local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots')
+-- pwm module
+--write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
+write_file(bone_capemgr, 'am33xx_pwm')
 
 local motor_ports = {
   'bone_pwm_P9_21',
@@ -23,10 +34,10 @@ local motor_ports = {
 }
 
 local motor_pwm_path = {
-  ['motor:1'] = os_capture('/sys/devices/ocp.3/pwm_test_P9_21.*'),
-  ['motor:2'] = os_capture('/sys/devices/ocp.3/pwm_test_P9_31.*'),
-  ['motor:3'] = os_capture('/sys/devices/ocp.3/pwm_test_P8_34.*'),
-  ['motor:4'] = os_capture('/sys/devices/ocp.3/pwm_test_P8_36.*'),
+  ['motor:1'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P9_21.*'),
+  ['motor:2'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P9_31.*'),
+  ['motor:3'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P8_34.*'),
+  ['motor:4'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P8_36.*'),
 }
 
 -- for gpios, see http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios
@@ -56,13 +67,6 @@ local motor_digital_ports = {
 local M = {}
 local floor = math.floor
 
-local function write_file(f, v)
-  print ('!!!!', f, v)
-  do return end
-  local fdpot = assert(io.open(f, 'w'))
-  f:write(v..'\n')
-  f:close()
-end
 
 local create_out_pin_0 = function (gpio)
   write_file(bone_capemgr, motor_digital_ports[gpio])
@@ -83,9 +87,7 @@ M.init = function(conf)
 	local sched = require 'lumen.sched'
   local log = require 'lumen.log'
 	
-  -- pwm module
-  --write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
-  write_file(bone_capemgr, 'am33xx_pwm')
+
   
   -- enables pwm for servo motor control pins
   for _, port_name in ipairs(motor_ports) do
@@ -107,7 +109,7 @@ M.init = function(conf)
     --configure pwm
     write_file(motor_file .. '/run', 0)
     write_file(motor_file .. '/period', PERIOD)
-    write_file(motor_file .. '/polarity', 1)
+    write_file(motor_file .. '/polarity', 0)
     write_file(motor_file .. '/value', 0)
     
     --configure reverser pins
