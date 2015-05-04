@@ -37,6 +37,11 @@ local motor_ports = {
   'bone_pwm_P8_34',
   'bone_pwm_P8_36',
 }
+-- enables pwm for servo motor control pins
+for _, port_name in ipairs(motor_ports) do
+  --write_file('/sys/devices/bone_capemgr.9/slots', port_name)
+  write_file(bone_capemgr, port_name)
+end
 
 local motor_pwm_path = {
   ['motor:1'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P9_21.*'),
@@ -92,13 +97,6 @@ M.init = function(conf)
 	local sched = require 'lumen.sched'
   local log = require 'lumen.log'
 	
-
-  
-  -- enables pwm for servo motor control pins
-  for _, port_name in ipairs(motor_ports) do
-    --write_file('/sys/devices/bone_capemgr.9/slots', port_name)
-    write_file(bone_capemgr, port_name)
-  end
   
   for motor_name, motor_file in pairs(motor_pwm_path) do
     local motor_device = {
