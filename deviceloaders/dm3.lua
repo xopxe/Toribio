@@ -7,6 +7,11 @@ local function os_capture(cmd, raw)
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
+  if raw then return s end
+  s = s:gsub('^%s+', '')
+  s = s:gsub('%s+$', '')
+  s = s:gsub('[\n\r]+', ' ')
+  s = s:gsub('[\n]+', ' ')
   return s
 end
 local function write_file(f, v)
