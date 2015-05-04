@@ -113,7 +113,7 @@ M.init = function(conf)
     write_file(motor_file .. '/run', 0)
     write_file(motor_file .. '/period', PERIOD)
     write_file(motor_file .. '/polarity', 0)
-    write_file(motor_file .. '/value', 0)
+    --write_file(motor_file .. '/value', 0)
     
     --configure reverser pins
     local motor_reverse_file = create_out_pin_0(motor_reverse_gpio[motor_name])
