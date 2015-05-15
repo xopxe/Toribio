@@ -2,8 +2,9 @@
 -- @module dm3
 -- @alias dm3
 
-
+local log = require 'lumen.log'
 local function os_capture(cmd, raw)
+  print ('????', cmd)
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -23,35 +24,20 @@ local function write_file(f, v)
 end
 ----------------------------------------------------------------
 
-
-local PERIOD = 2000
-
 local bone_capemgr = os_capture('ls -d /sys/devices/bone_capemgr.*/slots')
-local modules = os_capture('cat '..bone_capemgr, raw)
--- pwm module
---write_file('/sys/devices/bone_capemgr.9/slots', 'am33xx_pwm')
-if modules:find('am33xx_pwm', 1, true) == nil then
-   write_file(bone_capemgr, 'am33xx_pwm')
-end
+local modules = os_capture('cat '..bone_capemgr)
 
-local motor_ports = {
-  'bone_pwm_P9_21',
-  'bone_pwm_P9_31',
-  'bone_pwm_P8_34',
-  'bone_pwm_P8_36',
-}
--- enables pwm for servo motor control pins
-for _, port_name in ipairs(motor_ports) do
-  --write_file('/sys/devices/bone_capemgr.9/slots', port_name)
-  write_file(bone_capemgr, port_name)
-end
+-- i2c
+local i2cdetect = os_capture('i2cdetect -y -r 1', 'raw')
+log('DM3', 'INFO', 'i2cdetect: %s', i2cdetect)
 
-local motor_pwm_path = {
-  ['motor:1'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P9_21.*'),
-  ['motor:2'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P9_31.*'),
-  ['motor:3'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P8_34.*'),
-  ['motor:4'] = os_capture('ls -d /sys/devices/ocp.3/pwm_test_P8_36.*'),
+local motor_i2c = {
+  ['motor:1'] = '0x48',
+  ['motor:2'] = '0x49',
+  ['motor:3'] = '0x50',
+  ['motor:4'] = '0x51',
 }
+
 
 -- for gpios, see http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios
 -- or, easier, http://beagleboard.org/Support/bone101
@@ -80,7 +66,6 @@ local motor_digital_ports = {
 local M = {}
 local floor = math.floor
 
-
 local create_out_pin_0 = function (gpio)
   write_file(bone_capemgr, motor_digital_ports[gpio])
   write_file('/sys/class/gpio/export', gpio)
@@ -97,26 +82,18 @@ end
 M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'lumen.tasks.selector'
-	local sched = require 'lumen.sched'
-  local log = require 'lumen.log'
-	
+	local sched = require 'lumen.sched'	
   
-  for motor_name, motor_file in pairs(motor_pwm_path) do
+  for motor_name, motor_id in pairs(motor_i2c) do
     local motor_device = {
       name = motor_name,
       module = 'dm3motor',
       --filename = motor_file,
       events = {},
       set = {},
+      torque_enabled = false,
+      i2cset_string = '/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 ',
     }
-    
-    local motor_duty_file = motor_file .. '/duty'
-    
-    --configure pwm
-    write_file(motor_file .. '/run', 0)
-    write_file(motor_file .. '/period', PERIOD)
-    write_file(motor_file .. '/polarity', 0)
-    --write_file(motor_file .. '/value', 0)
     
     --configure reverser pins
     local motor_reverse_file = create_out_pin_0(motor_reverse_gpio[motor_name])
@@ -126,7 +103,10 @@ M.init = function(conf)
     end
     
     motor_device.set.torque_enable = function (value)
-      write_file(motor_file .. '/run', value and 1 or 0)
+      if not value then
+        os_capture(motor_device.i2cset_string..'0', 'raw')
+      end
+      motor_device.torque_enable = value      
     end
 
     local reversed = false
@@ -144,8 +124,10 @@ M.init = function(conf)
         end
       end
       
-      local duty = floor(PERIOD * speed / 100)
-      write_file(motor_duty_file, duty)
+      local outvel = floor(0xFF * speed / 100)
+      if motor_device.torque_enabled then
+        os_capture(motor_device.i2cset_string..outvel, 'raw')
+      end
     end
     
     log('DM3', 'INFO', 'Device %s created: %s', motor_device.module, motor_device.name)
