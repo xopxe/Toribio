@@ -106,7 +106,7 @@ M.init = function(conf)
       if not value then
         os_capture(motor_device.i2cset_string..'0', 'raw')
       end
-      motor_device.torque_enable = value      
+      motor_device.torque_enabled = value      
     end
 
     local reversed = false
