@@ -158,6 +158,10 @@ M.init = function(conf)
 
   dm3platform.set.power = function (value)
     --TODO throttle motors to 0 here?
+    for motor_name, motor_id in pairs(motor_i2c) do
+      os_capture('/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 0', 'raw')
+    end
+    
     --write_file(motor_power_file, value and 1 or 0)
   end 
   
