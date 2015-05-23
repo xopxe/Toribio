@@ -4,7 +4,8 @@
 
 local log = require 'lumen.log'
 local function os_capture(cmd, raw)
-  print ('????', cmd)
+  --print ('????', cmd)
+  --do return end
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -16,7 +17,7 @@ local function os_capture(cmd, raw)
   return s
 end
 local function write_file(f, v)
-  print ('!!!!', f, v)
+  --print ('!!!!', f, v)
   --do return end
   local fd = assert(io.open(f, 'w'))
   fd:write(v..'\n')
@@ -83,6 +84,11 @@ M.init = function(conf)
 	local toribio = require 'toribio'
 	local selector = require 'lumen.tasks.selector'
 	local sched = require 'lumen.sched'	
+  local torque_enabled = false
+  
+  local min_vel_i2c = conf.min_vel_i2c or 0x00
+  local max_vel_i2c = conf.max_vel_i2c or 0xff
+
   
   for motor_name, motor_id in pairs(motor_i2c) do
     local motor_device = {
@@ -91,7 +97,6 @@ M.init = function(conf)
       --filename = motor_file,
       events = {},
       set = {},
-      torque_enabled = false,
       i2cset_string = '/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 ',
     }
     
@@ -102,13 +107,6 @@ M.init = function(conf)
       assert(mode =='wheel')
     end
     
-    motor_device.set.torque_enable = function (value)
-      if not value then
-        os_capture(motor_device.i2cset_string..'0', 'raw')
-      end
-      motor_device.torque_enabled = value      
-    end
-
     local reversed = false
     motor_device.set.moving_speed = function (speed)
       if speed < 0 then
@@ -124,8 +122,9 @@ M.init = function(conf)
         end
       end
       
-      local outvel = floor(0xFF * speed / 100)
-      if motor_device.torque_enabled then
+      --local outvel = floor(0xFF * speed / 100)
+      local outvel = min_vel_i2c + floor((max_vel_i2c-min_vel_i2c) * speed / 100)      
+      if torque_enabled then
         os_capture(motor_device.i2cset_string..outvel, 'raw')
       end
     end
@@ -157,11 +156,13 @@ M.init = function(conf)
   end)
 
   dm3platform.set.power = function (value)
-    --TODO throttle motors to 0 here?
-    for motor_name, motor_id in pairs(motor_i2c) do
-      os_capture('/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 0', 'raw')
+    if not value then 
+      for motor_name, motor_id in pairs(motor_i2c) do
+        os_capture('/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 0', 'raw')
+      end
     end
-    
+    --write_file(motor_brake_file, value and 0 or 1)
+    torque_enabled = value
     --write_file(motor_power_file, value and 1 or 0)
   end 
   
@@ -174,8 +175,9 @@ M.init = function(conf)
   end
  
   dm3platform.set.brake = function (value)
-    --TODO throttle motors to 0 here?
-    write_file(motor_brake_file, value and 1 or 0)
+    --if torque_enabled or value then -- do not unbrake on powered off mode
+      write_file(motor_brake_file, value and 1 or 0)
+    --end
   end 
   
   log('DM3', 'INFO', 'Device %s created: %s', dm3platform.module, dm3platform.name)

@@ -183,17 +183,6 @@ M.init = function(conf)
     end)
   end
 
-  local torque_enable = function (e)
-    log('DM3', 'INFO', 'Torque enable: %s', tostring(e))
-    for i, chassis in ipairs(conf.motors) do
-      local motor_left = toribio.wait_for_device(chassis.left)
-      local motor_right = toribio.wait_for_device(chassis.right)
-      motor_left.set.torque_enable(e)
-      motor_right.set.torque_enable(e)
-    end
-  end
-  
-
   -- HTTP RC
   if conf.http_server then
     local http_server = require "lumen.tasks.http-server"
@@ -237,8 +226,6 @@ M.init = function(conf)
               elseif decoded.action == 'brake' then
                 log('DM3', 'INFO', 'Brake enable: %s', tostring(decoded.enable))
                 dm3.set.brake(decoded.enable)
-              elseif decoded.action == 'torque' then
-                torque_enable(decoded.enable)
               elseif decoded.action == 'power' then
                 log('DM3', 'INFO', 'Power enable: %s', tostring(decoded.enable))
                 dm3.set.power(decoded.enable)
