@@ -172,12 +172,14 @@ M.init = function(conf)
     local last_ts = start_ts
     local accum_ts = 0
     sched.run(function ()
+      dm3.set.power(true)
       for _, reg in ipairs(conf.script) do
         local t, modulo, angle = reg[1], reg[2], reg[2]
         accum_ts = accum_ts + t
         sched.sleep( (accum_ts+start_ts)-sched.get_time() )
         sched.signal( sig_drive_control, modulo, angle )
       end
+      dm3.set.power(false)
     end)
   end
 
@@ -333,7 +335,7 @@ M.init = function(conf)
       else
         fmodulo, fangle = 0, 0
       end
-      sched.signal(sig_drive_control, fmodulo, fangle)
+      sched.signal(sig_drive_control, tonumber(fmodulo), tonumber(fangle))
     end)
   end
 
