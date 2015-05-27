@@ -174,12 +174,11 @@ end
 
 
 M.init = function(conf)
-	local selector = require 'tasks/selector'
+	local selector = require 'lumen.tasks.selector'
 	
 	local ip = conf.ip or '127.0.0.1'
 	local port = conf.port or 2009
-	
-	
+  
 	local tcprecv = selector.new_tcp_server(ip, port, 'line',  function( inskt, line, err)
 		--print("bobot server:", inskt, line, err or '')
 		if not line then return end
