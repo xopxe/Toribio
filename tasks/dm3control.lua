@@ -36,6 +36,29 @@ M.init = function(conf)
     'No valid size.width / size.length found in conf')
   local d_p = conf.size.width / conf.size.length
   
+  
+  local gpsd_logger = sched.run(function()
+    local gpsd = toribio.wait_for_device('gpsd')
+    log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
+    
+    if not conf.data_dump.gps.enable then return
+    
+    local gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
+    gps_file:setvbuf ('line')
+    toribio.register_callback(gpsd, 'TPV', function(v)
+      local mode, speed, lat, lon, track = v.mode, v.speed, v.lat, v.lon, v.track 
+      if gps_file and mode and speed and lat and lon and track then
+        local s = (sched.get_time()-start_ts)
+          ..' '..mode..' '..speed..' '..lat..' '..lon..' '..track..'\n'
+        gps_file:write(s)
+      end
+    end)
+    sched.sleep(1)
+    gpsd.set_watch(true)
+  end)
+
+  
+  
   for i, chassis in ipairs(conf.motors) do
     log('DM', 'INFO', 'Initializing chassis %i', i)
       
@@ -197,11 +220,6 @@ M.init = function(conf)
       local gpsd_sender = sched.run(function()
         gpsd = toribio.wait_for_device('gpsd')
         log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
-        local gps_file
-        if conf.data_dump.gps.enable then
-          gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
-          gps_file:setvbuf ('line')
-        end
         local gps_mode
         local gps_speed
         toribio.register_callback(gpsd, 'TPV', function(v)
@@ -213,11 +231,6 @@ M.init = function(conf)
           if speed ~= gps_speed then 
             assert(ws:send('{ "action":"gps", "speed":' .. tostring(speed) ..'}'))
             gps_speed = speed
-          end
-          if gps_file and mode and speed and lat and lon and track then
-            local s = (sched.get_time()-start_ts)
-              ..' '..mode..' '..speed..' '..lat..' '..lon..' '..track..'\n'
-            gps_file:write(s)
           end
         end)
         sched.sleep(1)
