@@ -35,13 +35,13 @@ M.init = function(conf)
   assert(tonumber(conf.size.width) and tonumber(conf.size.length), 
     'No valid size.width / size.length found in conf')
   local d_p = conf.size.width / conf.size.length
-  
+  local gpsd
   
   local gpsd_logger = sched.run(function()
-    local gpsd = toribio.wait_for_device('gpsd')
+    gpsd = toribio.wait_for_device('gpsd')
     log('DM3', 'INFO', 'gpsd service found %s', tostring(gpsd))
     
-    if not conf.data_dump.gps.enable then return
+    if not conf.data_dump_gps.enable then return end
     
     local gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
     gps_file:setvbuf ('line')
@@ -107,7 +107,7 @@ M.init = function(conf)
     end
     
     local chassis_out_file
-    if conf.data_dump.chassis.enable and (i==1 or conf.articulated) then
+    if conf.data_dump.chassis_enable and (i==1 or conf.articulated) then
       chassis_out_file = io.open((conf.data_dump.path or './') .. start_date..'_chassis_'..i..'.log', 'w')
       chassis_out_file:setvbuf ('line')
     end
@@ -236,7 +236,17 @@ M.init = function(conf)
         sched.sleep(1)
         gpsd.set_watch(true)
       end)
+      local build_environment = function()
+        local e = {
+          sched = sched,
+          sleep = sched.sleep,
+          go = function(m, a) sched.signal(sig_drive_control, m, a) end,
+        }
+        for k,v in pairs (_G) do e[k] = e[k] or v end
+        return e
+      end
       sched.run(function()
+        local script
         while true do
           local message,opcode = ws:receive()
           log('DM3', 'DEBUG', 'websocket traffic "%s"', tostring(message))
@@ -244,8 +254,9 @@ M.init = function(conf)
             sched.signal(sig_drive_control, 0, 0)
             log('DM3', 'INFO', 'Connection closed, Powering down')
             dm3.set.power(false)
-            gpsd_sender:kill(); if gpsd then gpsd.set_watch(false) end
-            stat_sender:kill()
+            gpsd_sender:kill(); gpsd_sender=nil; if gpsd then gpsd.set_watch(false) end
+            stat_sender:kill(); stat_sender = nil
+            if script then script:kill(); script=nil; end
             watchdog:kill()
             ws:close()
             return
@@ -259,6 +270,10 @@ M.init = function(conf)
                 sched.signal(event_client_keeplive)
               elseif decoded.action == 'brake' then
                 log('DM3', 'INFO', 'Brake enable: %s', tostring(decoded.enable))
+                if script then 
+                  script:kill()
+                  script = nil
+                end
                 dm3.set.brake(decoded.enable)
               elseif decoded.action == 'power' then
                 log('DM3', 'INFO', 'Power enable: %s', tostring(decoded.enable))
@@ -266,6 +281,17 @@ M.init = function(conf)
               elseif decoded.action == 'horn' then
                 log('DM3', 'INFO', 'Horn enable: %s', tostring(e))
                 dm3.set.horn(decoded.enable)
+              elseif decoded.action == 'run' then
+                if script then script:kill() end
+                script = sched.run(function()
+                  local my_path = debug.getinfo(1, "S").source:match[[^@?(.*[\/])[^\/]-$]]
+                  --local filename = conf.script.path .. decoded.script .. '.lua'
+                  local filename = my_path .. 'dm3control/myscripts/'..decoded.script .. '.lua'
+                  log('DM3', 'INFO', 'Starting script: %s', tostring(filename))
+                  local s = assert(loadfile(filename))
+                  setfenv(s, build_environment())
+                  s()
+                end)
               end  
             else
               log('DM3', 'ERROR', 'failed to decode message with length %s with error "%s"', 
@@ -285,8 +311,6 @@ M.init = function(conf)
         end
       end)
     end)
-    
-    
     
     conf.http_server.ws_enable = true
     http_server.init(conf.http_server)

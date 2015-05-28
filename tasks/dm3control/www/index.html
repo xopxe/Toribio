@@ -4,7 +4,7 @@
 </head>
 
 <body>
-<h1>DM3 Remote Control</h1>
+<!--<h1>DM3 Remote Control</h1>-->
 
 <table>
 	<tr><td id=wslm_statustd align=center colspan=2><div id=wslm_status>Not initialized</div></td></tr>
@@ -17,8 +17,9 @@
 			<tr><td align=center><INPUT TYPE="Button" Value="Apply" onClick="output_vector(this.form);"></td></tr>
 			<tr><td><label><input type="checkbox" id="rc_power" onclick='dm_power(this);'>Power enable</label></td></tr>
 			<tr><td align="center"><input type="button" id="rc_horn" onmousedown='dm_horn(this);' onmouseup='dm_unhorn(this);' value='Bip' style="height:2em;width:10em" /></td></tr>
+			<tr"><td><INPUT TYPE=TEXT NAME="rc_script" id="rc_script" size="8"><INPUT TYPE="Button" Value="Run" onClick="run_script(this.form);"></td></tr>
 			<tr height="100%"><td>&nbsp;</td></tr>
-			<tr><td align="center"><input type="button" id="rc_brake" onmousedown='dm_brake(this);' onmouseup='dm_unbrake(this);' value='BRAKE' style="height:10em;width:10em" /></td></tr>
+			<tr><td align="center"><input type="button" id="rc_brake" onmousedown='dm_brake(this);' onmouseup='dm_unbrake(this);' value='BRAKE' style="height:3em;width:10em" /></td></tr>
 			</table>
 		</td>
 	</tr>
@@ -129,8 +130,8 @@ function get_appropriate_ws_url()
 	}
 
 	var canvas = document.createElement('canvas');
-	canvas.height = 500;
-	canvas.width = 500;
+	canvas.height = 300;
+	canvas.width = 300;
 	ctx = canvas.getContext("2d");
 	ctx.fillStyle = 'green';
    ctx.lineWidth = 2;
@@ -160,8 +161,8 @@ function output_position (x,y) {
 	
 	//socket_lm.send("d " + color + " " + last_x + " " + last_y + " " + x + ' ' + y + ';');
 	var vel, angle, xc, yc; 
-	xc = x-250;
-	yc = 250-y;
+	xc = x-150;
+	yc = 150-y;
 	
 	if (yc==0) {
 		if (xc==0) {
@@ -174,7 +175,7 @@ function output_position (x,y) {
 	} else {
 		angle = Math.atan2(xc, yc); //(xc/yc);
 	}
-	vel = Math.sqrt(yc*yc+xc*xc) / 2.5;
+	vel = 0.8 * Math.sqrt(yc*yc+xc*xc);
 	if (vel>100) vel=100;
 
 	document.getElementById('rc_modulo').value = vel.toFixed(2);
@@ -196,6 +197,13 @@ function output_vector () {
 	//socket_lm.send('' + left + ',' + right);
 	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
 }
+
+function run_script () {
+	var script_name = document.getElementById('rc_script').value;
+	//socket_lm.send('' + left + ',' + right);
+	socket_lm.send('{ "action":"run", "script":"' + script_name + '"}');
+}
+
 
 function dm_power () {
 	if (document.getElementById("rc_power").checked) {
@@ -227,7 +235,7 @@ function ev_mousedown (ev) {
 
 function ev_mouseup(ev) {
 	down = 0;
-	output_position(250,250);
+	output_position(150,150);
 }
 
 function ev_mousemove (ev) {
@@ -253,7 +261,7 @@ setInterval(function () {
 }, 1500);
 
 
-output_position(250,250);
+output_position(150,150);
 
 </script>
 
