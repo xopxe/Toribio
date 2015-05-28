@@ -241,6 +241,7 @@ M.init = function(conf)
           sched = sched,
           sleep = sched.sleep,
           go = function(m, a) sched.signal(sig_drive_control, m, a) end,
+          stop = function() sched.signal(sig_drive_control, 0, 0  ) end,
         }
         for k,v in pairs (_G) do e[k] = e[k] or v end
         return e
