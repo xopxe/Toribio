@@ -27,22 +27,29 @@
 
 			<tr><td align=right>
 				<table height="100%"> 
+				<tr><td><label><input type="checkbox" id="rc_power" onclick='dm_power(this);'>Power enable</label></td></tr>
+
+			<tr><td>&nbsp;</td></tr>
+
+			<tr><td><table height="100%"> 
 				<tr><td align=right>M: <INPUT TYPE=TEXT NAME="rc_modulo" id="rc_modulo" size="6"></td>
 				<td align=center rowspan=2><INPUT TYPE="Button" Value="Apply" onClick="output_vector(this.form);"></td></tr>
 				<tr><td align=right>a: <INPUT TYPE=TEXT NAME="rc_angle" id="rc_angle" size="6"></td></tr>
-				</table></td></tr>
-
-			<tr>&nbsp;</td></tr>
-
-			<tr><td><label><input type="checkbox" id="rc_power" onclick='dm_power(this);'>Power enable</label></td></tr>
+				</table>
+			</td></tr>
 
 			<tr><td>&nbsp;</td></tr>
 
-			<tr><td align="center"><input type="button" id="rc_horn" onmousedown='dm_horn(this);' onmouseup='dm_unhorn(this);' value='Bip' style="height:2em;width:10em" /></td></tr>
+			<tr><td><table height="100%"><tr>
+				<td>L: <INPUT TYPE=TEXT NAME="rc_left" id="rc_left" size="3"></td>
+				<td>R: <INPUT TYPE=TEXT NAME="rc_right" id="rc_right" size="3"></td>
+				<td><INPUT TYPE="Button" Value="Apply" onClick="output_lr(this.form);"></td></tr>
+				</table>
+			</td></tr>
 
 			<tr><td>&nbsp;</td></tr>
 
-			<tr><td><INPUT TYPE=TEXT NAME="rc_script" id="rc_script" size="8"><INPUT TYPE="Button" Value="Run" onClick="run_script(this.form);"></td></tr>
+			<tr><td><INPUT TYPE=TEXT NAME='rc_script' id="rc_script" size="8"><INPUT TYPE="Button" Value="Run" onClick="run_script(this.form);"></td></tr>
 
 			<tr><td>&nbsp;</td></tr>
 
@@ -50,15 +57,20 @@
 
 			<tr><td>&nbsp;</td></tr>
 
+			<tr><td align="center"><input type="button" id="rc_horn" onmousedown='dm_horn(this);' onmouseup='dm_unhorn(this);' value='Bip' style="height:2em;width:10em" /></td></tr>
+
+			<tr><td>&nbsp;</td></tr>
+
 			<tr><td align="center"><input type="button" id="rc_brake" onmousedown='dm_brake(this);' onmouseup='dm_unbrake(this);' value='BRAKE' style="height:3em;width:10em" /></td></tr>
 			</table>
 		</td>
 	</tr>
+</table></td></tr>
 	<tr><td id=stats colspan=2><table width="100%"1><tr>
 		<td width="33%">CPU: <div id=statcpu>n/a</div></td>
 		<td width="33%">RAM: <div id=statmem>n/a</div></td>
 		<td width="33%">GPS: <div id=gpsmode>n/a</div><div id=gpsspeed>n/a</div></td>
-	</tr></table></td></tr>
+	</tr>
 </table>
 
 <script>
@@ -229,6 +241,33 @@ function output_vector () {
 	socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
 }
 
+function output_lr () {
+	var l = document.getElementById('rc_left').value;
+	var r = document.getElementById('rc_right').value;
+
+	if (isNaN(l)) {
+		l = 0; document.getElementById('rc_left').value = 0
+	}
+	if (isNaN(r)) {
+		r = 0; document.getElementById('rc_right').value = 0
+	}
+	if (l>100) {
+		l=100; document.getElementById('rc_left').value = l.toFixed(2);
+	}
+	if (l<-100) {
+		l=-100; document.getElementById('rc_left').value = l.toFixed(2);
+	}
+	if (r>100) {
+		r=100; document.getElementById('rc_left').value = r.toFixed(2);
+	}
+	if (r<-100) {
+		r=-100; document.getElementById('rc_right').value = r.toFixed(2);
+	}
+
+	//socket_lm.send('{ "action":"drive", "modulo":' + vel + ', "angle":' + angle + ' }');
+	socket_lm.send('{ "action":"drive", "left":' + l + ', "right":' + r + ' }');
+}
+
 function run_script () {
 	var script_name = document.getElementById('rc_script').value;
 	//socket_lm.send('' + left + ',' + right);
@@ -291,7 +330,7 @@ setInterval(function () {
   socket_lm.send('{ "action":"keepalive" }');
 }, 1500);
 
-
+document.getElementById('rc_power').checked = false;;
 output_position(150,150);
 
 </script>

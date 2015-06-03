@@ -13,7 +13,7 @@ local event_client_keeplive = {}
 local start_date = tostring(os.date('%d-%m-%y_%H:%M:%S'))
 local start_ts = sched.get_time()
 
-local assert, tonumber, io_open, tostring = assert, tonumber, io.open, tostring
+local assert, tonumber, io_open, tostring, ipairs = assert, tonumber, io.open, tostring, ipairs
 local cos, sin, tan, abs = math.cos, math.sin, math.tan, math.abs
 
 local sig_drive_control = {}
@@ -43,7 +43,7 @@ M.init = function(conf)
     
     if not conf.data_dump_gps then return end
     
-    local gps_file = io.open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
+    local gps_file = io_open((conf.data_dump.path or './') .. start_date .. '_gps.log', 'w')
     gps_file:setvbuf ('line')
     toribio.register_callback(gpsd, 'TPV', function(v)
       local mode, speed, lat, lon, track = v.mode, v.speed, v.lat, v.lon, v.track 
@@ -108,7 +108,7 @@ M.init = function(conf)
     
     local chassis_out_file
     if conf.data_dump.chassis_enable and (i==1 or conf.articulated) then
-      chassis_out_file = io.open((conf.data_dump.path or './') .. start_date..'_chassis_'..i..'.log', 'w')
+      chassis_out_file = io_open((conf.data_dump.path or './') .. start_date..'_chassis_'..i..'.log', 'w')
       chassis_out_file:setvbuf ('line')
     end
     
@@ -205,6 +205,9 @@ M.init = function(conf)
     local gpsd
     
     http_server.set_websocket_protocol('dm3-rc-protocol', function(ws)
+      
+      dm3.set.power(false) --always start powered down
+      
       local stat_sender = sched.run(function()
           local lastclock = os.clock()
           while true do
@@ -265,8 +268,29 @@ M.init = function(conf)
           if opcode == ws.TEXT then        
             local decoded, index, e = decode_f(message)
             if decoded then 
-              if decoded.action == 'drive' then 
-                sched.signal(sig_drive_control, decoded.modulo, decoded.angle)
+              if decoded.action == 'drive' then
+                local modulo, angle, left, right = 
+                  tonumber(decoded.modulo), tonumber(decoded.angle), 
+                  tonumber(decoded.left), tonumber(decoded.right)
+                log('DM3', 'DETAIL', 'Drive: M:%s a:%s L:%s R:%s', 
+                  tostring(modulo), tostring(angle), tostring(left), tostring(right))
+                if left then 
+                  for _, chassis in ipairs(conf.motors) do
+                    local motor = toribio.wait_for_device(chassis.left)
+                    local mult = chassis.left_mult or 1
+                    motor.set.moving_speed( mult*left )
+                  end
+                end
+                if right then 
+                  for _, chassis in ipairs(conf.motors) do
+                    local motor = toribio.wait_for_device(chassis.right)
+                    local mult = chassis.right_mult or 1
+                    motor.set.moving_speed( mult*right )
+                  end
+                end
+                if modulo and angle then 
+                  sched.signal(sig_drive_control, modulo, angle)
+                end
               elseif decoded.action == 'keepalive' then
                 sched.signal(event_client_keeplive)
               elseif decoded.action == 'brake' then
@@ -296,7 +320,7 @@ M.init = function(conf)
               end  
             else
               log('DM3', 'ERROR', 'failed to decode message with length %s with error "%s"', 
-                tostring(#message), tostring(index).." "..tostring(decoded.enable))
+                tostring(#message), tostring(index).." "..tostring(decoded))
             end
           end
         end
