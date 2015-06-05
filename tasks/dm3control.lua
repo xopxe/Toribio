@@ -81,7 +81,7 @@ M.init = function(conf)
             local fdpot = assert(io_open(filepot, 'rb'))
             local data, err = fdpot:read('*l')
             fdpot:close()
-            local pot_reading = assert(tonumber(data), err)
+            return assert(tonumber(data), err)
           end
           
           local pot_calibration = assert(conf.pots[ipot].calibration or conf.pot.calibration, 
@@ -98,6 +98,9 @@ M.init = function(conf)
             local pot_reading = pot_angle_reader()
             if abs(pot_reading-last_pot) > threshold then
               last_pot = pot_reading
+	      if conf.pot.calibration_dump then 
+                 log('DM3', 'INFO', 'Pot reading %i %s %d', i, filepot, pot_reading)
+              end
               sched.signal(sig_angle, pot_angle_calibrator(pot_reading))
             end
             sched.sleep(rate)
