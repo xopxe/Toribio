@@ -178,9 +178,13 @@ M.init = function(conf)
   end
  
   dm3platform.set.brake = function (value)
-    --if torque_enabled or value then -- do not unbrake on powered off mode
-      write_file(motor_brake_file, value and 1 or 0)
-    --end
+    --FIXME termporary change until braking is tested
+    -- write_file(motor_brake_file, value and 1 or 0)
+    if not value then 
+      for motor_name, motor_id in pairs(motor_i2c) do
+        os_capture('/usr/sbin/i2cset -y 1 '..motor_id..' 0x41 0', 'raw')
+      end
+    end
   end 
   
   log('DM3', 'INFO', 'Device %s created: %s', dm3platform.module, dm3platform.name)
