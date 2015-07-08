@@ -107,7 +107,7 @@ M.init = function(conf)
 
 	--- Trigger a reading.
   -- @field covered arc in º
-	device.read=function(arc)   
+	device.read=function(arc, continuous)   
     local stepmin=math.floor((120-arc/2)*683/240)
     local stepmax=math.floor((120+arc/2)*683/240)
     
@@ -116,7 +116,12 @@ M.init = function(conf)
     local endp = string.format('%.4u', stepmax) --'0750'
     local clustcnt = '01'
     local scanint = '0'
-    local scancnt = '00' --'01'
+    local scancnt 
+    if continuous then 
+      scancnt='00' 
+    else
+      scancnt='01'
+    end
     
     --print ('!', start, endp)
     
@@ -126,6 +131,10 @@ M.init = function(conf)
 
 	device.get_version=function()
     --filehandler.fd:write('VV\n')
+	end
+
+	device.stop=function()
+    filehandler.fd:write('QT\n')
 	end
 
 	toribio.add_device(device)
@@ -139,3 +148,4 @@ return M
 -- @table conf
 -- @field load whether toribio should start this module automatically at startup.
 -- @field filename the device file for themouse (defaults to ''/dev/input/mice'').
+

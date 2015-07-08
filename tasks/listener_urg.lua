@@ -33,10 +33,13 @@ M.init = function(conf)
     urg.get_version()
     sched.sleep(1)
       
-    urg.read(120)
+    urg.read(120, true)
+    sched.sleep(5)
+    urg.stop()
     while true do
-      --urg.read(-45, 45)
-      sched.sleep(1)
+      --urg.read(120)
+      sched.sleep(5)
+      urg.stop()
     end
     
 
