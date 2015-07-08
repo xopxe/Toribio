@@ -230,7 +230,10 @@ M.init = function(conf)
       local angle = (min_i - (#measures/2)) * 240/683
       --print ('>', angle, min_val)
       local modulo = (v-500)*100/(4000-500) --(v-500)/35
-      sched.signal( sig_drive_control, modulo, math.rad(angle) )
+      if modulo>100 then modulo=100
+      elseif modulo<0 then modulo=0 end
+      
+      sched.signal( sig_drive_control, modulo, -math.rad(angle) )
     end
   end)
   
