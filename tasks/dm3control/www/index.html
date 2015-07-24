@@ -28,11 +28,11 @@
 			<tr><td align=right>
 				<table height="100%"> 
 				<tr><td><label><input type="checkbox" id="rc_power" onclick='dm_power(this);'>Power enable</label></td></tr>
-
+<!--
 			<tr><td align=right>
 				<table height="100%"> 
 				<tr><td><label><input type="checkbox" id="rc_auto" onclick='dm_auto(this);'>Autonomous</label></td></tr>
-
+-->
 			<tr><td>&nbsp;</td></tr>
 
 			<tr><td><table height="100%"> 
@@ -282,7 +282,7 @@ function dm_power () {
 		socket_lm.send('{ "action":"power", "enable": false }');	
 	}
 }
-
+/*
 function dm_auto () {
 	if (document.getElementById("rc_auto").checked) {
 		socket_lm.send('{ "action":"auto", "enable": true }');	
@@ -290,7 +290,7 @@ function dm_auto () {
 		socket_lm.send('{ "action":"auto", "enable": false }');	
 	}
 }
-
+*/
 function dm_horn () {
 	socket_lm.send('{ "action":"horn", "enable": true }');	
 }

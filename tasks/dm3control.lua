@@ -215,7 +215,7 @@ M.init = function(conf)
   end
 
   
-  
+  --[[
   local urg = toribio.wait_for_device({module='urg'})
   toribio.register_callback(urg, 'reading', function(cmd, status, ts, measures)
     local min_i, min_val = 0, math.huge
@@ -236,6 +236,7 @@ M.init = function(conf)
       sched.signal( sig_drive_control, modulo, -math.rad(angle) )
     end
   end)
+  --]]
   
   -- HTTP RC
   if conf.http_server then
@@ -344,6 +345,7 @@ M.init = function(conf)
               elseif decoded.action == 'power' then
                 log('DM3', 'INFO', 'Power enable: %s', tostring(decoded.enable))
                 dm3.set.power(decoded.enable)
+              --[[
               elseif decoded.action == 'auto' then
                 log('DM3', 'INFO', 'Autonomous: %s', tostring(decoded.enable))
                 if decoded.enable then 
@@ -351,6 +353,7 @@ M.init = function(conf)
                 else
                   urg.stop()
                 end
+              --]]
               elseif decoded.action == 'horn' then
                 log('DM3', 'INFO', 'Horn enable: %s', tostring(e))
                 dm3.set.horn(decoded.enable)
