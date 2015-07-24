@@ -396,23 +396,36 @@ M.init = function(conf)
 
 
   -- UDP RC
-  
   if conf.udp then 
     local udp = selector.new_udp(nil, nil, conf.udp.ip, conf.udp.port, -1)
 
     --listen for messages
     sched.sigrun({udp.events.data, buff_mode='keep_last'}, function(_, msg) 
-      local fmodulo, fangle
       if msg then
-        fmodulo, fangle = msg:match('^([^,]+),([^,]+)$')
-        --print("!U", left, right) 
+        local fmodulo, fangle = msg:match('^([^,]+),([^,]+)$')
+        if fmodulo and fangle then
+          sched.signal(sig_drive_control, tonumber(fmodulo), tonumber(fangle))
+          --print("!U", left, right) 
+        end
+        
+        local power = msg:match('^power%:([^,]+)$')
+        if power then
+          local enable = (power == '1' or power:upper() == 'TRUE' or power:upper() == 'ON')
+          log('DM3', 'INFO', 'Power enable: %s', tostring(enable))
+          dm3.set.power(enable)
+        end
+        
+        local brake = msg:match('^brake%:([^,]+)$')
+        if brake then
+          local enable = (brake == '1' or brake:upper() == 'TRUE' or brake:upper() == 'ON')
+          log('DM3', 'INFO', 'Brake enable: %s', tostring(enable))
+          dm3.set.brake(enable)
+        end        
       else
-        fmodulo, fangle = 0, 0
+        sched.signal(sig_drive_control, 0, 0)
       end
-      sched.signal(sig_drive_control, tonumber(fmodulo), tonumber(fangle))
     end)
   end
-
   -- /UDP RC
 
 end
