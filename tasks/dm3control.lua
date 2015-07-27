@@ -408,14 +408,14 @@ M.init = function(conf)
           --print("!U", left, right) 
         end
         
-        local power = msg:match('^power%:([^,]+)$')
+        local power = msg:match('^power%:(.*)$')
         if power then
           local enable = (power == '1' or power:upper() == 'TRUE' or power:upper() == 'ON')
           log('DM3', 'INFO', 'Power enable: %s', tostring(enable))
           dm3.set.power(enable)
         end
         
-        local brake = msg:match('^brake%:([^,]+)$')
+        local brake = msg:match('^brake%:(.*)$')
         if brake then
           local enable = (brake == '1' or brake:upper() == 'TRUE' or brake:upper() == 'ON')
           log('DM3', 'INFO', 'Brake enable: %s', tostring(enable))
